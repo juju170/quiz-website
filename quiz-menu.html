@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pilih Mode Kuis - Komunitas Ceria 2SD</title>
+    <!-- Menambahkan Google Font yang ramah anak -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- CSS Internal untuk styling -->
+    <style>
+        /* Pengaturan Dasar Body */
+        body {
+            font-family: 'Baloo 2', sans-serif;
+            margin: 0;
+            background-color: #f0f9ff; /* Biru langit sangat muda */
+            color: #333;
+            /* Mengatur agar konten selalu di tengah layar */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Container utama untuk membungkus semua elemen */
+        .container {
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        /* Judul Utama */
+        .main-title {
+            font-size: 2.5rem;
+            color: #0288d1; /* Biru tua */
+            margin-bottom: 40px;
+        }
+
+        /* Grid untuk menata card pilihan */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        /* Styling untuk setiap card mode kuis */
+        .mode-card {
+            background-color: #ffffff;
+            padding: 30px 20px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Efek hover pada card */
+        .mode-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .mode-card .icon {
+            font-size: 4rem; /* Ikon besar */
+            margin-bottom: 15px;
+        }
+
+        .mode-card h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.5rem;
+            color: #333;
+        }
+        
+        /* Warna spesifik untuk setiap judul card */
+        .mode-card.harian h2 { color: #f57c00; } /* Oranye */
+        .mode-card.tema h2 { color: #689f38; } /* Hijau */
+        .mode-card.tantangan h2 { color: #d32f2f; } /* Merah */
+
+
+        .mode-card p {
+            margin: 0;
+            font-size: 1rem;
+            color: #666;
+        }
+        
+        /* Tombol Kembali */
+        .back-button {
+            display: inline-block;
+            background-color: #ffb74d; /* Oranye pastel */
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        
+        .back-button:hover {
+            background-color: #ffa726; /* Oranye lebih gelap */
+            transform: scale(1.05);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 1. Judul Halaman -->
+        <h1 class="main-title">Pilih Mode Kuis 🎲</h1>
+
+        <!-- 2. Tiga Pilihan Mode Kuis -->
+        <div class="mode-grid">
+            <!-- Card Kuis Harian -->
+            <a href="#" class="mode-card harian">
+                <span class="icon">📚</span>
+                <h2>Kuis Harian</h2>
+                <p>Soal acak setiap hari untuk latihan rutin.</p>
+            </a>
+
+            <!-- Card Pilih Tema -->
+            <a href="#" class="mode-card tema">
+                <span class="icon">🎯</span>
+                <h2>Pilih Tema</h2>
+                <p>Pilih kategori soal yang kamu suka.</p>
+            </a>
+
+            <!-- Card Tantangan Mingguan -->
+            <a href="#" class="mode-card tantangan">
+                <span class="icon">⭐</span>
+                <h2>Tantangan Mingguan</h2>
+                <p>Kuis spesial dengan hadiah lencana!</p>
+            </a>
+        </div>
+
+        <!-- 4. Tombol Kembali -->
+        <a href="#" class="back-button">⬅️ Kembali ke Beranda</a>
+    </div>
+
+</body>
+</html>
+
