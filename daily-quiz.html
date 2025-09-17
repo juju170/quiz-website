@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Harian - Komunitas Ceria 2SD</title>
+    <!-- Menambahkan Google Font yang ramah anak -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <!-- CSS Internal untuk styling -->
+    <style>
+        /* Pengaturan Dasar Body */
+        body {
+            font-family: 'Baloo 2', sans-serif;
+            margin: 0;
+            background-color: #e3f2fd; /* Biru langit sangat muda */
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Container utama untuk membungkus semua elemen */
+        .container {
+            text-align: center;
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        /* 1 & 2. Judul Utama dan Emoji */
+        .main-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #1e88e5; /* Biru cerah */
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+
+        .main-title .emoji {
+            font-size: 2.5rem;
+            vertical-align: middle;
+        }
+
+        /* 3. Card Informasi Kuis */
+        .info-card {
+            background-color: #f1f8e9; /* Hijau pastel sangat muda */
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .info-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .info-card li {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .info-card li:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-card li::before {
+            content: '✔️';
+            margin-right: 10px;
+            color: #66bb6a;
+        }
+
+        /* 4. Teaser Soal */
+        .teaser-box {
+            background-color: #fff9c4; /* Kuning pastel */
+            border: 2px dashed #ffeb3b;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #f57f17;
+        }
+        
+        /* 5, 6, 7. Tombol Aksi */
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+            box-sizing: border-box;
+        }
+        
+        /* Tombol Aksi Utama */
+        .btn-start {
+            background-color: #66bb6a; /* Hijau segar */
+            color: white;
+            font-size: 1.4rem;
+            padding: 20px;
+            border-bottom: 4px solid #388e3c;
+        }
+        
+        .btn-start:hover {
+            background-color: #76c87a;
+            transform: translateY(-2px);
+        }
+
+        /* Tombol Aksi Sekunder */
+        .btn-secondary {
+            background-color: #ffb74d; /* Oranye pastel */
+            color: white;
+            border-bottom: 4px solid #f57c00;
+        }
+
+        .btn-secondary:hover {
+            background-color: #ffc971;
+            transform: translateY(-2px);
+        }
+
+        /* Tombol Kembali */
+        .btn-back {
+            background-color: #f0f0f0;
+            color: #777;
+            margin-top: 10px;
+            font-size: 1rem;
+            box-shadow: none;
+            border: 2px solid #ddd;
+        }
+
+        .btn-back:hover {
+            background-color: #e0e0e0;
+            border-color: #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 1 & 2. Judul dan Emoji -->
+        <h1 class="main-title">
+            Kuis Harian Hari Ini <span class="emoji">🗓️🎉</span>
+        </h1>
+
+        <!-- 3. Informasi Kuis -->
+        <div class="info-card">
+            <ul>
+                <li><strong>Jumlah Soal:</strong> Ada 5 pertanyaan</li>
+                <li><strong>Waktu:</strong> Sekitar 5 menit</li>
+                <li><strong>Tema:</strong> Campuran (Matematika, Bahasa, & Sains)</li>
+            </ul>
+        </div>
+
+        <!-- 4. Teaser Soal -->
+        <div class="teaser-box">
+            Contoh soal: 2 + 2 = ... ?
+        </div>
+
+        <!-- 5, 6, 7. Tombol-tombol Aksi -->
+        <div class="actions">
+            <a href="#" class="btn btn-start">Mulai Sekarang ➡️</a>
+            <a href="#" class="btn btn-secondary">Pilih Tema Lain 📚</a>
+            <a href="#" class="btn btn-back">⬅️ Kembali ke Menu Kuis</a>
+        </div>
+    </div>
+
+</body>
+</html>
+
