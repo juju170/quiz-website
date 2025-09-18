@@ -116,121 +116,99 @@
             </div>
         </div>
     </div>
-
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, query, collectionGroup } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+    // Import fungsi-fungsi Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getFirestore, collection, getDocs, query, collectionGroup, where } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
-            authDomain: "forumwidara.firebaseapp.com",
-            projectId: "forumwidara",
-            storageBucket: "forumwidara.firebasestorage.app",
-            messagingSenderId: "216895655168",
-            appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
-        };
+    // Konfigurasi Firebase Anda
+    const firebaseConfig = {
+        apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+        authDomain: "forumwidara.firebaseapp.com",
+        projectId: "forumwidara",
+        storageBucket: "forumwidara.firebasestorage.app",
+        messagingSenderId: "216895655168",
+        appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    // Inisialisasi Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        const loaderContainer = document.getElementById('loader-container');
-        const loaderText = document.getElementById('loader-text');
-        const quizContent = document.getElementById('quiz-content');
-        const progressText = document.getElementById('progress-text');
-        const progressBarFill = document.getElementById('progress-bar-fill');
-        const questionText = document.getElementById('question-text');
-        const answerOptions = document.getElementById('answer-options');
-        const feedbackBox = document.getElementById('feedback-box');
-        const nextBtn = document.getElementById('next-btn');
-        const quizScreen = document.getElementById('quiz-screen');
-        const resultsScreen = document.getElementById('results-screen');
-        const scoreText = document.getElementById('score-text');
-        const starsContainer = document.getElementById('stars-container');
-        const retryBtn = document.getElementById('retry-btn');
-        
-        let quizData = [];
-        let currentQuestionIndex = 0;
-        let score = 0;
-        let currentUser = null;
+    // Ambil elemen-elemen dari halaman
+    const loaderContainer = document.getElementById('loader-container');
+    const loaderText = document.getElementById('loader-text');
+    const quizContent = document.getElementById('quiz-content');
+    const progressText = document.getElementById('progress-text');
+    const progressBarFill = document.getElementById('progress-bar-fill');
+    const questionText = document.getElementById('question-text');
+    const answerOptions = document.getElementById('answer-options');
+    const feedbackBox = document.getElementById('feedback-box');
+    const nextBtn = document.getElementById('next-btn');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultsScreen = document.getElementById('results-screen');
+    const scoreText = document.getElementById('score-text');
+    const starsContainer = document.getElementById('stars-container');
+    const retryBtn = document.getElementById('retry-btn');
+    
+    // Variabel untuk menyimpan state kuis
+    let quizData = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let currentUser = null;
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                const urlParams = new URLSearchParams(window.location.search);
-                const currentQuizId = urlParams.get('quizId');
-                
-                if (currentQuizId) {
-                    loaderText.textContent = 'Memuat Kuis... 🐿️';
-                    retryBtn.href = `quiz-play.html?quizId=${currentQuizId}`;
-                    loadQuizData(currentQuizId);
-                } else {
-                    loaderText.textContent = 'Menyiapkan Kuis Acak Komunitas... 🎲';
-                    retryBtn.href = `quiz-play.html`;
-                    loadRandomQuizData();
-                }
+    // Cek status login pengguna
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUser = user;
+            const urlParams = new URLSearchParams(window.location.search);
+            const quizId = urlParams.get('quizId');
+            const theme = urlParams.get('theme'); // <-- BARU: Ambil parameter tema
+
+            // Logika untuk menentukan kuis mana yang akan dimuat
+            if (quizId) {
+                // Skenario 1: Memuat kuis spesifik berdasarkan ID
+                loaderText.textContent = 'Memuat Kuis Pilihan... 🐿️';
+                retryBtn.href = `quiz-play.html?quizId=${quizId}`;
+                loadQuizData(quizId);
+            } else if (theme) {
+                // Skenario 2 (BARU): Memuat kuis berdasarkan tema
+                loaderText.textContent = `Memuat Kuis Tema ${theme}... ✨`;
+                retryBtn.href = `quiz-play.html?theme=${theme}`;
+                loadQuizByTheme(theme);
             } else {
-                alert("Anda harus login untuk bermain kuis. Mengalihkan ke halaman login...");
-                window.location.href = 'login.html';
+                // Skenario 3 (Default): Memuat kuis acak
+                loaderText.textContent = 'Menyiapkan Kuis Acak Komunitas... 🎲';
+                retryBtn.href = `quiz-play.html`;
+                loadRandomQuizData();
             }
-        });
-        
-        async function loadRandomQuizData() {
-            try {
-                const allQuestionsQuery = query(collectionGroup(db, 'pertanyaan'));
-                const allQuestionsSnapshot = await getDocs(allQuestionsQuery);
-
-                if (allQuestionsSnapshot.empty) {
-                    throw new Error("Belum ada pertanyaan yang dibuat oleh komunitas.");
-                }
-
-                let allQuestions = [];
-                for (const questionDoc of allQuestionsSnapshot.docs) {
-                    const questionData = questionDoc.data();
-                    const answersQuery = query(collection(questionDoc.ref, 'jawaban'));
-                    const answersSnapshot = await getDocs(answersQuery);
-                    
-                    if (!answersSnapshot.empty) {
-                        const options = [];
-                        let correctAnswer = '';
-                        answersSnapshot.forEach(doc => {
-                            const answerData = doc.data();
-                            options.push(answerData.teksJawaban);
-                            if(answerData.benar) correctAnswer = answerData.teksJawaban;
-                        });
-                        allQuestions.push({ question: questionData.teksPertanyaan, options: options, answer: correctAnswer });
-                    }
-                }
-
-                const shuffledQuestions = shuffle(allQuestions);
-                quizData = shuffledQuestions.slice(0, 10);
-                
-                if (quizData.length === 0) {
-                    throw new Error("Tidak ada pertanyaan yang valid untuk dimainkan.");
-                }
-
-                startQuiz();
-
-            } catch (error) {
-                console.error("Error memuat kuis acak:", error);
-                loaderContainer.innerHTML = `<h2>Gagal memuat kuis acak.</h2><p>${error.message}</p><a href='index.html'>Kembali</a>`;
-            }
+        } else {
+            alert("Anda harus login untuk bermain kuis. Mengalihkan ke halaman login...");
+            window.location.href = 'login.html';
         }
+    });
 
-        async function loadQuizData(quizId) {
-            try {
-                const questionsQuery = query(collection(db, `quizzes/${quizId}/pertanyaan`));
-                const questionsSnapshot = await getDocs(questionsQuery);
-                if (questionsSnapshot.empty) {
-                    throw new Error("Kuis ini tidak memiliki pertanyaan.");
-                }
+    // FUNGSI BARU: Untuk memuat kuis berdasarkan tema
+    async function loadQuizByTheme(theme) {
+        try {
+            // Query untuk mencari semua pertanyaan dengan kategori yang sesuai
+            const themeQuery = query(collectionGroup(db, 'pertanyaan'), where('kategori', '==', theme));
+            const themeQuestionsSnapshot = await getDocs(themeQuery);
 
-                for (const questionDoc of questionsSnapshot.docs) {
-                    const questionData = questionDoc.data();
-                    const answersQuery = query(collection(db, `quizzes/${quizId}/pertanyaan/${questionDoc.id}/jawaban`));
-                    const answersSnapshot = await getDocs(answersQuery);
-                    
+            if (themeQuestionsSnapshot.empty) {
+                throw new Error(`Belum ada pertanyaan untuk tema "${theme}".`);
+            }
+
+            let allQuestions = [];
+            // Proses setiap dokumen pertanyaan yang ditemukan
+            for (const questionDoc of themeQuestionsSnapshot.docs) {
+                const questionData = questionDoc.data();
+                const answersQuery = query(collection(questionDoc.ref, 'jawaban'));
+                const answersSnapshot = await getDocs(answersQuery);
+                
+                if (!answersSnapshot.empty) {
                     const options = [];
                     let correctAnswer = '';
                     answersSnapshot.forEach(doc => {
@@ -238,93 +216,183 @@
                         options.push(answerData.teksJawaban);
                         if(answerData.benar) correctAnswer = answerData.teksJawaban;
                     });
-                    quizData.push({ question: questionData.teksPertanyaan, options: options, answer: correctAnswer });
+                    allQuestions.push({ question: questionData.teksPertanyaan, options: options, answer: correctAnswer });
                 }
-                
-                startQuiz();
-            } catch (error) {
-                console.error("Error memuat kuis:", error);
-                loaderContainer.innerHTML = `<h2>Gagal memuat kuis.</h2><p>${error.message}</p><a href='index.html'>Kembali</a>`;
             }
-        }
-        
-        function startQuiz() {
-            loaderContainer.style.display = 'none';
-            quizContent.style.display = 'block';
-            loadQuestion();
-        }
-
-        function loadQuestion() {
-            if (currentQuestionIndex < quizData.length) {
-                const currentQuestion = quizData[currentQuestionIndex];
-                progressText.textContent = `Soal ${currentQuestionIndex + 1} dari ${quizData.length}`;
-                const progressPercent = ((currentQuestionIndex + 1) / quizData.length) * 100;
-                progressBarFill.style.width = `${progressPercent}%`;
-                questionText.textContent = currentQuestion.question;
-                answerOptions.innerHTML = '';
-                
-                currentQuestion.options.forEach(option => {
-                    const button = document.createElement('button');
-                    button.textContent = option;
-                    button.classList.add('answer-btn');
-                    button.addEventListener('click', () => selectAnswer(button, option, currentQuestion.answer));
-                    answerOptions.appendChild(button);
-                });
-                feedbackBox.textContent = '';
-                nextBtn.style.visibility = 'hidden';
-            } else {
-                showResults();
-            }
-        }
-
-        function selectAnswer(button, selectedOption, correctAnswer) {
-            const allButtons = Array.from(answerOptions.children);
-            allButtons.forEach(btn => btn.disabled = true);
             
-            if (selectedOption === correctAnswer) {
-                score++;
-                button.classList.add('correct');
-                feedbackBox.textContent = 'Benar 🎉';
-                feedbackBox.className = 'feedback-box correct';
-            } else {
-                button.classList.add('wrong');
-                feedbackBox.textContent = 'Salah 😅';
-                feedbackBox.className = 'feedback-box wrong';
-                const correctButton = allButtons.find(btn => btn.textContent === correctAnswer);
-                if (correctButton) correctButton.classList.add('reveal-correct');
+            // Acak pertanyaan dan ambil maksimal 10 soal
+            const shuffledQuestions = shuffle(allQuestions);
+            quizData = shuffledQuestions.slice(0, 10);
+            
+            if (quizData.length === 0) {
+                throw new Error("Tidak ada pertanyaan yang valid untuk tema ini.");
             }
-            nextBtn.style.visibility = 'visible';
+
+            startQuiz();
+
+        } catch (error) {
+            console.error(`Error memuat kuis tema ${theme}:`, error);
+            loaderContainer.innerHTML = `<h2>Gagal memuat kuis.</h2><p>${error.message}</p><a href='themes.html'>Pilih Tema Lain</a>`;
         }
+    }
+    
+    // Fungsi lama untuk memuat kuis acak (tidak ada perubahan)
+    async function loadRandomQuizData() {
+        try {
+            const allQuestionsQuery = query(collectionGroup(db, 'pertanyaan'));
+            const allQuestionsSnapshot = await getDocs(allQuestionsQuery);
 
-        nextBtn.addEventListener('click', () => {
-            currentQuestionIndex++;
-            loadQuestion();
-        });
+            if (allQuestionsSnapshot.empty) {
+                throw new Error("Belum ada pertanyaan yang dibuat oleh komunitas.");
+            }
 
-        function showResults() {
-            quizScreen.style.display = 'none';
-            resultsScreen.style.display = 'block';
-            scoreText.textContent = `Kamu benar ${score} dari ${quizData.length} soal!`;
+            let allQuestions = [];
+            for (const questionDoc of allQuestionsSnapshot.docs) {
+                const questionData = questionDoc.data();
+                const answersQuery = query(collection(questionDoc.ref, 'jawaban'));
+                const answersSnapshot = await getDocs(answersQuery);
+                
+                if (!answersSnapshot.empty) {
+                    const options = [];
+                    let correctAnswer = '';
+                    answersSnapshot.forEach(doc => {
+                        const answerData = doc.data();
+                        options.push(answerData.teksJawaban);
+                        if(answerData.benar) correctAnswer = answerData.teksJawaban;
+                    });
+                    allQuestions.push({ question: questionData.teksPertanyaan, options: options, answer: correctAnswer });
+                }
+            }
 
-            const percentage = quizData.length > 0 ? (score / quizData.length) * 100 : 0;
-            let stars = '';
-            if (percentage >= 80) stars = '🌟🌟🌟';
-            else if (percentage >= 50) stars = '🌟🌟';
-            else if (percentage > 0) stars = '🌟';
-            else stars = '🤔';
-            starsContainer.textContent = stars;
+            const shuffledQuestions = shuffle(allQuestions);
+            quizData = shuffledQuestions.slice(0, 10);
+            
+            if (quizData.length === 0) {
+                throw new Error("Tidak ada pertanyaan yang valid untuk dimainkan.");
+            }
+
+            startQuiz();
+
+        } catch (error) {
+            console.error("Error memuat kuis acak:", error);
+            loaderContainer.innerHTML = `<h2>Gagal memuat kuis acak.</h2><p>${error.message}</p><a href='index.html'>Kembali</a>`;
         }
+    }
+
+    // Fungsi lama untuk memuat kuis berdasarkan ID (tidak ada perubahan)
+    async function loadQuizData(quizId) {
+        // ... (kode fungsi ini tetap sama seperti sebelumnya)
+        try {
+            const questionsQuery = query(collection(db, `quizzes/${quizId}/pertanyaan`));
+            const questionsSnapshot = await getDocs(questionsQuery);
+            if (questionsSnapshot.empty) {
+                throw new Error("Kuis ini tidak memiliki pertanyaan.");
+            }
+
+            for (const questionDoc of questionsSnapshot.docs) {
+                const questionData = questionDoc.data();
+                const answersQuery = query(collection(db, `quizzes/${quizId}/pertanyaan/${questionDoc.id}/jawaban`));
+                const answersSnapshot = await getDocs(answersQuery);
+                
+                const options = [];
+                let correctAnswer = '';
+                answersSnapshot.forEach(doc => {
+                    const answerData = doc.data();
+                    options.push(answerData.teksJawaban);
+                    if(answerData.benar) correctAnswer = answerData.teksJawaban;
+                });
+                quizData.push({ question: questionData.teksPertanyaan, options: options, answer: correctAnswer });
+            }
+            
+            startQuiz();
+        } catch (error) {
+            console.error("Error memuat kuis:", error);
+            loaderContainer.innerHTML = `<h2>Gagal memuat kuis.</h2><p>${error.message}</p><a href='index.html'>Kembali</a>`;
+        }
+    }
+    
+    // Sisa fungsi (startQuiz, loadQuestion, selectAnswer, showResults, shuffle)
+    // tidak perlu diubah.
+    
+    function startQuiz() {
+        loaderContainer.style.display = 'none';
+        quizContent.style.display = 'block';
+        currentQuestionIndex = 0;
+        score = 0;
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        if (currentQuestionIndex < quizData.length) {
+            const currentQuestion = quizData[currentQuestionIndex];
+            progressText.textContent = `Soal ${currentQuestionIndex + 1} dari ${quizData.length}`;
+            const progressPercent = ((currentQuestionIndex + 1) / quizData.length) * 100;
+            progressBarFill.style.width = `${progressPercent}%`;
+            questionText.textContent = currentQuestion.question;
+            answerOptions.innerHTML = '';
+            
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('answer-btn');
+                button.addEventListener('click', () => selectAnswer(button, option, currentQuestion.answer));
+                answerOptions.appendChild(button);
+            });
+            feedbackBox.textContent = '';
+            nextBtn.style.visibility = 'hidden';
+        } else {
+            showResults();
+        }
+    }
+
+    function selectAnswer(button, selectedOption, correctAnswer) {
+        const allButtons = Array.from(answerOptions.children);
+        allButtons.forEach(btn => btn.disabled = true);
         
-        function shuffle(array) {
-            let currentIndex = array.length, randomIndex;
-            while (currentIndex > 0) {
-                randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex--;
-                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-            }
-            return array;
+        if (selectedOption === correctAnswer) {
+            score++;
+            button.classList.add('correct');
+            feedbackBox.textContent = 'Benar 🎉';
+            feedbackBox.className = 'feedback-box correct';
+        } else {
+            button.classList.add('wrong');
+            feedbackBox.textContent = 'Salah 😅';
+            feedbackBox.className = 'feedback-box wrong';
+            const correctButton = allButtons.find(btn => btn.textContent === correctAnswer);
+            if (correctButton) correctButton.classList.add('reveal-correct');
         }
-    </script>
+        nextBtn.style.visibility = 'visible';
+    }
+
+    nextBtn.addEventListener('click', () => {
+        currentQuestionIndex++;
+        loadQuestion();
+    });
+
+    function showResults() {
+        quizScreen.style.display = 'none';
+        resultsScreen.style.display = 'block';
+        scoreText.textContent = `Kamu benar ${score} dari ${quizData.length} soal!`;
+
+        const percentage = quizData.length > 0 ? (score / quizData.length) * 100 : 0;
+        let stars = '';
+        if (percentage >= 80) stars = '🌟🌟🌟';
+        else if (percentage >= 50) stars = '🌟🌟';
+        else if (percentage > 0) stars = '🌟';
+        else stars = '🤔';
+        starsContainer.textContent = stars;
+    }
+    
+    function shuffle(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex > 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+            </script>
 </body>
 </html>
 
