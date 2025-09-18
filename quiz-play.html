@@ -184,7 +184,7 @@
 
         async function loadQuizData(quizId) {
             try {
-                const questionsQuery = query(collection(db, `quizzes/${quizId}/pertanyaan`));
+                const questionsQuery = query(collection(db, `quizzes/pertanyaan`));
                 const questionsSnapshot = await getDocs(questionsQuery);
                 if (questionsSnapshot.empty) {
                     throw new Error("Kuis ini tidak memiliki pertanyaan.");
@@ -192,7 +192,7 @@
 
                 for (const questionDoc of questionsSnapshot.docs) {
                     const questionData = questionDoc.data();
-                    const answersQuery = query(collection(db, `quizzes/${quizId}/pertanyaan/${questionDoc.id}/jawaban`));
+                    const answersQuery = query(collection(db, `quizzes/jawaban`));
                     const answersSnapshot = await getDocs(answersQuery);
                     
                     const options = [];
