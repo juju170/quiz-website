@@ -153,7 +153,7 @@
                 <span id="countdown-timer"></span>
             </div>
 
-            <form id="kuis-form" class="form-container">
+            <form id="kuis-form" class="form-container" style="display: none;">
                 <div class="input-group">
                     <label for="kuis-judul">Judul Kuis</label>
                     <input type="text" id="kuis-judul" placeholder="Contoh: Kuis Penjumlahan Seru" required>
@@ -182,7 +182,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-        import { getFirestore, collection, doc, query, where, getDocs, Timestamp, writeBatch } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, query, where, getDocs, Timestamp, writeBatch, collectionGroup } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
@@ -207,8 +207,8 @@
         const messageBox = document.getElementById('message-box');
 
         let currentUser = null;
-        let weeklyUploadCount = 0;
-        const WEEKLY_UPLOAD_LIMIT = 5;
+        let weeklyQuestionCount = 0;
+        const WEEKLY_QUESTION_LIMIT = 5;
         const MAX_QUESTIONS_PER_QUIZ = 5;
         let countdownInterval = null;
 
@@ -221,7 +221,6 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                // Memeriksa kuota saat pengguna login. Tombol-tombol akan diaktifkan di dalam fungsi ini.
                 await checkWeeklyQuota(user.uid);
                 startCountdownTimer();
             } else {
@@ -230,83 +229,89 @@
             }
         });
 
+        // --- FUNGSI KUOTA YANG SEPENUHNYA BARU ---
         async function checkWeeklyQuota(userId) {
-            // Menentukan hari Senin di awal minggu ini
             const today = new Date();
-            const dayOfWeek = today.getDay(); // Minggu = 0, Senin = 1, ...
-            const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Penyesuaian untuk hari Minggu
+            const dayOfWeek = today.getDay();
+            const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
             const startOfWeek = new Date(today.setDate(diff));
             startOfWeek.setHours(0, 0, 0, 0);
             const startOfWeekTimestamp = Timestamp.fromDate(startOfWeek);
 
-            // Query untuk menghitung kuis yang dibuat oleh user ini sejak awal minggu
-            const q = query(collection(db, 'quizzes'), where('dibuatOleh', '==', userId), where('dibuatPada', '>=', startOfWeekTimestamp));
+            // Query BARU menggunakan collectionGroup untuk mencari SEMUA 'pertanyaan'
+            const q = query(
+                collectionGroup(db, 'pertanyaan'), 
+                where('dibuatOleh', '==', userId), 
+                where('dibuatPada', '>=', startOfWeekTimestamp)
+            );
             
             try {
                 const querySnapshot = await getDocs(q);
-                weeklyUploadCount = querySnapshot.size;
-                const remaining = WEEKLY_UPLOAD_LIMIT - weeklyUploadCount;
-                quotaTextEl.textContent = `Sisa kuota pembuatan kuis minggu ini: ${remaining} dari ${WEEKLY_UPLOAD_LIMIT}`;
+                weeklyQuestionCount = querySnapshot.size; // Menghitung jumlah pertanyaan yang ditemukan
+                const remaining = WEEKLY_QUESTION_LIMIT - weeklyQuestionCount;
+                quotaTextEl.textContent = `Sisa kuota pembuatan PERTANYAAN minggu ini: ${remaining} dari ${WEEKLY_QUESTION_LIMIT}`;
 
                 if (remaining > 0) {
-                    // Jika kuota masih ada, aktifkan tombol dan tambahkan blok pertanyaan awal
-                    addQuestionBtn.disabled = false;
-                    submitBtn.disabled = false;
+                    kuisForm.style.display = 'block';
                     if (questionsContainer.children.length === 0) {
                         addQuestionBlock();
                     }
+                    submitBtn.disabled = false;
+                    updateAddQuestionButtonState();
                 } else {
-                    // Jika kuota habis, nonaktifkan tombol dan tampilkan pesan
                     kuisForm.style.display = 'none';
-                    showMessage('error', 'Kuota pembuatan kuis mingguan Anda telah habis.');
+                    showMessage('error', 'Kuota pembuatan pertanyaan mingguan Anda telah habis.');
                 }
             } catch (error) {
-                // Jika query gagal (kemungkinan besar karena index hilang), nonaktifkan semuanya
-                console.error("Gagal memeriksa kuota:", error);
+                console.error("Gagal memeriksa kuota pertanyaan:", error);
                 quotaTextEl.textContent = "Gagal memeriksa kuota. Coba muat ulang.";
-                addQuestionBtn.disabled = true;
-                submitBtn.disabled = true;
-                showMessage('error', 'Tidak dapat memverifikasi kuota. Pastikan koneksi internet stabil.');
+                kuisForm.style.display = 'none';
+                showMessage('error', 'Tidak dapat memverifikasi kuota. Anda mungkin perlu membuat index baru di Firebase Console.');
             }
         }
         
         function startCountdownTimer() {
+            // (Tidak ada perubahan di fungsi ini)
             if (countdownInterval) clearInterval(countdownInterval);
-
             const now = new Date();
             const nextMonday = new Date();
             const day = now.getDay();
             const daysUntilMonday = (day === 0) ? 1 : (8 - day);
             nextMonday.setDate(now.getDate() + daysUntilMonday);
             nextMonday.setHours(0, 0, 0, 0);
-
             countdownInterval = setInterval(() => {
                 const currentTime = new Date().getTime();
                 const distance = nextMonday - currentTime;
-
                 if (distance < 0) {
                     clearInterval(countdownInterval);
                     countdownTimerEl.textContent = "Kuota telah di-reset!";
                     return;
                 }
-
                 const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
                 countdownTimerEl.textContent = `Kuota reset dalam: ${days} hari ${hours} jam ${minutes} menit ${seconds} detik`;
             }, 1000);
         }
 
+        // --- FUNGSI UPDATE TOMBOL YANG LEBIH PINTAR ---
         function updateAddQuestionButtonState() {
-            const questionCount = questionsContainer.children.length;
-            addQuestionBtn.disabled = questionCount >= MAX_QUESTIONS_PER_QUIZ;
+            const remainingWeekly = WEEKLY_QUESTION_LIMIT - weeklyQuestionCount;
+            const currentQuestionsInForm = questionsContainer.children.length;
+            
+            // Tombol nonaktif jika:
+            // 1. Jumlah pertanyaan di form sudah mencapai batas kuis (5)
+            // 2. Jumlah pertanyaan di form sudah mencapai sisa kuota mingguan
+            addQuestionBtn.disabled = currentQuestionsInForm >= MAX_QUESTIONS_PER_QUIZ || currentQuestionsInForm >= remainingWeekly;
         }
 
         let questionCounter = 0;
         function addQuestionBlock() {
-            if (questionsContainer.children.length >= MAX_QUESTIONS_PER_QUIZ) return;
+            const remainingWeekly = WEEKLY_QUESTION_LIMIT - weeklyQuestionCount;
+            if (questionsContainer.children.length >= MAX_QUESTIONS_PER_QUIZ || questionsContainer.children.length >= remainingWeekly) {
+                 return;
+            }
             
             questionCounter++;
             const questionId = `q-${questionCounter}`;
@@ -351,14 +356,16 @@
         
         kuisForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (weeklyUploadCount >= WEEKLY_UPLOAD_LIMIT) {
-                showMessage('error', 'Maaf, kuota upload mingguan Anda sudah habis.');
+            const questionsInForm = questionsContainer.children.length;
+            if ((weeklyQuestionCount + questionsInForm) > WEEKLY_QUESTION_LIMIT) {
+                showMessage('error', 'Anda akan melebihi kuota mingguan dengan jumlah pertanyaan ini.');
                 return;
             }
-            if (questionsContainer.children.length === 0) {
+            if (questionsInForm === 0) {
                 showMessage('error', 'Kuis harus memiliki setidaknya satu pertanyaan.');
                 return;
             }
+
             loader.classList.add('show');
             try {
                 const batch = writeBatch(db);
@@ -367,16 +374,22 @@
                     judul: document.getElementById('kuis-judul').value,
                     tipe: document.getElementById('kuis-tipe').value,
                     dibuatOleh: currentUser.uid,
-                    dibuatPada: Timestamp.now()
+                    dibuatPada: Timestamp.now(),
+                    jumlahPertanyaan: questionsInForm // Menambahkan info jumlah pertanyaan
                 });
+
                 const questionBlocks = questionsContainer.querySelectorAll('.question-block');
                 for (const block of questionBlocks) {
                     const pertanyaanRef = doc(collection(db, `quizzes/${kuisRef.id}/pertanyaan`));
+                    
+                    // --- PERUBAHAN PENTING: MENAMBAHKAN ID PEMBUAT KE SETIAP PERTANYAAN ---
                     batch.set(pertanyaanRef, {
                         teksPertanyaan: block.querySelector('.pertanyaan-teks').value,
                         tipeJawaban: "pilihanGanda",
-                        dibuatPada: Timestamp.now()
+                        dibuatPada: Timestamp.now(),
+                        dibuatOleh: currentUser.uid // Ini kuncinya!
                     });
+                    
                     const jawabanInputs = block.querySelectorAll('.jawaban-teks');
                     const radioButtons = block.querySelectorAll('input[type="radio"]');
                     const correctIndex = Array.from(radioButtons).findIndex(radio => radio.checked);
@@ -394,7 +407,7 @@
                 showMessage('success', 'Kuis berhasil disimpan! Terima kasih atas kontribusinya.');
                 kuisForm.reset();
                 questionsContainer.innerHTML = '';
-                addQuestionBlock();
+                // Memeriksa kembali kuota untuk memperbarui UI
                 await checkWeeklyQuota(currentUser.uid);
 
             } catch (error) {
