@@ -78,11 +78,6 @@
         .btn-retry { background-color: #4db6ac; color: white; }
         .btn-other { background-color: #7986cb; color: white; }
         .btn-home { background-color: #90a4ae; color: white; }
-        #new-badges-container { margin-top: 25px; border-top: 2px dashed #ccc; padding-top: 25px; }
-        .badge-notification { background-color: #fffde7; border: 2px solid #ffca28; border-radius: 15px; padding: 15px; text-align: center; animation: popIn 0.5s ease-out; }
-        .badge-notification h4 { margin: 0 0 10px 0; color: #ff8f00; font-size: 1.3rem; }
-        .badge-notification img { width: 50px; height: 50px; }
-        @keyframes popIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .loader-container { padding: 50px 0; }
         .loader-container h2 { font-size: 2rem; }
         .spinner { margin: 20px auto; border: 8px solid #f3f3f3; border-top: 8px solid var(--blue-main); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
@@ -93,7 +88,7 @@
     <div class="quiz-container">
         <div id="quiz-screen">
             <div id="loader-container" class="loader-container">
-                <h2>Memuat Kuis... 🐿️</h2>
+                <h2 id="loader-text">Memuat Kuis... 🐿️</h2>
                 <div class="spinner"></div>
             </div>
             <div id="quiz-content" style="display:none;">
@@ -114,7 +109,6 @@
             <h2>Hebat!</h2>
             <p id="score-text" class="score"></p>
             <div id="stars-container" class="stars"></div>
-            <div id="new-badges-container"></div>
             <div class="results-options">
                 <a href="#" id="retry-btn" class="btn btn-retry">🔄 Coba Lagi</a>
                 <a href="themes.html" class="btn btn-other">📚 Pilih Kuis Lain</a>
@@ -126,7 +120,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, addDoc, Timestamp, query, limit, where } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, query, collectionGroup } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
@@ -142,6 +136,7 @@
         const db = getFirestore(app);
 
         const loaderContainer = document.getElementById('loader-container');
+        const loaderText = document.getElementById('loader-text');
         const quizContent = document.getElementById('quiz-content');
         const progressText = document.getElementById('progress-text');
         const progressBarFill = document.getElementById('progress-bar-fill');
@@ -154,31 +149,74 @@
         const scoreText = document.getElementById('score-text');
         const starsContainer = document.getElementById('stars-container');
         const retryBtn = document.getElementById('retry-btn');
-        const newBadgesContainer = document.getElementById('new-badges-container');
         
         let quizData = [];
         let currentQuestionIndex = 0;
         let score = 0;
         let currentUser = null;
-        let currentQuizId = null;
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
                 const urlParams = new URLSearchParams(window.location.search);
-                currentQuizId = urlParams.get('quizId');
+                const currentQuizId = urlParams.get('quizId');
                 
                 if (currentQuizId) {
-                    loadQuizData(currentQuizId);
+                    loaderText.textContent = 'Memuat Kuis... 🐿️';
                     retryBtn.href = `quiz-play.html?quizId=${currentQuizId}`;
+                    loadQuizData(currentQuizId);
                 } else {
-                    loaderContainer.innerHTML = "<h2>Oops! Kuis tidak ditemukan.</h2><a href='index.html'>Kembali ke beranda</a>";
+                    loaderText.textContent = 'Menyiapkan Kuis Acak Komunitas... 🎲';
+                    retryBtn.href = `quiz-play.html`;
+                    loadRandomQuizData();
                 }
             } else {
                 alert("Anda harus login untuk bermain kuis. Mengalihkan ke halaman login...");
                 window.location.href = 'login.html';
             }
         });
+        
+        async function loadRandomQuizData() {
+            try {
+                const allQuestionsQuery = query(collectionGroup(db, 'pertanyaan'));
+                const allQuestionsSnapshot = await getDocs(allQuestionsQuery);
+
+                if (allQuestionsSnapshot.empty) {
+                    throw new Error("Belum ada pertanyaan yang dibuat oleh komunitas.");
+                }
+
+                let allQuestions = [];
+                for (const questionDoc of allQuestionsSnapshot.docs) {
+                    const questionData = questionDoc.data();
+                    const answersQuery = query(collection(questionDoc.ref, 'jawaban'));
+                    const answersSnapshot = await getDocs(answersQuery);
+                    
+                    if (!answersSnapshot.empty) {
+                        const options = [];
+                        let correctAnswer = '';
+                        answersSnapshot.forEach(doc => {
+                            const answerData = doc.data();
+                            options.push(answerData.teksJawaban);
+                            if(answerData.benar) correctAnswer = answerData.teksJawaban;
+                        });
+                        allQuestions.push({ question: questionData.teksPertanyaan, options: options, answer: correctAnswer });
+                    }
+                }
+
+                const shuffledQuestions = shuffle(allQuestions);
+                quizData = shuffledQuestions.slice(0, 10);
+                
+                if (quizData.length === 0) {
+                    throw new Error("Tidak ada pertanyaan yang valid untuk dimainkan.");
+                }
+
+                startQuiz();
+
+            } catch (error) {
+                console.error("Error memuat kuis acak:", error);
+                loaderContainer.innerHTML = `<h2>Gagal memuat kuis acak.</h2><p>${error.message}</p><a href='index.html'>Kembali</a>`;
+            }
+        }
 
         async function loadQuizData(quizId) {
             try {
@@ -203,15 +241,19 @@
                     quizData.push({ question: questionData.teksPertanyaan, options: options, answer: correctAnswer });
                 }
                 
-                loaderContainer.style.display = 'none';
-                quizContent.style.display = 'block';
-                loadQuestion();
+                startQuiz();
             } catch (error) {
                 console.error("Error memuat kuis:", error);
                 loaderContainer.innerHTML = `<h2>Gagal memuat kuis.</h2><p>${error.message}</p><a href='index.html'>Kembali</a>`;
             }
         }
         
+        function startQuiz() {
+            loaderContainer.style.display = 'none';
+            quizContent.style.display = 'block';
+            loadQuestion();
+        }
+
         function loadQuestion() {
             if (currentQuestionIndex < quizData.length) {
                 const currentQuestion = quizData[currentQuestionIndex];
@@ -259,7 +301,7 @@
             loadQuestion();
         });
 
-        async function showResults() {
+        function showResults() {
             quizScreen.style.display = 'none';
             resultsScreen.style.display = 'block';
             scoreText.textContent = `Kamu benar ${score} dari ${quizData.length} soal!`;
@@ -271,90 +313,19 @@
             else if (percentage > 0) stars = '🌟';
             else stars = '🤔';
             starsContainer.textContent = stars;
-
-            try {
-                const anakId = await getAnakId(currentUser.uid);
-                if (!anakId) {
-                    console.warn("Tidak ada profil anak. Hasil tidak disimpan.");
-                    return;
-                }
-
-                await addDoc(collection(db, "hasilkuis"), {
-                    userId: currentUser.uid,
-                    anakId: anakId,
-                    quizId: currentQuizId,
-                    skor: score,
-                    waktuSelesai: Timestamp.now()
-                });
-                console.log("Hasil kuis berhasil disimpan!");
-
-                await checkAndAwardBadges(anakId, score);
-            } catch (error) {
-                console.error("Gagal menyimpan hasil kuis atau lencana:", error);
-            }
-        }
-
-        async function checkAndAwardBadges(anakId, finalScore) {
-            try {
-                const [allBadgesSnapshot, ownedBadgesSnapshot] = await Promise.all([
-                    getDocs(collection(db, "lencana")),
-                    getDocs(query(collection(db, "pencapaian"), where("anakId", "==", anakId)))
-                ]);
-
-                const allBadges = new Map(allBadgesSnapshot.docs.map(doc => [doc.id, doc.data()]));
-                const ownedBadgeIds = new Set(ownedBadgesSnapshot.docs.map(doc => doc.data().lencanaId));
-                
-                for (const [badgeId, badgeData] of allBadges.entries()) {
-                    if (ownedBadgeIds.has(badgeId)) continue;
-                    let earned = false;
-                    
-                    if (badgeData.nama.toLowerCase().includes("skor sempurna") && finalScore === quizData.length && quizData.length > 0) {
-                        earned = true;
-                    }
-                    
-                    if (badgeData.nama.toLowerCase().includes("rajin belajar")) {
-                        const quizCountSnapshot = await getDocs(query(collection(db, "hasilkuis"), where("anakId", "==", anakId)));
-                        if (quizCountSnapshot.size >= 5) {
-                            earned = true;
-                        }
-                    }
-
-                    if (earned) {
-                        await addDoc(collection(db, "pencapaian"), {
-                            anakId: anakId,
-                            lencanaId: badgeId,
-                            diperolehPada: Timestamp.now()
-                        });
-                        displayNewBadgeNotification(badgeData);
-                    }
-                }
-            } catch (error) {
-                console.error("Gagal memeriksa lencana: ", error);
-            }
         }
         
-        function displayNewBadgeNotification(badgeData) {
-            const notification = document.createElement('div');
-            notification.className = 'badge-notification';
-            notification.innerHTML = `
-                <h4>🎉 Lencana Baru Didapat! 🎉</h4>
-                <img src="${badgeData.ikon}" alt="${badgeData.nama}" onerror="this.src='https://placehold.co/50x50/ffde78/000?text=🏆'">
-                <p><strong>${badgeData.nama}</strong>: ${badgeData.deskripsi}</p>
-            `;
-            newBadgesContainer.appendChild(notification);
-        }
-
-        async function getAnakId(userId) {
-            try {
-                const q = query(collection(db, `users/${userId}/anak`), limit(1));
-                const querySnapshot = await getDocs(q);
-                return querySnapshot.empty ? null : querySnapshot.docs[0].id;
-            } catch (e) {
-                console.error("Error mendapatkan ID anak:", e);
-                return null;
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex > 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
             }
+            return array;
         }
     </script>
 </body>
 </html>
+
 
