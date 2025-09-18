@@ -347,51 +347,60 @@
             loader.classList.add('show');
             try {
                 const batch = writeBatch(db);
+                
+                // --- LANGKAH 1: Buat referensi untuk dokumen kuis utama ---
                 const kuisRef = doc(collection(db, "quizzes"));
                 batch.set(kuisRef, {
                     judul: document.getElementById('kuis-judul').value,
                     tipe: document.getElementById('kuis-tipe').value,
                     dibuatOleh: currentUser.uid,
-                    dibuatPada: Timestamp.now(),
-                    batasMingguan: WEEKLY_UPLOAD_LIMIT
+                    dibuatPada: Timestamp.now()
                 });
+
+                // --- LANGKAH 2: Loop melalui setiap blok pertanyaan di HTML ---
                 const questionBlocks = questionsContainer.querySelectorAll('.question-block');
                 for (const block of questionBlocks) {
+                    
+                    // --- PERBAIKAN LOGIKA UTAMA ADA DI SINI ---
+                    // Buat referensi BARU untuk setiap pertanyaan DI DALAM loop
                     const pertanyaanRef = doc(collection(db, `quizzes/${kuisRef.id}/pertanyaan`));
+                    
+                    // Tambahkan operasi 'set' untuk pertanyaan ke dalam batch
                     batch.set(pertanyaanRef, {
                         teksPertanyaan: block.querySelector('.pertanyaan-teks').value,
-                        mediaPertanyaan: null,
                         tipeJawaban: "pilihanGanda",
                         dibuatPada: Timestamp.now()
                     });
+
+                    // Ambil semua input jawaban dari blok pertanyaan saat ini
                     const jawabanInputs = block.querySelectorAll('.jawaban-teks');
                     const radioButtons = block.querySelectorAll('input[type="radio"]');
                     const correctIndex = Array.from(radioButtons).findIndex(radio => radio.checked);
+
+                    // Loop melalui setiap input jawaban
                     jawabanInputs.forEach((jawabanInput, index) => {
+                        // Buat referensi untuk setiap jawaban, menggunakan ID pertanyaan yang BENAR
                         const jawabanRef = doc(collection(db, `quizzes/${kuisRef.id}/pertanyaan/${pertanyaanRef.id}/jawaban`));
                         batch.set(jawabanRef, {
                             teksJawaban: jawabanInput.value,
-                            mediaJawaban: null,
                             benar: index === correctIndex
                         });
                     });
                 }
                 
+                // --- LANGKAH 3: Jalankan semua operasi yang sudah dikumpulkan ---
                 await batch.commit();
                 
-                // --- PERUBAHAN ALUR ---
-                // Tidak lagi redirect. Hanya menampilkan pesan dan mereset form.
                 showMessage('success', 'Kuis berhasil disimpan! Terima kasih atas kontribusinya.');
                 kuisForm.reset();
                 questionsContainer.innerHTML = '';
                 addQuestionBlock();
-                await checkWeeklyQuota(currentUser.uid); // Update sisa kuota
+                await checkWeeklyQuota(currentUser.uid);
 
             } catch (error) {
                 console.error("Error saat menyimpan kuis:", error);
                 showMessage('error', 'Terjadi kesalahan saat menyimpan kuis. Coba lagi nanti.');
             } finally {
-                // Selalu sembunyikan loader setelah proses selesai (baik sukses maupun gagal)
                 loader.classList.remove('show');
             }
         });
