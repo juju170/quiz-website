@@ -98,14 +98,14 @@
             cursor: pointer;
             transition: background-color 0.2s, opacity 0.2s;
         }
-        .btn:hover { background-color: #03a9f4; }
+        .btn:hover:not(:disabled) { background-color: #03a9f4; }
         .btn:disabled {
             background-color: #9e9e9e;
             cursor: not-allowed;
             opacity: 0.7;
         }
         .btn-add { background-color: #388e3c; }
-        .btn-add:hover { background-color: #4caf50; }
+        .btn-add:hover:not(:disabled) { background-color: #4caf50; }
         .btn-remove {
             position: absolute;
             top: 10px;
@@ -127,7 +127,7 @@
             background-color: #ff8f00;
             border-bottom: 4px solid #e65100;
         }
-        .btn-submit:hover { background-color: #ffa000; }
+        .btn-submit:hover:not(:disabled) { background-color: #ffa000; }
         .loader { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.8); z-index: 9999; justify-content: center; align-items: center; }
         .loader.show { display: flex; }
         .spinner { border: 8px solid #f3f3f3; border-top: 8px solid #3498db; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
@@ -169,10 +169,10 @@
                 <hr style="margin: 30px 0; border: 1px solid #eee;">
                 <div id="questions-container"></div>
                 <div style="text-align: center; margin-top: 20px;">
-                    <button type="button" id="add-question-btn" class="btn btn-add">➕ Tambah Pertanyaan</button>
+                    <button type="button" id="add-question-btn" class="btn btn-add" disabled>➕ Tambah Pertanyaan</button>
                 </div>
                 <div class="submit-section">
-                    <button type="submit" class="btn btn-submit">Simpan Kuis ✅</button>
+                    <button type="submit" id="submit-btn" class="btn btn-submit" disabled>Simpan Kuis ✅</button>
                 </div>
                  <div id="message-box" class="message"></div>
             </form>
@@ -202,6 +202,7 @@
         const kuisForm = document.getElementById('kuis-form');
         const questionsContainer = document.getElementById('questions-container');
         const addQuestionBtn = document.getElementById('add-question-btn');
+        const submitBtn = document.getElementById('submit-btn');
         const loader = document.getElementById('loader');
         const messageBox = document.getElementById('message-box');
 
@@ -220,9 +221,9 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
+                // Memeriksa kuota saat pengguna login. Tombol-tombol akan diaktifkan di dalam fungsi ini.
                 await checkWeeklyQuota(user.uid);
                 startCountdownTimer();
-                addQuestionBlock();
             } else {
                 alert("Anda harus login untuk membuat kuis. Mengalihkan ke halaman login...");
                 window.location.href = 'login.html';
@@ -230,13 +231,15 @@
         });
 
         async function checkWeeklyQuota(userId) {
+            // Menentukan hari Senin di awal minggu ini
             const today = new Date();
-            const dayOfWeek = today.getDay();
-            const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+            const dayOfWeek = today.getDay(); // Minggu = 0, Senin = 1, ...
+            const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Penyesuaian untuk hari Minggu
             const startOfWeek = new Date(today.setDate(diff));
             startOfWeek.setHours(0, 0, 0, 0);
             const startOfWeekTimestamp = Timestamp.fromDate(startOfWeek);
 
+            // Query untuk menghitung kuis yang dibuat oleh user ini sejak awal minggu
             const q = query(collection(db, 'quizzes'), where('dibuatOleh', '==', userId), where('dibuatPada', '>=', startOfWeekTimestamp));
             
             try {
@@ -245,13 +248,25 @@
                 const remaining = WEEKLY_UPLOAD_LIMIT - weeklyUploadCount;
                 quotaTextEl.textContent = `Sisa kuota pembuatan kuis minggu ini: ${remaining} dari ${WEEKLY_UPLOAD_LIMIT}`;
 
-                if (remaining <= 0) {
+                if (remaining > 0) {
+                    // Jika kuota masih ada, aktifkan tombol dan tambahkan blok pertanyaan awal
+                    addQuestionBtn.disabled = false;
+                    submitBtn.disabled = false;
+                    if (questionsContainer.children.length === 0) {
+                        addQuestionBlock();
+                    }
+                } else {
+                    // Jika kuota habis, nonaktifkan tombol dan tampilkan pesan
                     kuisForm.style.display = 'none';
                     showMessage('error', 'Kuota pembuatan kuis mingguan Anda telah habis.');
                 }
             } catch (error) {
+                // Jika query gagal (kemungkinan besar karena index hilang), nonaktifkan semuanya
                 console.error("Gagal memeriksa kuota:", error);
-                quotaTextEl.textContent = "Gagal memeriksa kuota.";
+                quotaTextEl.textContent = "Gagal memeriksa kuota. Coba muat ulang.";
+                addQuestionBtn.disabled = true;
+                submitBtn.disabled = true;
+                showMessage('error', 'Tidak dapat memverifikasi kuota. Pastikan koneksi internet stabil.');
             }
         }
         
@@ -347,8 +362,6 @@
             loader.classList.add('show');
             try {
                 const batch = writeBatch(db);
-                
-                // --- LANGKAH 1: Buat referensi untuk dokumen kuis utama ---
                 const kuisRef = doc(collection(db, "quizzes"));
                 batch.set(kuisRef, {
                     judul: document.getElementById('kuis-judul').value,
@@ -356,30 +369,18 @@
                     dibuatOleh: currentUser.uid,
                     dibuatPada: Timestamp.now()
                 });
-
-                // --- LANGKAH 2: Loop melalui setiap blok pertanyaan di HTML ---
                 const questionBlocks = questionsContainer.querySelectorAll('.question-block');
                 for (const block of questionBlocks) {
-                    
-                    // --- PERBAIKAN LOGIKA UTAMA ADA DI SINI ---
-                    // Buat referensi BARU untuk setiap pertanyaan DI DALAM loop
                     const pertanyaanRef = doc(collection(db, `quizzes/${kuisRef.id}/pertanyaan`));
-                    
-                    // Tambahkan operasi 'set' untuk pertanyaan ke dalam batch
                     batch.set(pertanyaanRef, {
                         teksPertanyaan: block.querySelector('.pertanyaan-teks').value,
                         tipeJawaban: "pilihanGanda",
                         dibuatPada: Timestamp.now()
                     });
-
-                    // Ambil semua input jawaban dari blok pertanyaan saat ini
                     const jawabanInputs = block.querySelectorAll('.jawaban-teks');
                     const radioButtons = block.querySelectorAll('input[type="radio"]');
                     const correctIndex = Array.from(radioButtons).findIndex(radio => radio.checked);
-
-                    // Loop melalui setiap input jawaban
                     jawabanInputs.forEach((jawabanInput, index) => {
-                        // Buat referensi untuk setiap jawaban, menggunakan ID pertanyaan yang BENAR
                         const jawabanRef = doc(collection(db, `quizzes/${kuisRef.id}/pertanyaan/${pertanyaanRef.id}/jawaban`));
                         batch.set(jawabanRef, {
                             teksJawaban: jawabanInput.value,
@@ -388,7 +389,6 @@
                     });
                 }
                 
-                // --- LANGKAH 3: Jalankan semua operasi yang sudah dikumpulkan ---
                 await batch.commit();
                 
                 showMessage('success', 'Kuis berhasil disimpan! Terima kasih atas kontribusinya.');
