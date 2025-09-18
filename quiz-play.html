@@ -192,7 +192,7 @@
 
                 for (const questionDoc of questionsSnapshot.docs) {
                     const questionData = questionDoc.data();
-                    const answersQuery = query(collection(db, `quizzes/${quizId}/jawaban/${jawabanId}`));
+                    const answersQuery = query(collection(db, `quizzes/${kuisRef.id}/pertanyaan/${pertanyaanRef.id}/jawaban`));
                     const answersSnapshot = await getDocs(answersQuery);
                     
                     const options = [];
