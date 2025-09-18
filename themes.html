@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pilih Tema Kuis - Komunitas Ceria 2SD</title>
+    <!-- Menambahkan Google Font yang ramah anak -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <!-- CSS Internal untuk styling -->
+    <style>
+        /* Pengaturan Dasar Body */
+        body {
+            font-family: 'Baloo 2', sans-serif;
+            margin: 0;
+            background-color: #f0f9ff; /* Biru langit sangat muda */
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Container utama untuk membungkus semua elemen */
+        .container {
+            text-align: center;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        /* 1. Judul Utama */
+        .main-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #0288d1; /* Biru tua */
+            margin: 0;
+        }
+
+        /* 2. Sub-teks */
+        .subtitle {
+            font-size: 1.1rem;
+            color: #555;
+            margin-top: 5px;
+            margin-bottom: 40px;
+        }
+
+        /* 3. Grid untuk menata card tema */
+        .theme-grid {
+            display: grid;
+            /* Membuat 2 kolom di layar lebar, dan 1 kolom di layar kecil secara otomatis */
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        /* 4. Styling untuk setiap card tema */
+        .theme-card {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 5px_15px rgba(0, 0, 0, 0.08);
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 3px solid transparent;
+        }
+
+        /* Efek hover pada card */
+        .theme-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+        /* Memberi warna border saat hover */
+        .theme-card.math:hover { border-color: #ffb74d; }
+        .theme-card.lang:hover { border-color: #64b5f6; }
+        .theme-card.science:hover { border-color: #81c784; }
+        .theme-card.art:hover { border-color: #ba68c8; }
+        .theme-card.mixed:hover { border-color: #e57373; }
+
+        .theme-card .icon {
+            font-size: 3.5rem; /* Ikon besar */
+            margin-bottom: 10px;
+        }
+
+        .theme-card h2 {
+            margin: 0 0 5px 0;
+            font-size: 1.5rem;
+        }
+        
+        .theme-card p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        /* 5. Tombol Navigasi Bawah */
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap; /* Agar tombol tidak tumpang tindih di layar kecil */
+        }
+        
+        .nav-btn {
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            transition: transform 0.2s;
+        }
+        .nav-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-btn.back {
+            background-color: #ffb74d; /* Oranye pastel */
+            color: white;
+        }
+        .nav-btn.home {
+            background-color: #90a4ae; /* Abu-abu */
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 1. Judul Halaman -->
+        <h1 class="main-title">Pilih Tema Kuis 🎯</h1>
+        <!-- 2. Sub-teks -->
+        <p class="subtitle">Pilih mata pelajaran atau topik favoritmu!</p>
+
+        <!-- 3. Grid Card Tema -->
+        <div class="theme-grid">
+            <!-- Card Matematika -->
+            <a href="#" class="theme-card math">
+                <span class="icon">➕</span>
+                <h2>Matematika Dasar</h2>
+                <p>Belajar tambah, kurang, kali, dan bagi!</p>
+            </a>
+
+            <!-- Card Bahasa Indonesia -->
+            <a href="#" class="theme-card lang">
+                <span class="icon">📖</span>
+                <h2>Bahasa Indonesia</h2>
+                <p>Mengenal huruf, kata, dan kalimat.</p>
+            </a>
+
+            <!-- Card IPA -->
+            <a href="#" class="theme-card science">
+                <span class="icon">🌍</span>
+                <h2>Ilmu Alam</h2>
+                <p>Menjelajahi dunia hewan dan tumbuhan.</p>
+            </a>
+
+            <!-- Card Seni -->
+            <a href="#" class="theme-card art">
+                <span class="icon">🎨</span>
+                <h2>Seni & Kreativitas</h2>
+                <p>Menebak warna, bentuk, dan gambar.</p>
+            </a>
+
+            <!-- Card Campuran -->
+            <a href="#" class="theme-card mixed">
+                <span class="icon">🧩</span>
+                <h2>Campuran Seru</h2>
+                <p>Gabungan semua pelajaran seru!</p>
+            </a>
+        </div>
+
+        <!-- 5. Navigasi Bawah -->
+        <div class="nav-buttons">
+            <a href="quiz-menu.html" class="nav-btn back">⬅️ Kembali ke Menu Kuis</a>
+            <a href="index.html" class="nav-btn home">🏠 Beranda</a>
+        </div>
+    </div>
+
+</body>
+</html>
+
