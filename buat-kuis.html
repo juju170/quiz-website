@@ -378,22 +378,25 @@
                 }
                 
                 await batch.commit();
-
-                // *** INILAH PERUBAHANNYA ***
-                // Menampilkan pesan sukses dan mengarahkan pengguna ke halaman kuis.
-                showMessage('success', 'Kuis berhasil dibuat! Mengalihkan ke halaman bermain...');
                 
-                setTimeout(() => {
-                    window.location.href = `quiz-play.html?quizId=${kuisRef.id}`;
-                }, 2000); // Tunggu 2 detik sebelum redirect
+                // --- PERUBAHAN ALUR ---
+                // Tidak lagi redirect. Hanya menampilkan pesan dan mereset form.
+                showMessage('success', 'Kuis berhasil disimpan! Terima kasih atas kontribusinya.');
+                kuisForm.reset();
+                questionsContainer.innerHTML = '';
+                addQuestionBlock();
+                await checkWeeklyQuota(currentUser.uid); // Update sisa kuota
 
             } catch (error) {
                 console.error("Error saat menyimpan kuis:", error);
                 showMessage('error', 'Terjadi kesalahan saat menyimpan kuis. Coba lagi nanti.');
-                loader.classList.remove('show'); // Sembunyikan loader jika terjadi error
+            } finally {
+                // Selalu sembunyikan loader setelah proses selesai (baik sukses maupun gagal)
+                loader.classList.remove('show');
             }
         });
     </script>
 </body>
 </html>
+
 
