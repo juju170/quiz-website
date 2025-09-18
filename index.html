@@ -4,33 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Komunitas Ceria Kelas 2 SD</title>
-    <!-- Menambahkan Google Font yang ramah anak -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700&display=swap" rel="stylesheet">
-
-    <!-- CSS Internal untuk styling -->
     <style>
-        /* Pengaturan Dasar Body */
         body {
             font-family: 'Baloo 2', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f0f9ff; /* Biru langit yang sangat muda */
+            background-color: #f0f9ff;
             color: #333;
             text-align: center;
         }
-
-        /* Container utama untuk membatasi lebar konten */
         .container {
             max-width: 960px;
             margin: 0 auto;
             padding: 20px;
         }
-
-        /* 1. Header */
         header {
-            background-color: #4dd0e1; /* Biru cerah */
+            background-color: #4dd0e1;
             padding: 20px;
             color: white;
             border-bottom-left-radius: 20px;
@@ -42,21 +34,18 @@
             align-items: center;
             gap: 15px;
         }
-
         header h1 {
             margin: 0;
             font-size: 1.8rem;
             flex-grow: 1;
             text-align: left;
         }
-
         .header-buttons {
             display: flex;
             gap: 10px;
         }
-
         .btn {
-            background-color: #ffb74d; /* Oranye pastel */
+            background-color: #ffb74d;
             color: white;
             padding: 10px 20px;
             text-decoration: none;
@@ -65,28 +54,22 @@
             transition: transform 0.2s, background-color 0.2s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
         .btn:hover {
             background-color: #ffa726;
             transform: scale(1.05);
         }
+        .btn.secondary { background-color: #81c784; }
+        .btn.secondary:hover { background-color: #66bb6a; }
+        /* Tombol baru untuk kelola kuis */
+        .btn.tertiary { background-color: #64b5f6; }
+        .btn.tertiary:hover { background-color: #42a5f5; }
 
-        .btn.secondary {
-            background-color: #81c784; /* Hijau pastel */
-        }
-        .btn.secondary:hover {
-             background-color: #66bb6a;
-        }
-
-
-        /* 2. Menu Utama */
         .menu-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 20px;
             margin-top: 30px;
         }
-
         .menu-card {
             background-color: #ffffff;
             padding: 20px;
@@ -97,54 +80,37 @@
             font-weight: 700;
             transition: transform 0.2s, box-shadow 0.2s;
         }
-
         .menu-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
         }
-
         .menu-card .icon {
             font-size: 3rem;
             display: block;
             margin-bottom: 10px;
         }
-
-        /* 3. Highlight Mingguan */
         .highlight {
-            background-color: #fffde7; /* Kuning sangat muda */
-            border: 2px dashed #ffd54f; /* Kuning cerah */
+            background-color: #fffde7;
+            border: 2px dashed #ffd54f;
             padding: 20px;
             margin: 40px 0;
             border-radius: 15px;
         }
-
-        .highlight h2 {
-            margin: 0;
-            color: #ff8f00;
-        }
-        
-        /* 4. Bagian Komunitas */
+        .highlight h2 { margin: 0; color: #ff8f00; }
         .komunitas {
-            background-color: #e8f5e9; /* Hijau sangat muda */
+            background-color: #e8f5e9;
             padding: 30px;
             border-radius: 15px;
             margin-bottom: 30px;
         }
-        
-        .komunitas h2 {
-            margin-top: 0;
-        }
-
+        .komunitas h2 { margin-top: 0; }
         .upload-button {
             display: inline-block;
             margin-bottom: 30px;
-            background-color: #64b5f6; /* Biru lebih soft */
+            background-color: #64b5f6;
             font-size: 1.1rem;
         }
-        .upload-button:hover {
-            background-color: #42a5f5;
-        }
-        
+        .upload-button:hover { background-color: #42a5f5; }
         .tips-ortu ul {
             list-style: none;
             padding: 0;
@@ -152,57 +118,42 @@
             max-width: 600px;
             margin: 0 auto;
         }
-        
         .tips-ortu li {
             background-color: #ffffff;
             padding: 15px;
             margin-bottom: 10px;
             border-radius: 8px;
-            border-left: 5px solid #81c784; /* Aksen hijau */
+            border-left: 5px solid #81c784;
         }
-        
-        .tips-ortu li::before {
-            content: "💡";
-            margin-right: 10px;
-        }
-
-        /* 5. Footer */
+        .tips-ortu li::before { content: "💡"; margin-right: 10px; }
         footer {
-            background-color: #455a64; /* Abu-abu gelap */
+            background-color: #455a64;
             color: white;
             padding: 20px;
             margin-top: 20px;
         }
-
-        footer a {
-            color: #a7ffeb; /* Warna link di footer */
-            text-decoration: none;
-            margin: 0 10px;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
+        footer a { color: #a7ffeb; text-decoration: none; margin: 0 10px; }
+        footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
-    <!-- 1. Header Situs -->
     <header>
         <h1>Komunitas Ceria 2SD</h1>
         <div class="header-buttons">
             <a href="quiz-menu.html" class="btn">Mulai Kuis 🎲</a>
             <a href="buat-kuis.html" class="btn secondary">Tambah Soal 📚</a>
+            <!-- Tombol Kelola Kuis, awalnya disembunyikan -->
+            <a href="kelola-kuis.html" id="kelola-kuis-btn" class="btn tertiary" style="display: none;">Kelola Kuis Saya ⚙️</a>
         </div>
     </header>
 
     <div class="container">
         <main>
-            <!-- 2. Bagian Menu Utama -->
             <section class="menu-utama">
                 <h2>Ayo Mulai Belajar & Bermain!</h2>
                 <div class="menu-grid">
-                    <a href="#" class="menu-card">
+                    <a href="quiz-menu.html" class="menu-card">
                         <span class="icon">🧩</span>
                         <span>Main Kuis</span>
                     </a>
@@ -225,15 +176,13 @@
                 </div>
             </section>
 
-            <!-- 3. Bagian Highlight Mingguan -->
             <section class="highlight">
                 <h2>Tema Minggu Ini: Hewan Laut 🐠</h2>
             </section>
 
-            <!-- 4. Bagian Komunitas -->
             <section class="komunitas">
                 <h2>Untuk Ayah & Bunda</h2>
-                <a href="#" class="btn upload-button">Upload Soal Baru 📤</a>
+                <a href="buat-kuis.html" class="btn upload-button">Upload Soal Baru 📤</a>
                 
                 <div class="tips-ortu">
                     <h3>Tips & Artikel Terbaru</h3>
@@ -248,7 +197,6 @@
         </main>
     </div>
 
-    <!-- 5. Footer Sederhana -->
     <footer>
         <nav>
             <a href="#">Beranda</a> |
@@ -258,42 +206,35 @@
         </nav>
         <p>&copy; 2024 Komunitas Ceria Kelas 2 SD</p>
     </footer>
-<script type="module">
-  // Import modul Firebase
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-  // Konfigurasi Firebase kamu
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+  
   const firebaseConfig = {
     apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
     authDomain: "forumwidara.firebaseapp.com",
     projectId: "forumwidara",
     storageBucket: "forumwidara.firebasestorage.app",
     messagingSenderId: "216895655168",
-    appId: "1:216895655168:web:59255f600fc3b3b44eb7e5",
-    measurementId: "G-GVD3VJ2HZN"
+    appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
   };
 
-  // Inisialisasi Firebase
   const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+  const auth = getAuth(app);
 
-  // Tes: tambahkan dokumen ke koleksi "test"
-  async function tesKoneksi() {
-    try {
-      await addDoc(collection(db, "test"), {
-        pesan: "Halo dari Komunitas Ceria 2SD!",
-        waktu: new Date()
-      });
-      console.log("✅ Data berhasil dikirim ke Firestore!");
-    } catch (e) {
-      console.error("❌ Error: ", e);
+  // Cek status login pengguna
+  onAuthStateChanged(auth, (user) => {
+    const kelolaKuisBtn = document.getElementById('kelola-kuis-btn');
+    if (user) {
+      // Jika pengguna login, tampilkan tombol "Kelola Kuis Saya"
+      kelolaKuisBtn.style.display = 'inline-block';
+    } else {
+      // Jika tidak ada pengguna yang login, sembunyikan tombolnya
+      kelolaKuisBtn.style.display = 'none';
     }
-  }
-
-  tesKoneksi();
-</script
+  });
+</script>
 </body>
 </html>
 
-    
