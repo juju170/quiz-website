@@ -4,18 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kuis Harian - Komunitas Ceria 2SD</title>
-    <!-- Menambahkan Google Font yang ramah anak -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
-
-    <!-- CSS Internal untuk styling -->
     <style>
-        /* Pengaturan Dasar Body */
         body {
             font-family: 'Baloo 2', sans-serif;
             margin: 0;
-            background-color: #e3f2fd; /* Biru langit sangat muda */
+            background-color: #e3f2fd;
             color: #333;
             display: flex;
             justify-content: center;
@@ -24,8 +20,6 @@
             padding: 20px;
             box-sizing: border-box;
         }
-
-        /* Container utama untuk membungkus semua elemen */
         .container {
             text-align: center;
             background-color: #ffffff;
@@ -35,54 +29,30 @@
             max-width: 500px;
             width: 100%;
         }
-
-        /* 1 & 2. Judul Utama dan Emoji */
         .main-title {
             font-size: 2.2rem;
             font-weight: 800;
-            color: #1e88e5; /* Biru cerah */
+            color: #1e88e5;
             margin-top: 0;
             margin-bottom: 30px;
         }
-
         .main-title .emoji {
             font-size: 2.5rem;
             vertical-align: middle;
         }
-
-        /* 3. Card Informasi Kuis */
         .info-card {
-            background-color: #f1f8e9; /* Hijau pastel sangat muda */
+            background-color: #f1f8e9;
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 30px;
             text-align: left;
         }
-
-        .info-card ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .info-card li {
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-        
-        .info-card li:last-child {
-            margin-bottom: 0;
-        }
-
-        .info-card li::before {
-            content: '✔️';
-            margin-right: 10px;
-            color: #66bb6a;
-        }
-
-        /* 4. Teaser Soal */
+        .info-card ul { list-style: none; padding: 0; margin: 0; }
+        .info-card li { margin-bottom: 10px; font-size: 1.1rem; }
+        .info-card li:last-child { margin-bottom: 0; }
+        .info-card li::before { content: '✔️'; margin-right: 10px; color: #66bb6a; }
         .teaser-box {
-            background-color: #fff9c4; /* Kuning pastel */
+            background-color: #fff9c4;
             border: 2px dashed #ffeb3b;
             padding: 15px;
             border-radius: 10px;
@@ -91,78 +61,41 @@
             font-weight: 700;
             color: #f57f17;
         }
-        
-        /* 5, 6, 7. Tombol Aksi */
-        .actions {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
+        .actions { display: flex; flex-direction: column; gap: 15px; }
         .btn {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            border-radius: 15px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 1.1rem;
+            display: block; width: 100%; padding: 15px; border-radius: 15px;
+            text-decoration: none; font-weight: 700; font-size: 1.1rem;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease, background-color 0.2s ease;
+            transition: transform 0.2s ease, background-color 0.2s ease, opacity 0.2s;
             box-sizing: border-box;
         }
-        
-        /* Tombol Aksi Utama */
         .btn-start {
-            background-color: #66bb6a; /* Hijau segar */
-            color: white;
-            font-size: 1.4rem;
-            padding: 20px;
-            border-bottom: 4px solid #388e3c;
+            background-color: #66bb6a; color: white; font-size: 1.4rem;
+            padding: 20px; border-bottom: 4px solid #388e3c;
         }
-        
-        .btn-start:hover {
-            background-color: #76c87a;
-            transform: translateY(-2px);
+        .btn-start:hover { background-color: #76c87a; transform: translateY(-2px); }
+        .btn-start.disabled {
+            background-color: #9e9e9e;
+            border-bottom-color: #616161;
+            cursor: not-allowed;
+            pointer-events: none;
+            opacity: 0.7;
         }
-
-        /* Tombol Aksi Sekunder */
-        .btn-secondary {
-            background-color: #ffb74d; /* Oranye pastel */
-            color: white;
-            border-bottom: 4px solid #f57c00;
-        }
-
-        .btn-secondary:hover {
-            background-color: #ffc971;
-            transform: translateY(-2px);
-        }
-
-        /* Tombol Kembali */
+        .btn-secondary { background-color: #ffb74d; color: white; border-bottom: 4px solid #f57c00; }
+        .btn-secondary:hover { background-color: #ffc971; transform: translateY(-2px); }
         .btn-back {
-            background-color: #f0f0f0;
-            color: #777;
-            margin-top: 10px;
-            font-size: 1rem;
-            box-shadow: none;
-            border: 2px solid #ddd;
+            background-color: #f0f0f0; color: #777; margin-top: 10px;
+            font-size: 1rem; box-shadow: none; border: 2px solid #ddd;
         }
-
-        .btn-back:hover {
-            background-color: #e0e0e0;
-            border-color: #ccc;
-        }
+        .btn-back:hover { background-color: #e0e0e0; border-color: #ccc; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- 1 & 2. Judul dan Emoji -->
         <h1 class="main-title">
             Kuis Harian Hari Ini <span class="emoji">🗓️🎉</span>
         </h1>
-
-        <!-- 3. Informasi Kuis -->
         <div class="info-card">
             <ul>
                 <li><strong>Jumlah Soal:</strong> Ada 5 pertanyaan</li>
@@ -170,20 +103,84 @@
                 <li><strong>Tema:</strong> Campuran (Matematika, Bahasa, & Sains)</li>
             </ul>
         </div>
-
-        <!-- 4. Teaser Soal -->
-        <div class="teaser-box">
-            Contoh soal: 2 + 2 = ... ?
+        <div class="teaser-box" id="teaser-box">
+            Mencari kuis harian...
         </div>
-
-        <!-- 5, 6, 7. Tombol-tombol Aksi -->
         <div class="actions">
-            <a href="quiz-play.html" class="btn btn-start">Mulai Sekarang ➡️</a>
-            <a href="#" class="btn btn-secondary">Pilih Tema Lain 📚</a>
-            <a href="#" class="btn btn-back">⬅️ Kembali ke Menu Kuis</a>
+            <!-- Tombol "Mulai Sekarang" sekarang punya ID dan dinonaktifkan sementara -->
+            <a href="#" id="start-quiz-btn" class="btn btn-start disabled">Memuat Kuis...</a>
+            <a href="themes.html" class="btn btn-secondary">Pilih Tema Lain 📚</a>
+            <a href="index.html" class="btn btn-back">⬅️ Kembali ke Beranda</a>
         </div>
     </div>
 
+    <!-- ===== AWAL DARI KODE BARU ===== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+        import { getFirestore, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+        // Konfigurasi Firebase Anda
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+            authDomain: "forumwidara.firebaseapp.com",
+            projectId: "forumwidara",
+            storageBucket: "forumwidara.firebasestorage.app",
+            messagingSenderId: "216895655168",
+            appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Mendapatkan elemen tombol dari HTML
+        const startButton = document.getElementById('start-quiz-btn');
+        const teaserBox = document.getElementById('teaser-box');
+
+        // Fungsi untuk mencari kuis harian terbaru
+        async function findDailyQuiz() {
+            try {
+                // Membuat query untuk mencari kuis dengan tipe 'harian',
+                // diurutkan dari yang paling baru, dan hanya mengambil 1.
+                const q = query(
+                    collection(db, "quizzes"), 
+                    where("tipe", "==", "harian"), 
+                    orderBy("dibuatPada", "desc"), 
+                    limit(1)
+                );
+
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    // Jika tidak ada kuis harian yang ditemukan
+                    teaserBox.textContent = "Yah, kuis harian belum tersedia hari ini.";
+                    startButton.textContent = "Kuis Belum Ada";
+                    // Tombol tetap nonaktif
+                } else {
+                    // Jika kuis ditemukan
+                    const dailyQuizDoc = querySnapshot.docs[0];
+                    const quizId = dailyQuizDoc.id;
+                    const quizData = dailyQuizDoc.data();
+
+                    teaserBox.textContent = `Kuis hari ini: "${quizData.judul}"`;
+                    
+                    // Mengatur link tombol agar menyertakan ID kuis
+                    startButton.href = `quiz-play.html?quizId=${quizId}`;
+                    startButton.textContent = "Mulai Sekarang ➡️";
+                    // Mengaktifkan kembali tombolnya
+                    startButton.classList.remove('disabled');
+                }
+            } catch (error) {
+                console.error("Gagal mencari kuis harian:", error);
+                teaserBox.textContent = "Oops! Gagal mengambil data kuis.";
+                startButton.textContent = "Terjadi Error";
+            }
+        }
+
+        // Menjalankan fungsi saat halaman dimuat
+        findDailyQuiz();
+
+    </script>
+    <!-- ===== AKHIR DARI KODE BARU ===== -->
 </body>
 </html>
 
