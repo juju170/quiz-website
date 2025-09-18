@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buat Kuis Baru - Komunitas Ceria 2SD</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Baloo 2', sans-serif;
+            margin: 0;
+            background-color: #f0f9ff;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            color: #0277bd;
+        }
+        .form-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #ccc;
+            box-sizing: border-box;
+            font-family: 'Baloo 2', sans-serif;
+            font-size: 1rem;
+        }
+        .quota-info {
+            background-color: #e3f2fd;
+            border: 2px solid #90caf9;
+            color: #1565c0;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+        #countdown-timer {
+            display: block;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            color: #0d47a1;
+        }
+        .question-block {
+            background-color: #fafafa;
+            border: 2px dashed #ddd;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .question-block .answer-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .answer-option { display: flex; align-items: center; }
+        .answer-option input[type="text"] { flex-grow: 1; }
+        .answer-option input[type="radio"] { margin-right: 10px; width: 20px; height: 20px; }
+        .btn {
+            background-color: #0288d1;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s, opacity 0.2s;
+        }
+        .btn:hover { background-color: #03a9f4; }
+        .btn:disabled {
+            background-color: #9e9e9e;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .btn-add { background-color: #388e3c; }
+        .btn-add:hover { background-color: #4caf50; }
+        .btn-remove {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #e57373;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .submit-section { text-align: center; margin-top: 30px; }
+        .btn-submit {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            background-color: #ff8f00;
+            border-bottom: 4px solid #e65100;
+        }
+        .btn-submit:hover { background-color: #ffa000; }
+        .loader { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.8); z-index: 9999; justify-content: center; align-items: center; }
+        .loader.show { display: flex; }
+        .spinner { border: 8px solid #f3f3f3; border-top: 8px solid #3498db; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .message { text-align: center; padding: 15px; border-radius: 8px; font-weight: 700; margin-top: 20px; display: none; }
+        .message.success { background-color: #e8f5e9; color: #2e7d32; }
+        .message.error { background-color: #ffebee; color: #c62828; }
+    </style>
+</head>
+<body>
+
+    <div class="loader" id="loader"><div class="spinner"></div></div>
+
+    <div class="container">
+        <header class="page-header">
+            <h1>Buat Kuis Baru 📝</h1>
+            <p>Bagikan pengetahuanmu kepada anak-anak lain!</p>
+        </header>
+
+        <main>
+            <div id="quota-info" class="quota-info">
+                <span id="quota-text">Memeriksa kuota...</span>
+                <span id="countdown-timer"></span>
+            </div>
+
+            <form id="kuis-form" class="form-container">
+                <div class="input-group">
+                    <label for="kuis-judul">Judul Kuis</label>
+                    <input type="text" id="kuis-judul" placeholder="Contoh: Kuis Penjumlahan Seru" required>
+                </div>
+                <div class="input-group">
+                    <label for="kuis-tipe">Tipe Kuis</label>
+                    <select id="kuis-tipe" required>
+                        <option value="harian">Kuis Harian</option>
+                        <option value="tema">Kuis Bertema</option>
+                        <option value="mingguan">Tantangan Mingguan</option>
+                    </select>
+                </div>
+                <hr style="margin: 30px 0; border: 1px solid #eee;">
+                <div id="questions-container"></div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button type="button" id="add-question-btn" class="btn btn-add">➕ Tambah Pertanyaan</button>
+                </div>
+                <div class="submit-section">
+                    <button type="submit" class="btn btn-submit">Simpan Kuis ✅</button>
+                </div>
+                 <div id="message-box" class="message"></div>
+            </form>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, doc, query, where, getDocs, Timestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "GANTI_DENGAN_API_KEY_ANDA",
+            authDomain: "GANTI_DENGAN_AUTH_DOMAIN_ANDA",
+            projectId: "GANTI_DENGAN_PROJECT_ID_ANDA",
+            storageBucket: "GANTI_DENGAN_STORAGE_BUCKET_ANDA",
+            messagingSenderId: "GANTI_DENGAN_MESSAGING_SENDER_ID_ANDA",
+            appId: "GANTI_DENGAN_APP_ID_ANDA"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const quotaTextEl = document.getElementById('quota-text');
+        const countdownTimerEl = document.getElementById('countdown-timer');
+        const kuisForm = document.getElementById('kuis-form');
+        const questionsContainer = document.getElementById('questions-container');
+        const addQuestionBtn = document.getElementById('add-question-btn');
+        const loader = document.getElementById('loader');
+        const messageBox = document.getElementById('message-box');
+
+        let currentUser = null;
+        let weeklyUploadCount = 0;
+        const WEEKLY_UPLOAD_LIMIT = 5;
+        const MAX_QUESTIONS_PER_QUIZ = 5;
+        let countdownInterval = null;
+
+        function showMessage(type, text) {
+            messageBox.className = `message ${type}`;
+            messageBox.textContent = text;
+            messageBox.style.display = 'block';
+        }
+        
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await checkWeeklyQuota(user.uid);
+                startCountdownTimer();
+                addQuestionBlock();
+            } else {
+                alert("Anda harus login untuk membuat kuis. Mengalihkan ke halaman login...");
+                window.location.href = 'login.html';
+            }
+        });
+
+        async function checkWeeklyQuota(userId) {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+            const startOfWeek = new Date(today.setDate(diff));
+            startOfWeek.setHours(0, 0, 0, 0);
+            const startOfWeekTimestamp = Timestamp.fromDate(startOfWeek);
+
+            const q = query(collection(db, 'quizzes'), where('dibuatOleh', '==', userId), where('dibuatPada', '>=', startOfWeekTimestamp));
+            
+            try {
+                const querySnapshot = await getDocs(q);
+                weeklyUploadCount = querySnapshot.size;
+                const remaining = WEEKLY_UPLOAD_LIMIT - weeklyUploadCount;
+                quotaTextEl.textContent = `Sisa kuota pembuatan kuis minggu ini: ${remaining} dari ${WEEKLY_UPLOAD_LIMIT}`;
+
+                if (remaining <= 0) {
+                    kuisForm.style.display = 'none';
+                    showMessage('error', 'Kuota pembuatan kuis mingguan Anda telah habis.');
+                }
+            } catch (error) {
+                console.error("Gagal memeriksa kuota:", error);
+                quotaTextEl.textContent = "Gagal memeriksa kuota.";
+            }
+        }
+        
+        function startCountdownTimer() {
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            const now = new Date();
+            const nextMonday = new Date();
+            const day = now.getDay();
+            const daysUntilMonday = (day === 0) ? 1 : (8 - day);
+            nextMonday.setDate(now.getDate() + daysUntilMonday);
+            nextMonday.setHours(0, 0, 0, 0);
+
+            countdownInterval = setInterval(() => {
+                const currentTime = new Date().getTime();
+                const distance = nextMonday - currentTime;
+
+                if (distance < 0) {
+                    clearInterval(countdownInterval);
+                    countdownTimerEl.textContent = "Kuota telah di-reset!";
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                countdownTimerEl.textContent = `Kuota reset dalam: ${days} hari ${hours} jam ${minutes} menit ${seconds} detik`;
+            }, 1000);
+        }
+
+        function updateAddQuestionButtonState() {
+            const questionCount = questionsContainer.children.length;
+            addQuestionBtn.disabled = questionCount >= MAX_QUESTIONS_PER_QUIZ;
+        }
+
+        let questionCounter = 0;
+        function addQuestionBlock() {
+            if (questionsContainer.children.length >= MAX_QUESTIONS_PER_QUIZ) return;
+            
+            questionCounter++;
+            const questionId = `q-${questionCounter}`;
+            const block = document.createElement('div');
+            block.className = 'question-block';
+            block.id = questionId;
+
+            block.innerHTML = `
+                <button type="button" class="btn-remove" data-target="${questionId}">X</button>
+                <div class="input-group">
+                    <label>Pertanyaan ke-${questionsContainer.children.length + 1}</label>
+                    <textarea class="pertanyaan-teks" placeholder="Contoh: Apa ibu kota Indonesia?" required></textarea>
+                </div>
+                <label>Pilihan Jawaban (pilih satu yang benar)</label>
+                <div class="answer-options">
+                    ${[1, 2, 3, 4].map(i => `
+                        <div class="answer-option">
+                            <input type="radio" name="correct-answer-${questionId}" value="${i-1}" required>
+                            <input type="text" class="jawaban-teks" placeholder="Jawaban ${i}" required>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            questionsContainer.appendChild(block);
+            updateAddQuestionButtonState();
+        }
+
+        addQuestionBtn.addEventListener('click', addQuestionBlock);
+
+        questionsContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-remove')) {
+                const targetId = e.target.dataset.target;
+                document.getElementById(targetId)?.remove();
+                
+                const allLabels = questionsContainer.querySelectorAll('.question-block > .input-group > label');
+                allLabels.forEach((label, index) => {
+                    label.textContent = `Pertanyaan ke-${index + 1}`;
+                });
+                updateAddQuestionButtonState();
+            }
+        });
+        
+        kuisForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (weeklyUploadCount >= WEEKLY_UPLOAD_LIMIT) {
+                showMessage('error', 'Maaf, kuota upload mingguan Anda sudah habis.');
+                return;
+            }
+            if (questionsContainer.children.length === 0) {
+                showMessage('error', 'Kuis harus memiliki setidaknya satu pertanyaan.');
+                return;
+            }
+            loader.classList.add('show');
+            try {
+                const batch = writeBatch(db);
+                const kuisRef = doc(collection(db, "quizzes"));
+                batch.set(kuisRef, {
+                    judul: document.getElementById('kuis-judul').value,
+                    tipe: document.getElementById('kuis-tipe').value,
+                    dibuatOleh: currentUser.uid,
+                    dibuatPada: Timestamp.now(),
+                    batasMingguan: WEEKLY_UPLOAD_LIMIT
+                });
+                const questionBlocks = questionsContainer.querySelectorAll('.question-block');
+                for (const block of questionBlocks) {
+                    const pertanyaanRef = doc(collection(db, `quizzes/${kuisRef.id}/pertanyaan`));
+                    batch.set(pertanyaanRef, {
+                        teksPertanyaan: block.querySelector('.pertanyaan-teks').value,
+                        mediaPertanyaan: null,
+                        tipeJawaban: "pilihanGanda",
+                        dibuatPada: Timestamp.now()
+                    });
+                    const jawabanInputs = block.querySelectorAll('.jawaban-teks');
+                    const radioButtons = block.querySelectorAll('input[type="radio"]');
+                    const correctIndex = Array.from(radioButtons).findIndex(radio => radio.checked);
+                    jawabanInputs.forEach((jawabanInput, index) => {
+                        const jawabanRef = doc(collection(db, `quizzes/${kuisRef.id}/pertanyaan/${pertanyaanRef.id}/jawaban`));
+                        batch.set(jawabanRef, {
+                            teksJawaban: jawabanInput.value,
+                            mediaJawaban: null,
+                            benar: index === correctIndex
+                        });
+                    });
+                }
+                await batch.commit();
+                showMessage('success', 'Kuis berhasil disimpan! Terima kasih atas kontribusinya.');
+                kuisForm.reset();
+                questionsContainer.innerHTML = '';
+                addQuestionBlock();
+                await checkWeeklyQuota(currentUser.uid);
+            } catch (error) {
+                console.error("Error saat menyimpan kuis:", error);
+                showMessage('error', 'Terjadi kesalahan saat menyimpan kuis. Coba lagi nanti.');
+            } finally {
+                loader.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
+
+
