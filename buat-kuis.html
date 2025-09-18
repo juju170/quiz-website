@@ -106,14 +106,13 @@
         </header>
 
         <main>
-             <!-- Kontainer untuk kuota sengaja dihilangkan agar tidak mengganggu, bisa ditambahkan lagi jika perlu -->
             <form id="kuis-form" class="form-container">
                 <div class="input-group">
                     <label for="kuis-judul">Judul Kuis (Opsional)</label>
                     <input type="text" id="kuis-judul" placeholder="Contoh: Kuis Penjumlahan Seru">
                 </div>
                 <hr style="margin: 30px 0; border: 1px solid #eee;">
-                <h3 style="text-align:center; margin-top:0;">Isi Pertanyaan</h3>
+                <h3 style="text-align:center; margin-top:0;">Isi Pertanyaan (Maksimal 5)</h3>
                 <div id="questions-container"></div>
                 <div style="text-align: center; margin-top: 20px;">
                     <button type="button" id="add-question-btn" class="btn btn-add">➕ Tambah Pertanyaan</button>
@@ -133,11 +132,11 @@
 
         const firebaseConfig = {
             apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
-            authDomain: "forumwidara.firebaseapp.com",
-            projectId: "forumwidara",
-            storageBucket: "forumwidara.firebasestorage.app",
-            messagingSenderId: "216895655168",
-            appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+            authDomain: "forumwidara.firebaseapp.com",
+            projectId: "forumwidara",
+            storageBucket: "forumwidara.firebasestorage.app",
+            messagingSenderId: "216895655168",
+            appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -150,7 +149,8 @@
         const messageBox = document.getElementById('message-box');
 
         let currentUser = null;
-        
+        const MAX_QUESTIONS = 5; // <-- BARU: Definisikan batas maksimal
+
         function showMessage(type, text) {
             messageBox.className = `message ${type}`;
             messageBox.textContent = text;
@@ -168,9 +168,25 @@
                 window.location.href = 'login.html';
             }
         });
-
+        
+        // --- FUNGSI BARU ---
+        // Fungsi ini akan dipanggil setiap kali ada perubahan jumlah pertanyaan
+        function checkQuestionLimit() {
+            const questionCount = questionsContainer.children.length;
+            if (questionCount >= MAX_QUESTIONS) {
+                addQuestionBtn.disabled = true;
+            } else {
+                addQuestionBtn.disabled = false;
+            }
+        }
+        
         let questionCounter = 0;
         function addQuestionBlock() {
+            // Cek dulu sebelum menambahkan
+            if (questionsContainer.children.length >= MAX_QUESTIONS) {
+                return; // Hentikan fungsi jika sudah mencapai batas
+            }
+
             questionCounter++;
             const questionId = `q-${questionCounter}`;
             const block = document.createElement('div');
@@ -183,20 +199,17 @@
                     <label>Pertanyaan ke-${questionsContainer.children.length + 1}</label>
                     <textarea class="pertanyaan-teks" placeholder="Contoh: Apa ibu kota Indonesia?" required></textarea>
                 </div>
-                
-                <!-- === INI BAGIAN BARUNYA === -->
                 <div class="input-group kategori-group">
                     <label for="kategori-${questionId}">Pilih Kategori</label>
                     <select id="kategori-${questionId}" class="kategori-pilihan" required>
                         <option value="">-- Pilih Kategori --</option>
                         <option value="matematika">Matematika</option>
                         <option value="bahasa">Bahasa Indonesia</option>
-                        <option value="sains">Sains</option>
+                        <option value="ipa">IPA</option>
+                        <option value="seni">Seni</option>
                         <option value="umum">Pengetahuan Umum</option>
                     </select>
                 </div>
-                <!-- === AKHIR BAGIAN BARU === -->
-
                 <label>Pilihan Jawaban (pilih satu yang benar)</label>
                 <div class="answer-options">
                     ${[1, 2, 3, 4].map(i => `
@@ -208,6 +221,9 @@
                 </div>
             `;
             questionsContainer.appendChild(block);
+            
+            // Panggil fungsi pengecekan setelah menambahkan
+            checkQuestionLimit(); 
         }
 
         addQuestionBtn.addEventListener('click', addQuestionBlock);
@@ -219,11 +235,13 @@
                 
                 const allLabels = questionsContainer.querySelectorAll('.question-block > .input-group > label');
                 allLabels.forEach((label, index) => {
-                    // Update nomor pertanyaan
                     if (label.textContent.startsWith('Pertanyaan')) {
                         label.textContent = `Pertanyaan ke-${index + 1}`;
                     }
                 });
+
+                // Panggil fungsi pengecekan setelah menghapus
+                checkQuestionLimit();
             }
         });
         
@@ -234,37 +252,30 @@
                 return;
             }
 
+            // (Sisa kode untuk submit ke Firebase tidak ada perubahan, jadi saya singkat)
             try {
                 const batch = writeBatch(db);
-                
                 const kuisJudul = document.getElementById('kuis-judul').value || `Kuis oleh ${currentUser.displayName || 'Pengguna'}`;
                 const kuisRef = doc(collection(db, "quizzes"));
-
                 batch.set(kuisRef, {
                     judul: kuisJudul,
                     tipe: 'komunitas',
                     dibuatOleh: currentUser.uid,
                     dibuatPada: Timestamp.now()
                 });
-
                 const questionBlocks = questionsContainer.querySelectorAll('.question-block');
                 for (const block of questionBlocks) {
                     const pertanyaanRef = doc(collection(db, `quizzes/${kuisRef.id}/pertanyaan`));
-                    
-                    // Ambil nilai kategori dari dropdown
                     const kategori = block.querySelector('.kategori-pilihan').value;
-
                     batch.set(pertanyaanRef, {
                         teksPertanyaan: block.querySelector('.pertanyaan-teks').value,
-                        kategori: kategori, // Simpan kategori ke database
+                        kategori: kategori,
                         dibuatPada: Timestamp.now(),
                         dibuatOleh: currentUser.uid
                     });
-                    
                     const jawabanInputs = block.querySelectorAll('.jawaban-teks');
                     const radioButtons = block.querySelectorAll('input[type="radio"]');
                     const correctIndex = Array.from(radioButtons).findIndex(radio => radio.checked);
-                    
                     jawabanInputs.forEach((jawabanInput, index) => {
                         const jawabanRef = doc(collection(db, `quizzes/${kuisRef.id}/pertanyaan/${pertanyaanRef.id}/jawaban`));
                         batch.set(jawabanRef, {
@@ -273,21 +284,18 @@
                         });
                     });
                 }
-                
                 await batch.commit();
-                
                 showMessage('success', 'Pertanyaan berhasil disimpan! Terima kasih atas kontribusinya.');
                 kuisForm.reset();
                 questionsContainer.innerHTML = '';
                 addQuestionBlock();
-
+                checkQuestionLimit(); // <-- Panggil juga di sini setelah submit berhasil
             } catch (error) {
                 console.error("Error:", error);
-                showMessage('error', 'Terjadi kesalahan.');
+                showMessage('error', 'Terjadi kesalahan saat menyimpan kuis.');
             }
         });
     </script>
 </body>
 </html>
-
 
