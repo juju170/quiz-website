@@ -137,48 +137,45 @@
         const teaserBox = document.getElementById('teaser-box');
 
         // Fungsi untuk mencari kuis harian terbaru
-        async function findDailyQuiz() {
-            try {
-                // Membuat query untuk mencari kuis dengan tipe 'harian',
-                // diurutkan dari yang paling baru, dan hanya mengambil 1.
-                const q = query(
-                    collection(db, "quizzes"), 
-                    where("tipe", "==", "harian"), 
-                    orderBy("dibuatPada", "desc"), 
-                    limit(1)
-                );
+ // Ganti fungsi lama di daily-quiz.html dengan yang ini
 
-                const querySnapshot = await getDocs(q);
+async function findDailyQuiz() {
+    try {
+        // --- PERUBAHAN KECIL TAPI PENTING DI SINI ---
+        // Mencari kuis yang field 'tags'-nya mengandung 'harian'
+        const q = query(
+            collection(db, "quizzes"), 
+            where("tags", "array-contains", "harian"), // Ganti 'tipe' menjadi 'tags' dan '==' menjadi 'array-contains'
+            orderBy("dibuatPada", "desc"), 
+            limit(1)
+        );
+        // --- AKHIR PERUBAHAN ---
 
-                if (querySnapshot.empty) {
-                    // Jika tidak ada kuis harian yang ditemukan
-                    teaserBox.textContent = "Yah, kuis harian belum tersedia hari ini.";
-                    startButton.textContent = "Kuis Belum Ada";
-                    // Tombol tetap nonaktif
-                } else {
-                    // Jika kuis ditemukan
-                    const dailyQuizDoc = querySnapshot.docs[0];
-                    const quizId = dailyQuizDoc.id;
-                    const quizData = dailyQuizDoc.data();
+        const querySnapshot = await getDocs(q);
 
-                    teaserBox.textContent = `Kuis hari ini: "${quizData.judul}"`;
-                    
-                    // Mengatur link tombol agar menyertakan ID kuis
-                    startButton.href = `quiz-play.html?quizId=${quizId}`;
-                    startButton.textContent = "Mulai Sekarang ➡️";
-                    // Mengaktifkan kembali tombolnya
-                    startButton.classList.remove('disabled');
-                }
-            } catch (error) {
-                console.error("Gagal mencari kuis harian:", error);
-                teaserBox.textContent = "Oops! Gagal mengambil data kuis.";
-                startButton.textContent = "Terjadi Error";
-            }
+        if (querySnapshot.empty) {
+            teaserBox.textContent = "Yah, kuis harian belum tersedia hari ini.";
+            startButton.textContent = "Kuis Belum Ada";
+        } else {
+            const dailyQuizDoc = querySnapshot.docs[0];
+            const quizId = dailyQuizDoc.id;
+            const quizData = dailyQuizDoc.data();
+
+            teaserBox.textContent = `Kuis hari ini: "${quizData.judul}"`;
+            
+            startButton.href = `quiz-play.html?quizId=${quizId}`;
+            startButton.textContent = "Mulai Sekarang ➡️";
+            startButton.classList.remove('disabled');
         }
-
-        // Menjalankan fungsi saat halaman dimuat
-        findDailyQuiz();
-
+    } catch (error) {
+        console.error("Gagal mencari kuis harian:", error);
+        teaserBox.textContent = "Oops! Gagal mengambil data kuis.";
+        startButton.textContent = "Terjadi Error";
+    }
+}
+        
+// Menjalankan fungsi saat halaman dimuat
+findDailyQuiz();    
     </script>
     <!-- ===== AKHIR DARI KODE BARU ===== -->
 </body>
