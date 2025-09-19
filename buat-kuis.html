@@ -34,6 +34,46 @@
         .message.success { background-color: #e8f5e9; color: #2e7d32; }
         .message.error { background-color: #ffebee; color: #c62828; }
     </style>
+    <style>
+        /* Hanya untuk demo, agar halaman bisa di-scroll */
+        body {
+            height: 200vh;
+            margin: 0;
+            padding-bottom: 100px; /* Memberi ruang di bawah agar tidak tertutup tombol */
+            font-family: sans-serif;
+        }
+
+        /* -- GAYA UNTUK TOMBOL BERANDA -- */
+        .tombol-beranda {
+            position: fixed; /* Membuat posisi tombol tetap saat di-scroll */
+            bottom: 20px;
+            right: 20px;
+            
+            background-color: #FFC107; /* Warna kuning amber yang cerah */
+            color: #333; /* Warna teks gelap agar mudah dibaca */
+            
+            padding: 12px 20px; /* Jarak antara teks dan tepi tombol */
+            border-radius: 50px; /* Sudut cembung/bulat sempurna (pill shape) */
+            
+            display: flex; /* Mengaktifkan flexbox untuk alignment */
+            align-items: center; /* Menengahkan teks dan ikon secara vertikal */
+            gap: 8px; /* Jarak antara emoji dan teks "Beranda" */
+            
+            font-family: 'Baloo 2', sans-serif; /* Menggunakan font yang sesuai tema */
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none; /* Menghilangkan garis bawah pada link */
+            
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Efek bayangan halus */
+            transition: transform 0.2s ease, box-shadow 0.2s ease; /* Animasi halus */
+            z-index: 1000; /* Memastikan tombol selalu di lapisan paling atas */
+        }
+
+        .tombol-beranda:hover {
+            transform: translateY(-3px); /* Sedikit terangkat saat disentuh */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Bayangan lebih jelas */
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -256,13 +296,11 @@
             setTimeout(() => { messageBox.style.display = 'none'; }, 4000);
         }
     </script>
-    <body>
-    <div class="container">
-        <div class="mode-grid">
-    <a href="index.html" class="back-button">⬅️ Kembali ke Beranda</a>
-    </div>
-    </div>
-    </body>
+</head>
+    <a href="index.html" class="tombol-beranda" title="Kembali ke Beranda">
+        <span>🏠</span>
+        <span>Beranda</span>
+    </a>
 </body>
 </html>
 
