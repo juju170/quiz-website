@@ -16,9 +16,35 @@
         .header-actions a { color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; display: inline-block; transition: background-color 0.2s; }
         .btn-add { background-color: #388e3c; }
         .btn-add:hover { background-color: #4caf50; }
-        .btn-back { background-color: #78909c; }
-        .btn-back:hover { background-color: #90a4ae; }
-        
+        .tombol-beranda {
+            position: fixed; /* Membuat posisi tombol tetap saat di-scroll */
+            bottom: 20px;
+            right: 20px;
+            
+            background-color: #FFC107; /* Warna kuning amber yang cerah */
+            color: #333; /* Warna teks gelap agar mudah dibaca */
+            
+            padding: 12px 20px; /* Jarak antara teks dan tepi tombol */
+            border-radius: 50px; /* Sudut cembung/bulat sempurna (pill shape) */
+            
+            display: flex; /* Mengaktifkan flexbox untuk alignment */
+            align-items: center; /* Menengahkan teks dan ikon secara vertikal */
+            gap: 8px; /* Jarak antara emoji dan teks "Beranda" */
+            
+            font-family: 'Baloo 2', sans-serif; /* Menggunakan font yang sesuai tema */
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none; /* Menghilangkan garis bawah pada link */
+            
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Efek bayangan halus */
+            transition: transform 0.2s ease, box-shadow 0.2s ease; /* Animasi halus */
+            z-index: 1000; /* Memastikan tombol selalu di lapisan paling atas */
+        }
+
+        .tombol-beranda:hover {
+            transform: translateY(-3px); /* Sedikit terangkat saat disentuh */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Bayangan lebih jelas */
+        }
         #question-list-container { display: grid; gap: 20px; }
         .question-card { display: flex; justify-content: space-between; align-items: center; background-color: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); flex-wrap: wrap; gap: 15px; }
         .question-info p { margin: 0; font-size: 1.2rem; font-weight: 700; flex-grow: 1; }
@@ -197,7 +223,10 @@
         });
         // --- AKHIR PENYEMPURNAAN ---
     </script>
-    <a href="index.html" class="back-button">⬅️ Kembali ke Beranda</a>
+<a href="index.html" class="tombol-beranda" title="Kembali ke Beranda">
+        <span>🏠</span>
+        <span>Beranda</span>
+</a>
 </body>
 </html>
 
