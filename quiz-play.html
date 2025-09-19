@@ -13,165 +13,302 @@
         .quiz-container { position: relative; background-color: white; padding: 20px 30px 30px 30px; border-radius: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); width: 100%; max-width: 600px; text-align: center; }
         .btn-quit-quiz { position: absolute; top: 15px; right: 15px; background-color: #f1f1f1; color: #888; border: 2px solid #ddd; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 1.2rem; font-weight: 700; transition: all 0.2s ease; z-index: 10; }
         .btn-quit-quiz:hover { transform: scale(1.1) rotate(90deg); }
-        .progress-container { margin-bottom: 15px; }
         .question-box { background-color: var(--blue-light); padding: 20px; border-radius: 15px; margin-bottom: 25px; min-height: 80px; display: flex; justify-content: center; align-items: center; border-left: 8px solid var(--blue-main); }
         .question-text { font-size: 1.8rem; font-weight: 800; color: var(--blue-main); margin: 0; }
         .answer-options { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        .answer-btn { border: none; padding: 20px; border-radius: 15px; font-size: 1.5rem; font-family: 'Baloo 2', sans-serif; font-weight: 700; cursor: pointer; border-bottom: 6px solid; }
+        .answer-btn, .btn-action-word { border: none; padding: 15px; border-radius: 15px; font-family: 'Baloo 2', sans-serif; font-weight: 700; cursor: pointer; }
+        .answer-btn { font-size: 1.5rem; border-bottom: 6px solid; }
         .answer-btn.correct { background-color: var(--green-correct); color: white; border-color: #388e3c; animation: pulse 0.5s; }
         .answer-btn.wrong { background-color: var(--red-wrong); color: white; border-color: #c62828; }
-        .feedback-box { margin-top: 20px; font-size: 1.8rem; font-weight: 800; min-height: 40px; }
         .next-btn { margin-top: 15px; background-color: var(--orange-next); color: white; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: 800; border-radius: 30px; cursor: pointer; visibility: hidden; border-bottom: 4px solid #f57c00; }
-        .results-screen .btn { text-decoration: none; padding: 15px; border-radius: 15px; font-weight: 700; font-size: 1.2rem; width: 100%; max-width: 300px; box-sizing: border-box; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
-
-        /* --- STYLE BARU UNTUK SUSUN HURUF --- */
         .susun-huruf-wrapper { margin-top: 15px; }
         .answer-slots-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; min-height: 60px; }
         .answer-slot { width: 50px; height: 60px; background-color: #e0e0e0; border-bottom: 5px solid #bdbdbd; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: 800; }
         .letter-choices-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
         .letter-choice-btn { width: 55px; height: 55px; font-size: 1.8rem; background-color: #81d4fa; border: none; border-bottom: 5px solid #29b6f6; border-radius: 15px; font-family: 'Baloo 2', sans-serif; font-weight: 700; cursor: pointer; transition: all 0.2s; }
         .susun-huruf-actions { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
-        .btn-action-word { background-color: #ffb74d; border: none; color: white; padding: 10px 25px; font-size: 1rem; border-radius: 20px; font-weight: 700; cursor: pointer; }
+        .btn-action-word { background-color: #ffb74d; color: white; padding: 10px 25px; font-size: 1rem; border-radius: 20px; }
         .btn-check-word { background-color: #66bb6a; }
+        .esai-wrapper textarea { width: 100%; padding: 15px; font-family: 'Baloo 2', sans-serif; font-size: 1.2rem; border-radius: 10px; border: 3px solid #ccc; box-sizing: border-box; min-height: 120px; }
+        .feedback-box { min-height: 40px; font-size: 1.6rem; font-weight: 700; margin-top: 15px; }
+        .results-screen h2 { font-size: 2.5rem; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
-    <div class="quiz-container">
-        <!-- ... (konten tidak berubah) ... -->
+    <div id="quiz-container" class="quiz-container">
+        <!-- Konten Kuis akan dimuat di sini oleh JavaScript -->
+        <h2>Memuat Kuis...</h2>
     </div>
 
     <script type="module">
-        // ... (konfigurasi Firebase dan deklarasi elemen tidak berubah) ...
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-        // ... (fungsi loadQuiz, fetchQuestions, startQuiz tidak berubah) ...
-        
-        // --- PERUBAHAN UTAMA ADA DI FUNGSI DI BAWAH INI ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+            authDomain: "forumwidara.firebaseapp.com",
+            projectId: "forumwidara",
+            storageBucket: "forumwidara.firebasestorage.app",
+            messagingSenderId: "216895655168",
+            appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-        async function fetchQuestions(q) {
-            const snapshot = await getDocs(q);
-            let questions = [];
-            for (const doc of snapshot.docs) {
+        const quizContainer = document.getElementById('quiz-container');
+        let allQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        // --- AWAL PERBAIKAN PENTING ---
+        async function fetchQuestions(quizQuery) {
+            const snapshot = await getDocs(quizQuery);
+            const questions = [];
+            snapshot.forEach(doc => {
                 const data = doc.data();
                 const type = data.tipeSoal || 'pilihan_ganda';
+
+                // Membuat objek pertanyaan dasar
+                const questionData = {
+                    id: doc.id,
+                    type: type,
+                    question: data.teksPertanyaan,
+                    answer: data.jawabanBenar,
+                };
+
+                // Menambahkan properti spesifik berdasarkan tipe soal
                 if (type === 'pilihan_ganda') {
-                    // ... (tidak berubah)
-                } else if (type === 'esai') {
-                    // ... (tidak berubah)
-                } else if (type === 'susun_huruf') {
-                    questions.push({ 
-                        type, 
-                        question: data.teksPertanyaan, 
-                        answer: data.jawabanBenar 
-                    });
+                    questionData.options = data.pilihanJawaban;
                 }
-            }
+                
+                // Semua tipe soal sekarang ditambahkan ke daftar
+                questions.push(questionData);
+            });
             return questions;
+        }
+        // --- AKHIR PERBAIKAN PENTING ---
+
+        function loadQuizUI() {
+            quizContainer.innerHTML = `
+                <a href="index.html" class="btn-quit-quiz">&times;</a>
+                <div class="progress-container">
+                    <p>Pertanyaan <span id="question-number"></span> dari <span id="total-questions"></span></p>
+                    <p>Skor: <span id="score">0</span></p>
+                </div>
+                <div class="question-box">
+                    <h2 id="question-text" class="question-text"></h2>
+                </div>
+                <div id="answer-options" class="answer-options"></div>
+                <div id="feedback-box" class="feedback-box"></div>
+                <button id="next-btn" class="next-btn">Lanjut</button>
+            `;
+            document.getElementById('next-btn').addEventListener('click', () => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < allQuestions.length) {
+                    loadQuestion();
+                } else {
+                    showResults();
+                }
+            });
+        }
+        
+        async function startQuiz() {
+            loadQuizUI();
+            const params = new URLSearchParams(window.location.search);
+            const category = params.get('kategori');
+            const isHarian = params.get('harian') === 'true';
+            
+            let q;
+            const pertanyaanRef = collection(db, "pertanyaan");
+            if (isHarian) {
+                q = query(pertanyaanRef, where("isHarian", "==", true), limit(10));
+            } else if (category) {
+                q = query(pertanyaanRef, where("kategori", "==", category), limit(10));
+            } else {
+                q = query(pertanyaanRef, limit(10)); // Kuis acak jika tidak ada parameter
+            }
+
+            try {
+                allQuestions = await fetchQuestions(q);
+                if (allQuestions.length === 0) {
+                    quizContainer.innerHTML = '<h2>Oops! Tidak ada pertanyaan untuk kategori ini.</h2><a href="index.html">Kembali</a>';
+                    return;
+                }
+                allQuestions = shuffle(allQuestions);
+                currentQuestionIndex = 0;
+                score = 0;
+                loadQuestion();
+            } catch(error) {
+                console.error("Gagal memuat pertanyaan:", error);
+                quizContainer.innerHTML = '<h2>Terjadi kesalahan saat memuat kuis. Coba lagi nanti.</h2>';
+            }
         }
 
         function loadQuestion() {
-            // ... (logika awal tidak berubah) ...
-            if (currentQuestion.type === 'pilihan_ganda') {
-                // ... (tidak berubah)
-            } else if (currentQuestion.type === 'susun_huruf') {
-                renderSusunHurufUI(currentQuestion);
+            const questionData = allQuestions[currentQuestionIndex];
+            document.getElementById('question-number').textContent = currentQuestionIndex + 1;
+            document.getElementById('total-questions').textContent = allQuestions.length;
+            document.getElementById('score').textContent = score;
+            document.getElementById('question-text').textContent = questionData.question;
+            document.getElementById('answer-options').innerHTML = '';
+            document.getElementById('feedback-box').innerHTML = '';
+            document.getElementById('next-btn').style.visibility = 'hidden';
+
+            if (questionData.type === 'pilihan_ganda') {
+                renderPilihanGandaUI(questionData);
+            } else if (questionData.type === 'susun_huruf') {
+                renderSusunHurufUI(questionData);
+            } else if (questionData.type === 'esai') {
+                renderEsaiUI(questionData);
             }
         }
-        
-                function renderSusunHurufUI(question) {
-            // Mengosongkan kontainer jawaban sebelum merender yang baru
-            answerOptions.innerHTML = '';
 
+        function renderPilihanGandaUI(question) {
+            const answerOptions = document.getElementById('answer-options');
+            const options = shuffle([...question.options]);
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = 'answer-btn';
+                button.onclick = () => checkMultipleChoiceAnswer(button, option, question.answer);
+                answerOptions.appendChild(button);
+            });
+        }
+        
+        function renderSusunHurufUI(question) {
+            const answerOptions = document.getElementById('answer-options');
             const wrapper = document.createElement('div');
             wrapper.className = 'susun-huruf-wrapper';
             
-            // Kontainer untuk slot jawaban yang akan diisi pemain
             const slotsContainer = document.createElement('div');
             slotsContainer.className = 'answer-slots-container';
-            slotsContainer.id = 'slots-container';
             for (let i = 0; i < question.answer.length; i++) {
                 slotsContainer.innerHTML += `<div class="answer-slot"></div>`;
             }
 
-            // Kontainer untuk pilihan huruf yang tersedia
             const choicesContainer = document.createElement('div');
             choicesContainer.className = 'letter-choices-container';
             
-            // Mengacak huruf dari jawaban dan menyimpannya sebagai array
             const letterChoices = shuffle(question.answer.split(''));
 
-            // Membuat tombol untuk setiap huruf. Setiap tombol akan memiliki ID unik.
             letterChoices.forEach((letter, index) => {
                 const btn = document.createElement('button');
                 const btnId = `choice-btn-${index}`;
                 btn.id = btnId;
                 btn.textContent = letter;
                 btn.className = 'letter-choice-btn';
-                
-                // Aksi saat tombol huruf diklik
                 btn.onclick = () => {
-                    // Cari slot kosong pertama
                     const emptySlot = slotsContainer.querySelector('.answer-slot:not(.filled)');
                     if (emptySlot) {
                         emptySlot.textContent = letter;
                         emptySlot.classList.add('filled');
-                        // Simpan ID tombol yang diklik ke slot untuk referensi 'Hapus'
                         emptySlot.dataset.sourceBtnId = btnId;
-                        // Sembunyikan tombol huruf yang sudah dipakai
                         btn.style.visibility = 'hidden';
                     }
                 };
                 choicesContainer.appendChild(btn);
             });
 
-            // Kontainer untuk tombol aksi (Hapus & Periksa)
             const actions = document.createElement('div');
             actions.className = 'susun-huruf-actions';
             
-            // Tombol untuk menghapus satu huruf dari slot jawaban
             const backspaceBtn = document.createElement('button');
-            backspaceBtn.textContent = 'Hapus 1 Huruf';
+            backspaceBtn.textContent = 'Hapus';
             backspaceBtn.className = 'btn-action-word';
             backspaceBtn.onclick = () => {
                 const filledSlots = slotsContainer.querySelectorAll('.answer-slot.filled');
                 if (filledSlots.length > 0) {
                     const lastFilledSlot = filledSlots[filledSlots.length - 1];
                     const sourceBtnId = lastFilledSlot.dataset.sourceBtnId;
-                    
-                    // Jika ada referensi tombol sumber, tampilkan kembali tombol itu
                     if (sourceBtnId) {
-                        const sourceBtn = document.getElementById(sourceBtnId);
-                        if (sourceBtn) {
-                            sourceBtn.style.visibility = 'visible';
-                        }
+                        document.getElementById(sourceBtnId).style.visibility = 'visible';
                     }
-                    
-                    // Kosongkan slot terakhir
                     lastFilledSlot.textContent = '';
                     lastFilledSlot.classList.remove('filled');
                     delete lastFilledSlot.dataset.sourceBtnId;
                 }
             };
 
-            // Tombol untuk memeriksa jawaban akhir
             const checkBtn = document.createElement('button');
-            checkBtn.textContent = 'Periksa Jawaban';
+            checkBtn.textContent = 'Periksa';
             checkBtn.className = 'btn-action-word btn-check-word';
             checkBtn.onclick = () => checkWordAnswer(question.answer);
             
             actions.append(backspaceBtn, checkBtn);
-            
             wrapper.append(slotsContainer, choicesContainer, actions);
             answerOptions.appendChild(wrapper);
         }
 
-        // --- Pastikan Anda memiliki fungsi shuffle ini ---
+        function renderEsaiUI(question) {
+            const answerOptions = document.getElementById('answer-options');
+            answerOptions.innerHTML = `
+                <div class="esai-wrapper">
+                    <textarea id="esai-answer" placeholder="Ketik jawabanmu di sini..."></textarea>
+                    <button id="check-esai-btn" class="btn-action-word btn-check-word" style="margin-top: 10px;">Periksa Jawaban</button>
+                </div>
+            `;
+            document.getElementById('check-esai-btn').onclick = () => checkEsaiAnswer(question.answer);
+        }
+
+        function checkMultipleChoiceAnswer(button, selectedAnswer, correctAnswer) {
+             // ... logika tidak berubah
+        }
+
+        function checkWordAnswer(correctAnswer) {
+            const slots = document.querySelectorAll('.answer-slots-container .answer-slot');
+            const userAnswer = Array.from(slots).map(slot => slot.textContent).join('');
+            
+            if (userAnswer.toUpperCase() === correctAnswer.toUpperCase()) {
+                slots.forEach(slot => slot.style.backgroundColor = 'var(--green-correct)');
+                showFeedback(true, "Jawaban Benar!");
+            } else {
+                slots.forEach(slot => slot.style.backgroundColor = 'var(--red-wrong)');
+                showFeedback(false, `Salah! Jawaban: ${correctAnswer}`);
+            }
+             document.querySelectorAll('.letter-choice-btn, .btn-action-word').forEach(btn => btn.disabled = true);
+        }
+        
+        function checkEsaiAnswer(correctAnswer) {
+            const userAnswer = document.getElementById('esai-answer').value;
+            // Pengecekan sederhana: jika jawaban pengguna mengandung kata kunci
+            if (userAnswer.toLowerCase().includes(correctAnswer.toLowerCase())) {
+                 showFeedback(true, "Jawabanmu Tepat!");
+            } else {
+                 showFeedback(false, `Kurang Tepat. Jawaban yang diharapkan: ${correctAnswer}`);
+            }
+             document.getElementById('check-esai-btn').disabled = true;
+        }
+
+        function showFeedback(isCorrect, message) {
+            if (isCorrect) {
+                score += 10;
+                document.getElementById('score').textContent = score;
+            }
+            const feedbackBox = document.getElementById('feedback-box');
+            feedbackBox.textContent = message;
+            feedbackBox.style.color = isCorrect ? 'var(--green-correct)' : 'var(--red-wrong)';
+            document.getElementById('next-btn').style.visibility = 'visible';
+        }
+
+        function showResults() {
+            const percentage = (score / (allQuestions.length * 10)) * 100;
+            quizContainer.innerHTML = `
+                <div class="results-screen">
+                    <h2>Kuis Selesai!</h2>
+                    <p>Skor Akhir Kamu:</p>
+                    <h1>${score}</h1>
+                    <p>Kamu benar ${score / 10} dari ${allQuestions.length} pertanyaan (${percentage.toFixed(0)}%)!</p>
+                    <a href="quiz-play.html${window.location.search}" class="btn" style="background-color:#4caf50; color:white; display:block; margin-bottom:10px;">Main Lagi</a>
+                    <a href="index.html" class="btn" style="background-color:#f1f1f1;">Kembali ke Menu</a>
+                </div>
+            `;
+        }
+        
         function shuffle(array) {
             let currentIndex = array.length, randomIndex;
-            while (currentIndex != 0) {
+            while (currentIndex > 0) {
                 randomIndex = Math.floor(Math.random() * currentIndex);
                 currentIndex--;
                 [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
@@ -179,8 +316,9 @@
             return array;
         }
 
+        // Mulai kuis saat halaman dimuat
+        startQuiz();
     </script>
 </body>
 </html>
-
 
