@@ -37,13 +37,11 @@
 </head>
 <body>
     <div id="quiz-container" class="quiz-container">
-        <!-- Konten Kuis akan dimuat di sini oleh JavaScript -->
         <h2>Memuat Kuis...</h2>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
         import { getFirestore, collection, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -62,33 +60,25 @@
         let currentQuestionIndex = 0;
         let score = 0;
 
-        // --- AWAL PERBAIKAN PENTING ---
         async function fetchQuestions(quizQuery) {
             const snapshot = await getDocs(quizQuery);
             const questions = [];
             snapshot.forEach(doc => {
                 const data = doc.data();
                 const type = data.tipeSoal || 'pilihan_ganda';
-
-                // Membuat objek pertanyaan dasar
                 const questionData = {
                     id: doc.id,
                     type: type,
                     question: data.teksPertanyaan,
                     answer: data.jawabanBenar,
                 };
-
-                // Menambahkan properti spesifik berdasarkan tipe soal
                 if (type === 'pilihan_ganda') {
                     questionData.options = data.pilihanJawaban;
                 }
-                
-                // Semua tipe soal sekarang ditambahkan ke daftar
                 questions.push(questionData);
             });
             return questions;
         }
-        // --- AKHIR PERBAIKAN PENTING ---
 
         function loadQuizUI() {
             quizContainer.innerHTML = `
@@ -127,7 +117,7 @@
             } else if (category) {
                 q = query(pertanyaanRef, where("kategori", "==", category), limit(10));
             } else {
-                q = query(pertanyaanRef, limit(10)); // Kuis acak jika tidak ada parameter
+                q = query(pertanyaanRef, limit(10));
             }
 
             try {
@@ -137,8 +127,6 @@
                     return;
                 }
                 allQuestions = shuffle(allQuestions);
-                currentQuestionIndex = 0;
-                score = 0;
                 loadQuestion();
             } catch(error) {
                 console.error("Gagal memuat pertanyaan:", error);
@@ -178,7 +166,7 @@
         }
         
         function renderSusunHurufUI(question) {
-            const answerOptions = document.getElementById('answer-options');
+             const answerOptions = document.getElementById('answer-options');
             const wrapper = document.createElement('div');
             wrapper.className = 'susun-huruf-wrapper';
             
@@ -222,7 +210,7 @@
                 if (filledSlots.length > 0) {
                     const lastFilledSlot = filledSlots[filledSlots.length - 1];
                     const sourceBtnId = lastFilledSlot.dataset.sourceBtnId;
-                    if (sourceBtnId) {
+                    if (sourceBtnId && document.getElementById(sourceBtnId)) {
                         document.getElementById(sourceBtnId).style.visibility = 'visible';
                     }
                     lastFilledSlot.textContent = '';
@@ -252,9 +240,26 @@
             document.getElementById('check-esai-btn').onclick = () => checkEsaiAnswer(question.answer);
         }
 
+        // --- AWAL FUNGSI BARU ---
         function checkMultipleChoiceAnswer(button, selectedAnswer, correctAnswer) {
-             // ... logika tidak berubah
+            const allButtons = document.querySelectorAll('.answer-btn');
+            allButtons.forEach(btn => btn.disabled = true); // Nonaktifkan semua tombol
+
+            if (selectedAnswer === correctAnswer) {
+                button.classList.add('correct');
+                showFeedback(true, "Jawaban Benar!");
+            } else {
+                button.classList.add('wrong');
+                // Tandai jawaban yang benar
+                allButtons.forEach(btn => {
+                    if (btn.textContent === correctAnswer) {
+                        btn.classList.add('correct');
+                    }
+                });
+                showFeedback(false, `Salah! Jawaban yang benar adalah "${correctAnswer}"`);
+            }
         }
+        // --- AKHIR FUNGSI BARU ---
 
         function checkWordAnswer(correctAnswer) {
             const slots = document.querySelectorAll('.answer-slots-container .answer-slot');
@@ -272,7 +277,6 @@
         
         function checkEsaiAnswer(correctAnswer) {
             const userAnswer = document.getElementById('esai-answer').value;
-            // Pengecekan sederhana: jika jawaban pengguna mengandung kata kunci
             if (userAnswer.toLowerCase().includes(correctAnswer.toLowerCase())) {
                  showFeedback(true, "Jawabanmu Tepat!");
             } else {
@@ -293,15 +297,22 @@
         }
 
         function showResults() {
-            const percentage = (score / (allQuestions.length * 10)) * 100;
+            const percentage = Math.round((score / (allQuestions.length * 10)) * 100);
+            let message = "Kerja bagus!";
+            if (percentage < 50) message = "Jangan menyerah, coba lagi ya!";
+            if (percentage > 80) message = "Luar biasa, kamu hebat!";
+
             quizContainer.innerHTML = `
                 <div class="results-screen">
                     <h2>Kuis Selesai!</h2>
+                    <p style="font-size: 1.5rem;">${message}</p>
                     <p>Skor Akhir Kamu:</p>
-                    <h1>${score}</h1>
-                    <p>Kamu benar ${score / 10} dari ${allQuestions.length} pertanyaan (${percentage.toFixed(0)}%)!</p>
-                    <a href="quiz-play.html${window.location.search}" class="btn" style="background-color:#4caf50; color:white; display:block; margin-bottom:10px;">Main Lagi</a>
-                    <a href="index.html" class="btn" style="background-color:#f1f1f1;">Kembali ke Menu</a>
+                    <h1 style="font-size: 4rem; margin: 0; color: var(--blue-main);">${score}</h1>
+                    <p>Kamu benar ${score / 10} dari ${allQuestions.length} pertanyaan (${percentage}%)!</p>
+                    <div style="margin-top: 20px; display: grid; gap: 10px;">
+                        <a href="${window.location.href}" class="btn" style="background-color:var(--green-correct); color:white; display:block; text-decoration: none;">Main Lagi Kategori Ini</a>
+                        <a href="index.html" class="btn" style="background-color:#f1f1f1; display:block; text-decoration: none;">Kembali ke Menu Utama</a>
+                    </div>
                 </div>
             `;
         }
@@ -316,9 +327,9 @@
             return array;
         }
 
-        // Mulai kuis saat halaman dimuat
         startQuiz();
     </script>
 </body>
 </html>
+
 
