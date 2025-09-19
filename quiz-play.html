@@ -136,7 +136,7 @@
             }
         });
 
-        async function fetchQuestions(q) {
+                async function fetchQuestions(q) {
             const querySnapshot = await getDocs(q);
             if (querySnapshot.empty) {
                 throw new Error("Tidak ada pertanyaan yang ditemukan.");
@@ -144,21 +144,37 @@
             let allQuestions = [];
             for (const questionDoc of querySnapshot.docs) {
                 const questionData = questionDoc.data();
-                const answersQuery = query(collection(questionDoc.ref, 'jawaban'));
-                const answersSnapshot = await getDocs(answersQuery);
-                if (!answersSnapshot.empty) {
-                    const options = [];
-                    let correctAnswer = '';
-                    answersSnapshot.forEach(doc => {
-                        const answerData = doc.data();
-                        options.push(answerData.teksJawaban);
-                        if(answerData.benar) correctAnswer = answerData.teksJawaban;
+                const questionType = questionData.tipeSoal || 'pilihan_ganda'; // Default ke pilihan ganda jika field tidak ada
+
+                if (questionType === 'pilihan_ganda') {
+                    const answersQuery = query(collection(questionDoc.ref, 'jawaban'));
+                    const answersSnapshot = await getDocs(answersQuery);
+                    if (!answersSnapshot.empty) {
+                        const options = [];
+                        let correctAnswer = '';
+                        answersSnapshot.forEach(doc => {
+                            const answerData = doc.data();
+                            options.push(answerData.teksJawaban);
+                            if(answerData.benar) correctAnswer = answerData.teksJawaban;
+                        });
+                        allQuestions.push({ 
+                            type: 'pilihan_ganda',
+                            question: questionData.teksPertanyaan, 
+                            options: options, 
+                            answer: correctAnswer 
+                        });
+                    }
+                } else if (questionType === 'esai') {
+                    allQuestions.push({
+                        type: 'esai',
+                        question: questionData.teksPertanyaan,
+                        answerKey: questionData.kunciJawaban || 'Tidak ada kunci jawaban.'
                     });
-                    allQuestions.push({ question: questionData.teksPertanyaan, options: options, answer: correctAnswer });
                 }
             }
             return allQuestions;
         }
+
         
         async function loadDailyQuiz() {
             try {
@@ -209,26 +225,57 @@
             loadQuestion();
         }
 
-        function loadQuestion() {
+                function loadQuestion() {
             if (currentQuestionIndex < quizData.length) {
                 const currentQuestion = quizData[currentQuestionIndex];
                 progressText.textContent = `Soal ${currentQuestionIndex + 1} dari ${quizData.length}`;
                 progressBarFill.style.width = `${((currentQuestionIndex + 1) / quizData.length) * 100}%`;
                 questionText.textContent = currentQuestion.question;
-                answerOptions.innerHTML = '';
-                shuffle(currentQuestion.options).forEach(option => {
-                    const button = document.createElement('button');
-                    button.textContent = option;
-                    button.classList.add('answer-btn');
-                    button.addEventListener('click', () => selectAnswer(button, option, currentQuestion.answer));
-                    answerOptions.appendChild(button);
-                });
+                answerOptions.innerHTML = ''; // Selalu kosongkan container
+
+                // Tampilkan UI berdasarkan tipe soal
+                if (currentQuestion.type === 'pilihan_ganda') {
+                    shuffle(currentQuestion.options).forEach(option => {
+                        const button = document.createElement('button');
+                        button.textContent = option;
+                        button.classList.add('answer-btn');
+                        button.addEventListener('click', () => selectAnswer(button, option, currentQuestion.answer));
+                        answerOptions.appendChild(button);
+                    });
+                } else if (currentQuestion.type === 'esai') {
+                    // Buat textarea untuk jawaban esai
+                    const esaiTextarea = document.createElement('textarea');
+                    esaiTextarea.placeholder = 'Ketik jawabanmu di sini...';
+                    esaiTextarea.rows = 5;
+                    esaiTextarea.style.cssText = "width: 100%; font-size: 1.2rem; padding: 10px; border-radius: 10px; border: 2px solid #ccc; box-sizing: border-box; font-family: 'Baloo 2', sans-serif;";
+                    
+                    // Buat tombol untuk submit jawaban esai
+                    const submitEsaiBtn = document.createElement('button');
+                    submitEsaiBtn.textContent = 'Kunci Jawaban';
+                    submitEsaiBtn.classList.add('btn'); // Gunakan style umum dari file buat-kuis
+                    submitEsaiBtn.style.backgroundColor = 'var(--blue-main)';
+                    submitEsaiBtn.style.marginTop = '15px';
+                    submitEsaiBtn.addEventListener('click', () => {
+                        // Untuk esai, kita tidak menilai benar/salah secara otomatis.
+                        // Kita langsung tunjukkan tombol lanjut.
+                        // Di masa depan, di sini bisa ditambahkan logika perbandingan kata kunci.
+                        submitEsaiBtn.disabled = true;
+                        esaiTextarea.disabled = true;
+                        document.getElementById('feedback-box').innerHTML = `<div style="font-size:1.1rem; text-align:left; background-color:#eef; padding:15px; border-radius:10px;"><b>Kunci Jawaban:</b><br>${currentQuestion.answerKey}</div>`;
+                        nextBtn.style.visibility = 'visible';
+                    });
+
+                    answerOptions.appendChild(esaiTextarea);
+                    answerOptions.appendChild(submitEsaiBtn);
+                }
+
                 document.getElementById('feedback-box').innerHTML = '';
                 nextBtn.style.visibility = 'hidden';
             } else {
                 showResults();
             }
         }
+
 
         function selectAnswer(button, selectedOption, correctAnswer) {
             Array.from(answerOptions.children).forEach(btn => btn.disabled = true);
