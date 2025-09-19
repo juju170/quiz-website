@@ -4,18 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pilih Tema Kuis - Komunitas Ceria 2SD</title>
-    <!-- Menambahkan Google Font yang ramah anak -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
-
-    <!-- CSS Internal untuk styling -->
     <style>
-        /* Pengaturan Dasar Body */
         body {
             font-family: 'Baloo 2', sans-serif;
             margin: 0;
-            background-color: #f0f9ff; /* Biru langit sangat muda */
+            background-color: #f0f9ff;
             color: #333;
             display: flex;
             justify-content: center;
@@ -24,91 +20,83 @@
             padding: 20px;
             box-sizing: border-box;
         }
-
-        /* Container utama untuk membungkus semua elemen */
         .container {
             text-align: center;
-            max-width: 700px;
+            max-width: 900px; /* Lebarkan sedikit untuk 3 kolom */
             width: 100%;
         }
-
-        /* 1. Judul Utama */
         .main-title {
             font-size: 2.5rem;
             font-weight: 800;
-            color: #0288d1; /* Biru tua */
+            color: #0288d1;
             margin: 0;
         }
-
-        /* 2. Sub-teks */
         .subtitle {
             font-size: 1.1rem;
             color: #555;
             margin-top: 5px;
             margin-bottom: 40px;
         }
-
-        /* 3. Grid untuk menata card tema */
         .theme-grid {
             display: grid;
-            /* Membuat 2 kolom di layar lebar, dan 1 kolom di layar kecil secara otomatis */
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            /* Lebih baik 3 kolom di layar lebar */
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 25px;
             margin-bottom: 50px;
         }
-
-        /* 4. Styling untuk setiap card tema */
         .theme-card {
             background-color: #ffffff;
             padding: 25px;
             border-radius: 20px;
-            box-shadow: 0 5px_15px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
             text-decoration: none;
             color: inherit;
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
             display: flex;
             flex-direction: column;
             align-items: center;
-            border: 3px solid transparent;
+            border: 4px solid transparent;
         }
-
-        /* Efek hover pada card */
         .theme-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
         }
-        /* Memberi warna border saat hover */
-        .theme-card.math:hover { border-color: #ffb74d; }
-        .theme-card.lang:hover { border-color: #64b5f6; }
-        .theme-card.science:hover { border-color: #81c784; }
-        .theme-card.art:hover { border-color: #ba68c8; }
-        .theme-card.mixed:hover { border-color: #e57373; }
+        /* --- Awal Penambahan Warna Hover Baru --- */
+        .theme-card.c-matematika:hover { border-color: #ffb74d; }
+        .theme-card.c-bahasa_indonesia:hover { border-color: #e57373; }
+        .theme-card.c-bahasa_inggris:hover { border-color: #64b5f6; }
+        .theme-card.c-ipa:hover { border-color: #81c784; }
+        .theme-card.c-agama_islam:hover { border-color: #4db6ac; }
+        .theme-card.c-ips:hover { border-color: #7986cb; }
+        .theme-card.c-sejarah:hover { border-color: #a1887f; }
+        .theme-card.c-pkn:hover { border-color: #90a4ae; }
+        .theme-card.c-basa_sunda:hover { border-color: #ba68c8; }
+        .theme-card.c-olahraga:hover { border-color: #ffd54f; }
+        .theme-card.c-seni:hover { border-color: #f06292; }
+        .theme-card.c-campuran_seru:hover { border-color: #4dd0e1; }
+        /* --- Akhir Penambahan Warna Hover Baru --- */
 
         .theme-card .icon {
-            font-size: 3.5rem; /* Ikon besar */
+            font-size: 3.5rem;
             margin-bottom: 10px;
+            line-height: 1;
         }
-
         .theme-card h2 {
             margin: 0 0 5px 0;
             font-size: 1.5rem;
         }
-        
         .theme-card p {
             margin: 0;
             font-size: 0.95rem;
             color: #666;
             line-height: 1.4;
         }
-        
-        /* 5. Tombol Navigasi Bawah */
         .nav-buttons {
             display: flex;
             gap: 15px;
             justify-content: center;
-            flex-wrap: wrap; /* Agar tombol tidak tumpang tindih di layar kecil */
+            flex-wrap: wrap;
         }
-        
         .nav-btn {
             padding: 12px 25px;
             border-radius: 30px;
@@ -118,68 +106,61 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.15);
             transition: transform 0.2s;
         }
-        .nav-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .nav-btn.back {
-            background-color: #ffb74d; /* Oranye pastel */
-            color: white;
-        }
-        .nav-btn.home {
-            background-color: #90a4ae; /* Abu-abu */
-            color: white;
-        }
-
+        .nav-btn:hover { transform: scale(1.05); }
+        .nav-btn.back { background-color: #ffb74d; color: white; }
+        .nav-btn.home { background-color: #90a4ae; color: white; }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <!-- 1. Judul Halaman -->
         <h1 class="main-title">Pilih Tema Kuis 🎯</h1>
-        <!-- 2. Sub-teks -->
         <p class="subtitle">Pilih mata pelajaran atau topik favoritmu!</p>
 
-        <!-- 3. Grid Card Tema -->
+        <!-- --- AWAL PERUBAHAN GRID TEMA --- -->
         <div class="theme-grid">
-    <a href="quiz-play.html?theme=matematika" class="theme-card math">
-        <span class="icon">➕</span>
-        <h2>Matematika Dasar</h2>
-        <p>Belajar tambah, kurang, kali, dan bagi!</p>
-    </a>
-
-    <a href="quiz-play.html?theme=bahasa" class="theme-card lang">
-        <span class="icon">📖</span>
-        <h2>Bahasa Indonesia</h2>
-        <p>Mengenal huruf, kata, dan kalimat.</p>
-    </a>
-
-    <a href="quiz-play.html?theme=ipa" class="theme-card science">
-        <span class="icon">🌍</span>
-        <h2>Ilmu Alam</h2>
-        <p>Menjelajahi dunia hewan dan tumbuhan.</p>
-    </a>
-
-    <a href="quiz-play.html?theme=seni" class="theme-card art">
-        <span class="icon">🎨</span>
-        <h2>Seni & Kreativitas</h2>
-        <p>Menebak warna, bentuk, dan gambar.</p>
-    </a>
-
-    <a href="quiz-play.html" class="theme-card mixed">
-        <span class="icon">🧩</span>
-        <h2>Campuran Seru</h2>
-        <p>Gabungan semua pelajaran seru!</p>
-    </a>
+            <a href="quiz-play.html?kategori=matematika" class="theme-card c-matematika">
+                <span class="icon">🧮</span><h2>Matematika</h2><p>Asah logika dengan angka dan hitungan.</p>
+            </a>
+            <a href="quiz-play.html?kategori=bahasa_indonesia" class="theme-card c-bahasa_indonesia">
+                <span class="icon">🇮🇩</span><h2>Bahasa Indonesia</h2><p>Perkaya kosakata dan ejaan yang benar.</p>
+            </a>
+            <a href="quiz-play.html?kategori=bahasa_inggris" class="theme-card c-bahasa_inggris">
+                <span class="icon">🇬🇧</span><h2>Bahasa Inggris</h2><p>Let's learn English words and sentences!</p>
+            </a>
+            <a href="quiz-play.html?kategori=ipa" class="theme-card c-ipa">
+                <span class="icon">🔬</span><h2>Ilmu Pengetahuan Alam</h2><p>Jelajahi dunia sains, hewan, dan tumbuhan.</p>
+            </a>
+            <a href="quiz-play.html?kategori=agama_islam" class="theme-card c-agama_islam">
+                <span class="icon">🕌</span><h2>Ilmu Agama Islam</h2><p>Mengenal akidah, akhlak, dan sejarah Islam.</p>
+            </a>
+            <a href="quiz-play.html?kategori=ips" class="theme-card c-ips">
+                <span class="icon">🌍</span><h2>Ilmu Sosial</h2><p>Pelajari tentang masyarakat dan lingkungan.</p>
+            </a>
+            <a href="quiz-play.html?kategori=sejarah" class="theme-card c-sejarah">
+                <span class="icon">📜</span><h2>Ilmu Sejarah</h2><p>Kisah dan peristiwa penting masa lalu.</p>
+            </a>
+            <a href="quiz-play.html?kategori=pkn" class="theme-card c-pkn">
+                <span class="icon">🏛️</span><h2>Ilmu Kewarganegaraan</h2><p>Tentang negara, hukum, dan Pancasila.</p>
+            </a>
+            <a href="quiz-play.html?kategori=basa_sunda" class="theme-card c-basa_sunda">
+                <span class="icon"> Sunda</span><h2>Basa Sunda</h2><p>Diajar basa jeung budaya Sunda.</p>
+            </a>
+            <a href="quiz-play.html?kategori=olahraga" class="theme-card c-olahraga">
+                <span class="icon">⚽</span><h2>Ilmu Olahraga</h2><p>Kuis seputar atlet, aturan, dan kesehatan.</p>
+            </a>
+            <a href="quiz-play.html?kategori=seni" class="theme-card c-seni">
+                <span class="icon">🎨</span><h2>Ilmu Seni</h2><p>Menebak karya, musik, dan kreativitas.</p>
+            </a>
+            <a href="quiz-play.html?kategori=campuran_seru" class="theme-card c-campuran_seru">
+                <span class="icon">🧩</span><h2>Campuran Teka Teki</h2><p>Gabungan acak semua pelajaran seru!</p>
+            </a>
         </div>
-        <!-- 5. Navigasi Bawah -->
+        <!-- --- AKHIR PERUBAHAN GRID TEMA --- -->
+        
         <div class="nav-buttons">
-            <a href="quiz-menu.html" class="nav-btn back">⬅️ Kembali ke Menu Kuis</a>
             <a href="index.html" class="nav-btn home">🏠 Beranda</a>
         </div>
     </div>
-
 </body>
 </html>
 
