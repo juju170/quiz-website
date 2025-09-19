@@ -13,7 +13,14 @@
         .quiz-container { position: relative; background-color: white; padding: 20px 30px 30px 30px; border-radius: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); width: 100%; max-width: 600px; text-align: center; }
         .btn-quit-quiz { position: absolute; top: 15px; right: 15px; background-color: #f1f1f1; color: #888; border: 2px solid #ddd; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 1.2rem; font-weight: 700; transition: all 0.2s ease; z-index: 10; }
         .btn-quit-quiz:hover { transform: scale(1.1) rotate(90deg); }
-        .question-box { background-color: var(--blue-light); padding: 20px; border-radius: 15px; margin-bottom: 25px; min-height: 80px; display: flex; justify-content: center; align-items: center; border-left: 8px solid var(--blue-main); }
+        .question-box { background-color: var(--blue-light); padding: 20px; border-radius: 15px; margin-bottom: 25px; min-height: 80px; display: flex; flex-direction: column; justify-content: center; align-items: center; border-left: 8px solid var(--blue-main); }
+        
+        /* --- AWAL STYLE MEDIA --- */
+        #media-container { margin-bottom: 15px; width: 100%; }
+        #media-container img { max-width: 100%; height: auto; border-radius: 10px; max-height: 300px; }
+        #media-container audio { width: 100%; margin-top: 10px; }
+        /* --- AKHIR STYLE MEDIA --- */
+
         .question-text { font-size: 1.8rem; font-weight: 800; color: var(--blue-main); margin: 0; }
         .answer-options { display: grid; grid-template-columns: 1fr; gap: 15px; }
         .answer-btn, .btn-action-word { border: none; padding: 15px; border-radius: 15px; font-family: 'Baloo 2', sans-serif; font-weight: 700; cursor: pointer; }
@@ -22,41 +29,12 @@
         .answer-btn.wrong { background-color: var(--red-wrong); color: white; border-color: #c62828; }
         .next-btn { margin-top: 15px; background-color: var(--orange-next); color: white; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: 800; border-radius: 30px; cursor: pointer; visibility: hidden; border-bottom: 4px solid #f57c00; }
         .susun-huruf-wrapper { margin-top: 15px; }
-        
-        /* --- AWAL PERUBAHAN TAMPILAN SUSUN HURUF --- */
-        .answer-slots-container {
-            display: flex;
-            justify-content: center;
-            flex-wrap: nowrap; /* Mencegah item turun ke baris baru */
-            overflow-x: auto; /* Membuat kontainer bisa di-scroll horizontal */
-            -webkit-overflow-scrolling: touch; /* Scrolling halus di iOS */
-            scrollbar-width: thin; /* Scrollbar tipis untuk Firefox */
-            scrollbar-color: #bdbdbd #f1f1f1; /* Warna scrollbar untuk Firefox */
-            gap: 10px;
-            margin-bottom: 25px;
-            min-height: 60px;
-            padding: 5px 5px 10px 5px; /* Padding agar tidak terlalu mepet & ada ruang untuk scrollbar */
-        }
+        .answer-slots-container { display: flex; justify-content: center; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: #bdbdbd #f1f1f1; gap: 10px; margin-bottom: 25px; min-height: 60px; padding: 5px 5px 10px 5px; }
         .answer-slots-container::-webkit-scrollbar { height: 8px; }
         .answer-slots-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
         .answer-slots-container::-webkit-scrollbar-thumb { background: #bdbdbd; border-radius: 4px; }
         .answer-slots-container::-webkit-scrollbar-thumb:hover { background: #888; }
-        
-        .answer-slot {
-            width: 50px;
-            height: 60px;
-            flex-shrink: 0; /* Mencegah kotak menyusut */
-            background-color: #e0e0e0;
-            border-bottom: 5px solid #bdbdbd;
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2rem;
-            font-weight: 800;
-        }
-        /* --- AKHIR PERUBAHAN TAMPILAN SUSUN HURUF --- */
-
+        .answer-slot { width: 50px; height: 60px; flex-shrink: 0; background-color: #e0e0e0; border-bottom: 5px solid #bdbdbd; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: 800; }
         .letter-choices-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
         .letter-choice-btn { width: 55px; height: 55px; font-size: 1.8rem; background-color: #81d4fa; border: none; border-bottom: 5px solid #29b6f6; border-radius: 15px; font-family: 'Baloo 2', sans-serif; font-weight: 700; cursor: pointer; transition: all 0.2s; }
         .susun-huruf-actions { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
@@ -92,6 +70,16 @@
         let allQuestions = [];
         let currentQuestionIndex = 0;
         let score = 0;
+        
+        // --- FUNGSI BARU UNTUK KONVERSI LINK GOOGLE DRIVE ---
+        function getGoogleDriveDirectLink(url) {
+            if (!url || !url.includes('drive.google.com')) return url;
+            const fileId = url.match(/d\/(.+?)\//);
+            if (fileId && fileId[1]) {
+                return `https://drive.google.com/uc?export=view&id=${fileId[1]}`;
+            }
+            return url;
+        }
 
         async function fetchQuestions(quizQuery) {
             const snapshot = await getDocs(quizQuery);
@@ -104,16 +92,16 @@
                     type: type,
                     question: data.teksPertanyaan,
                     answer: data.jawabanBenar,
+                    // --- AMBIL DATA MEDIA ---
+                    imageUrl: data.urlGambar || null,
+                    audioUrl: data.urlSuara || null,
                 };
                 if (type === 'pilihan_ganda') {
                     questionData.options = data.pilihanJawaban;
                 }
-                // --- AWAL PERUBAHAN LOGIKA FETCH SUSUN HURUF ---
                 if (type === 'susun_huruf') {
-                    // Gunakan field `pilihanHuruf` jika ada, jika tidak (untuk soal lama), gunakan `jawabanBenar`
                     questionData.letterPool = data.pilihanHuruf || data.jawabanBenar;
                 }
-                // --- AKHIR PERUBAHAN LOGIKA FETCH SUSUN HURUF ---
                 questions.push(questionData);
             });
             return questions;
@@ -127,6 +115,8 @@
                     <p>Skor: <span id="score">0</span></p>
                 </div>
                 <div class="question-box">
+                    <!-- --- CONTAINER UNTUK MEDIA --- -->
+                    <div id="media-container"></div>
                     <h2 id="question-text" class="question-text"></h2>
                 </div>
                 <div id="answer-options" class="answer-options"></div>
@@ -184,6 +174,28 @@
             document.getElementById('feedback-box').innerHTML = '';
             document.getElementById('next-btn').style.visibility = 'hidden';
 
+            // --- AWAL LOGIKA TAMPILAN MEDIA ---
+            const mediaContainer = document.getElementById('media-container');
+            mediaContainer.innerHTML = ''; // Kosongkan dulu
+
+            if (questionData.imageUrl) {
+                const img = document.createElement('img');
+                img.src = getGoogleDriveDirectLink(questionData.imageUrl);
+                img.alt = "Gambar Pendukung Soal";
+                mediaContainer.appendChild(img);
+            }
+
+            if (questionData.audioUrl) {
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                const source = document.createElement('source');
+                source.src = getGoogleDriveDirectLink(questionData.audioUrl);
+                audio.appendChild(source);
+                mediaContainer.appendChild(audio);
+            }
+            // --- AKHIR LOGIKA TAMPILAN MEDIA ---
+
+
             if (questionData.type === 'pilihan_ganda') {
                 renderPilihanGandaUI(questionData);
             } else if (questionData.type === 'susun_huruf') {
@@ -218,11 +230,7 @@
 
             const choicesContainer = document.createElement('div');
             choicesContainer.className = 'letter-choices-container';
-            
-            // --- AWAL PERUBAHAN LOGIKA PEMILIHAN HURUF ---
-            // Gunakan `letterPool` yang berisi jawaban + pengecoh
             const letterChoices = shuffle(question.letterPool.split(''));
-            // --- AKHIR PERUBAHAN LOGIKA PEMILIHAN HURUF ---
 
             letterChoices.forEach((letter, index) => {
                 const btn = document.createElement('button');
