@@ -99,7 +99,6 @@
                     </div>
                      <div class="input-group">
                         <label for="kategori-pilihan">Pilih Kategori Soal</label>
-                        <!-- --- AWAL PERUBAHAN --- -->
                         <select id="kategori-pilihan" required>
                             <option value="">-- Pilih Kategori --</option>
                             <option value="matematika">Matematika</option>
@@ -115,7 +114,6 @@
                             <option value="seni">Ilmu Seni</option>
                             <option value="campuran_seru">Campuran Teka Teki Seru</option>
                         </select>
-                        <!-- --- AKHIR PERUBAHAN --- -->
                     </div>
                     <div class="input-group checkbox-group">
                         <input type="checkbox" id="is-harian">
@@ -129,14 +127,21 @@
                         <hr><label for="kunci-jawaban-esai" style="font-weight:700;">Tulis Kunci Jawaban / Kata Kunci</label>
                         <div class="input-group"><textarea id="kunci-jawaban-esai" placeholder="Tulis jawaban yang dianggap benar..." rows="4"></textarea></div>
                     </div>
+                    <!-- --- AWAL PERUBAHAN --- -->
                     <div id="susun-huruf-container" style="display: none;">
                         <hr><label style="font-weight:700;">Pengaturan Soal Susun Huruf</label>
                         <div class="input-group">
-                            <label for="jawaban-susun-huruf">Jawaban Benar</label>
-                            <input type="text" id="jawaban-susun-huruf" placeholder="Contoh: KUCING (hanya huruf, tanpa spasi)">
-                            <p class="info-text">Huruf dari jawaban ini akan otomatis diacak saat dimainkan.</p>
+                            <label for="jawaban-susun-huruf">Jawaban Benar (hanya 1 kata)</label>
+                            <input type="text" id="jawaban-susun-huruf" placeholder="Contoh: BUKU">
+                            <p class="info-text">Tulis jawaban yang benar tanpa spasi.</p>
+                        </div>
+                        <div class="input-group">
+                            <label for="pilihan-huruf">Huruf yang Ditampilkan (maksimal 20)</label>
+                            <input type="text" id="pilihan-huruf" placeholder="Contoh: BUKUXYZ" maxlength="20">
+                            <p class="info-text">Tulis semua huruf yang akan diacak di kuis. <strong>Wajib mengandung semua huruf dari jawaban benar.</strong></p>
                         </div>
                     </div>
+                    <!-- --- AKHIR PERUBAHAN --- -->
                     <div class="submit-section">
                         <button type="submit" id="submit-btn" class="btn-submit">Simpan Pertanyaan ✅</button>
                     </div>
@@ -147,7 +152,6 @@
     </div>
 
     <script type="module">
-        // JavaScript tidak berubah, hanya HTML di atas yang diubah
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
         import { getFirestore, collection, doc, Timestamp, writeBatch, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
@@ -244,11 +248,44 @@
                     dataPertanyaan.jawabanBenar = dataPertanyaan.pilihanJawaban[correctIndex];
                 } else if (dataPertanyaan.tipeSoal === 'esai') {
                     dataPertanyaan.jawabanBenar = document.getElementById('kunci-jawaban-esai').value;
-                } else if (dataPertanyaan.tipeSoal === 'susun_huruf') {
+                } 
+                // --- AWAL PERUBAHAN LOGIKA SUSUN HURUF ---
+                else if (dataPertanyaan.tipeSoal === 'susun_huruf') {
                     const jawaban = document.getElementById('jawaban-susun-huruf').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-                    if (!jawaban) throw new Error("Jawaban untuk Susun Huruf tidak boleh kosong.");
+                    const pilihan = document.getElementById('pilihan-huruf').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+                    if (!jawaban || !pilihan) {
+                        throw new Error("Jawaban Benar dan Huruf yang Ditampilkan tidak boleh kosong.");
+                    }
+                    if (pilihan.length > 20) {
+                        throw new Error("Jumlah huruf yang ditampilkan tidak boleh lebih dari 20.");
+                    }
+
+                    // Validasi untuk memastikan semua huruf jawaban ada di dalam pilihan huruf
+                    const jawabanMap = {};
+                    for (const char of jawaban) {
+                        jawabanMap[char] = (jawabanMap[char] || 0) + 1;
+                    }
+                    const pilihanMap = {};
+                    for (const char of pilihan) {
+                        pilihanMap[char] = (pilihanMap[char] || 0) + 1;
+                    }
+                    let isValid = true;
+                    for (const char in jawabanMap) {
+                        if (!pilihanMap[char] || pilihanMap[char] < jawabanMap[char]) {
+                            isValid = false;
+                            break;
+                        }
+                    }
+                    if (!isValid) {
+                        throw new Error("Pastikan 'Huruf yang Ditampilkan' mengandung semua huruf dari 'Jawaban Benar' dengan jumlah yang sesuai.");
+                    }
+
                     dataPertanyaan.jawabanBenar = jawaban;
+                    dataPertanyaan.pilihanHuruf = pilihan; // Field baru untuk menyimpan semua huruf
                 }
+                // --- AKHIR PERUBAHAN LOGIKA SUSUN HURUF ---
+
                 batch.set(pertanyaanRef, dataPertanyaan);
                 const creationRecordRef = doc(collection(db, "userData", currentUser.uid, "questionCreationTimestamp"));
                 batch.set(creationRecordRef, {
@@ -276,6 +313,7 @@
             document.querySelectorAll('#pilihan-ganda-container input').forEach(i => i.required = (tipe === 'pilihan_ganda'));
             document.getElementById('kunci-jawaban-esai').required = (tipe === 'esai');
             document.getElementById('jawaban-susun-huruf').required = (tipe === 'susun_huruf');
+            document.getElementById('pilihan-huruf').required = (tipe === 'susun_huruf');
         }
         tipeSoalSelect.addEventListener('change', handleTipeSoalChange);
 
@@ -304,5 +342,3 @@
 </body>
 </html>
 
-
-                    
