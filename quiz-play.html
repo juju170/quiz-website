@@ -81,10 +81,14 @@
             }
         }
         
-        function renderSusunHurufUI(question) {
+                function renderSusunHurufUI(question) {
+            // Mengosongkan kontainer jawaban sebelum merender yang baru
+            answerOptions.innerHTML = '';
+
             const wrapper = document.createElement('div');
             wrapper.className = 'susun-huruf-wrapper';
             
+            // Kontainer untuk slot jawaban yang akan diisi pemain
             const slotsContainer = document.createElement('div');
             slotsContainer.className = 'answer-slots-container';
             slotsContainer.id = 'slots-container';
@@ -92,27 +96,42 @@
                 slotsContainer.innerHTML += `<div class="answer-slot"></div>`;
             }
 
+            // Kontainer untuk pilihan huruf yang tersedia
             const choicesContainer = document.createElement('div');
             choicesContainer.className = 'letter-choices-container';
-            // Acak huruf dari jawaban yang benar
-            const letterChoices = shuffle(question.answer.split('')).join('');
-            letterChoices.split('').forEach(letter => {
+            
+            // Mengacak huruf dari jawaban dan menyimpannya sebagai array
+            const letterChoices = shuffle(question.answer.split(''));
+
+            // Membuat tombol untuk setiap huruf. Setiap tombol akan memiliki ID unik.
+            letterChoices.forEach((letter, index) => {
                 const btn = document.createElement('button');
+                const btnId = `choice-btn-${index}`;
+                btn.id = btnId;
                 btn.textContent = letter;
                 btn.className = 'letter-choice-btn';
+                
+                // Aksi saat tombol huruf diklik
                 btn.onclick = () => {
+                    // Cari slot kosong pertama
                     const emptySlot = slotsContainer.querySelector('.answer-slot:not(.filled)');
                     if (emptySlot) {
                         emptySlot.textContent = letter;
                         emptySlot.classList.add('filled');
+                        // Simpan ID tombol yang diklik ke slot untuk referensi 'Hapus'
+                        emptySlot.dataset.sourceBtnId = btnId;
+                        // Sembunyikan tombol huruf yang sudah dipakai
+                        btn.style.visibility = 'hidden';
                     }
                 };
                 choicesContainer.appendChild(btn);
             });
 
+            // Kontainer untuk tombol aksi (Hapus & Periksa)
             const actions = document.createElement('div');
             actions.className = 'susun-huruf-actions';
             
+            // Tombol untuk menghapus satu huruf dari slot jawaban
             const backspaceBtn = document.createElement('button');
             backspaceBtn.textContent = 'Hapus 1 Huruf';
             backspaceBtn.className = 'btn-action-word';
@@ -120,11 +139,24 @@
                 const filledSlots = slotsContainer.querySelectorAll('.answer-slot.filled');
                 if (filledSlots.length > 0) {
                     const lastFilledSlot = filledSlots[filledSlots.length - 1];
+                    const sourceBtnId = lastFilledSlot.dataset.sourceBtnId;
+                    
+                    // Jika ada referensi tombol sumber, tampilkan kembali tombol itu
+                    if (sourceBtnId) {
+                        const sourceBtn = document.getElementById(sourceBtnId);
+                        if (sourceBtn) {
+                            sourceBtn.style.visibility = 'visible';
+                        }
+                    }
+                    
+                    // Kosongkan slot terakhir
                     lastFilledSlot.textContent = '';
                     lastFilledSlot.classList.remove('filled');
+                    delete lastFilledSlot.dataset.sourceBtnId;
                 }
             };
 
+            // Tombol untuk memeriksa jawaban akhir
             const checkBtn = document.createElement('button');
             checkBtn.textContent = 'Periksa Jawaban';
             checkBtn.className = 'btn-action-word btn-check-word';
@@ -136,11 +168,17 @@
             answerOptions.appendChild(wrapper);
         }
 
-        function checkWordAnswer(correctAnswer) {
-            // ... (fungsi ini tidak berubah dari sebelumnya) ...
+        // --- Pastikan Anda memiliki fungsi shuffle ini ---
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
         }
 
-        // ... (sisa fungsi lainnya tidak berubah) ...
     </script>
 </body>
 </html>
