@@ -12,16 +12,26 @@
         .container { max-width: 900px; margin: 30px auto; padding: 20px; }
         .page-header { text-align: center; margin-bottom: 30px; }
         .page-header h1 { font-size: 2.5rem; margin: 0; color: #0277bd; }
-        .page-header .btn-add { background-color: #388e3c; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; display: inline-block; margin-top: 15px; transition: background-color 0.2s; }
-        .page-header .btn-add:hover { background-color: #4caf50; }
+        .header-actions { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-top: 20px; }
+        .header-actions a { color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; display: inline-block; transition: background-color 0.2s; }
+        .btn-add { background-color: #388e3c; }
+        .btn-add:hover { background-color: #4caf50; }
+        .btn-back { background-color: #78909c; }
+        .btn-back:hover { background-color: #90a4ae; }
+        
         #question-list-container { display: grid; gap: 20px; }
         .question-card { display: flex; justify-content: space-between; align-items: center; background-color: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); flex-wrap: wrap; gap: 15px; }
         .question-info p { margin: 0; font-size: 1.2rem; font-weight: 700; flex-grow: 1; }
-        .question-info span { display: block; font-size: 0.9rem; font-weight: 400; color: #555; background-color: #e3f2fd; padding: 3px 8px; border-radius: 5px; display: inline-block; margin-top: 5px; }
+        .question-info .tags { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+        .question-info .tag { font-size: 0.9rem; font-weight: 700; padding: 4px 12px; border-radius: 15px; display: inline-block; }
+        .tag.kategori { background-color: #e3f2fd; color: #1e88e5; }
+        .tag.tipe-pg { background-color: #ede7f6; color: #5e35b1; }
+        .tag.tipe-esai { background-color: #e0f2f1; color: #00796b; }
+        
         .btn-delete-question { background-color: #e57373; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; padding: 10px 15px; }
         #loader { text-align: center; padding: 50px; font-size: 1.5rem; font-weight: 700; color: #0277bd; }
-        .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; }
-        .modal-content { background-color: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 400px; }
+        .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background-color: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 400px; width: 90%; }
         .modal-content h4 { margin-top: 0; }
         .modal-actions { margin-top: 20px; display: flex; gap: 15px; justify-content: center; }
         .modal-actions button { padding: 10px 25px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; }
@@ -34,7 +44,11 @@
         <header class="page-header">
             <h1>Kelola Pertanyaan Saya</h1>
             <p>Lihat atau hapus pertanyaan yang pernah Anda buat.</p>
-            <a href="buat-kuis.html" class="btn-add">➕ Buat Pertanyaan Baru</a>
+            <!-- Tombol Kembali dan Buat Baru -->
+            <div class="header-actions">
+                <a href="buat-kuis.html" class="btn-add">➕ Buat Pertanyaan Baru</a>
+                <a href="index.html" class="btn-back">🏠 Kembali ke Beranda</a>
+            </div>
         </header>
         <main id="question-list-container">
             <div id="loader">Memuat pertanyaan Anda...</div>
@@ -91,7 +105,6 @@
             loader.style.display = 'block';
             questionListContainer.innerHTML = '';
             try {
-                // Kueri diubah untuk mencari di koleksi 'pertanyaan'
                 const q = query(collection(db, 'pertanyaan'), where('dibuatOleh', '==', userId));
                 const querySnapshot = await getDocs(q);
 
@@ -104,19 +117,29 @@
 
                 querySnapshot.forEach(doc => {
                     const question = doc.data();
+                    
+                    // --- PERBAIKAN: Identifikasi tipe soal ---
+                    const isEsai = question.tipeSoal === 'esai';
+                    const tipeSoalTeks = isEsai ? 'Esai' : 'Pilihan Ganda';
+                    const tipeSoalClass = isEsai ? 'tipe-esai' : 'tipe-pg';
+                    
                     const questionCard = document.createElement('div');
                     questionCard.className = 'question-card';
                     questionCard.innerHTML = `
                         <div class="question-info">
                             <p>${question.teksPertanyaan}</p>
-                            <span>Kategori: ${question.kategori}</span>
+                            <div class="tags">
+                                <span class="tag kategori">Kategori: ${question.kategori}</span>
+                                <span class="tag ${tipeSoalClass}">${tipeSoalTeks}</span>
+                            </div>
                         </div>
                         <button class="btn-delete-question" data-question-id="${doc.id}">Hapus</button>
                     `;
                     questionListContainer.appendChild(questionCard);
                 });
 
-            } catch (error) {
+            } catch (error)
+             {
                 console.error("Error memuat pertanyaan:", error);
                 loader.innerHTML = '<h2>Oops! Terjadi kesalahan.</h2>';
             }
@@ -142,13 +165,10 @@
 
             try {
                 const batch = writeBatch(db);
-                
-                // Hapus semua jawaban di dalam pertanyaan
                 const answersRef = collection(db, `pertanyaan/${questionIdToDelete}/jawaban`);
                 const answersSnapshot = await getDocs(answersRef);
                 answersSnapshot.forEach(answerDoc => batch.delete(answerDoc.ref));
                 
-                // Hapus pertanyaan itu sendiri
                 const questionRef = doc(db, 'pertanyaan', questionIdToDelete);
                 batch.delete(questionRef);
                 
