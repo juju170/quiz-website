@@ -27,7 +27,6 @@
         .tag.kategori { background-color: #e3f2fd; color: #1e88e5; }
         .tag.tipe-pg { background-color: #ede7f6; color: #5e35b1; }
         .tag.tipe-esai { background-color: #e0f2f1; color: #00796b; }
-        /* --- CSS BARU UNTUK LABEL SUSUN HURUF --- */
         .tag.tipe-susun { background-color: #fff3e0; color: #ef6c00; }
         
         .btn-delete-question { background-color: #e57373; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; padding: 10px 15px; }
@@ -56,7 +55,14 @@
         </main>
     </div>
     <div id="delete-modal" class="modal-backdrop">
-        <!-- Konten modal tidak berubah -->
+        <div class="modal-content">
+            <h4>Hapus Pertanyaan Ini?</h4>
+            <p>Tindakan ini akan menghapus pertanyaan dan riwayat pembuatannya secara permanen.</p>
+            <div class="modal-actions">
+                <button id="cancel-delete-btn" class="btn-cancel">Batal</button>
+                <button id="confirm-delete-btn" class="btn-confirm-delete">Ya, Hapus</button>
+            </div>
+        </div>
     </div>
 
     <script type="module">
@@ -79,10 +85,17 @@
 
         const loader = document.getElementById('loader');
         const questionListContainer = document.getElementById('question-list-container');
-        // ... (elemen modal tidak berubah)
+        const deleteModal = document.getElementById('delete-modal');
+        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        
+        let currentUser = null;
+        let questionIdToDelete = null;
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                // --- PERBAIKAN KRUSIAL: Baris ini ditambahkan kembali ---
+                currentUser = user;
                 loadUserQuestions(user.uid);
             } else {
                 loader.innerHTML = '<h2>Anda harus login untuk melihat halaman ini.</h2><a href="login.html">Login Sekarang</a>';
@@ -90,26 +103,21 @@
         });
 
         async function loadUserQuestions(userId) {
+            // Fungsi ini tidak berubah dari sebelumnya, sudah benar
             loader.style.display = 'block';
-            questionListContainer.innerHTML = ''; // Kosongkan daftar sebelum memuat
+            questionListContainer.innerHTML = '';
             try {
                 const q = query(collection(db, 'pertanyaan'), where('dibuatOleh', '==', userId));
                 const querySnapshot = await getDocs(q);
-
                 loader.style.display = 'none';
-
                 if (querySnapshot.empty) {
                     questionListContainer.innerHTML = '<p style="text-align:center;">Anda belum pernah membuat pertanyaan.</p>';
                     return;
                 }
-
                 querySnapshot.forEach(doc => {
                     const question = doc.data();
-                    
-                    // --- AWAL MODIFIKASI LOGIKA TIPE SOAL ---
-                    let tipeSoalTeks = 'Pilihan Ganda'; // Default
-                    let tipeSoalClass = 'tipe-pg';     // Default
-
+                    let tipeSoalTeks = 'Pilihan Ganda';
+                    let tipeSoalClass = 'tipe-pg';
                     if (question.tipeSoal === 'esai') {
                         tipeSoalTeks = 'Esai';
                         tipeSoalClass = 'tipe-esai';
@@ -117,8 +125,6 @@
                         tipeSoalTeks = 'Susun Huruf';
                         tipeSoalClass = 'tipe-susun';
                     }
-                    // --- AKHIR MODIFIKASI ---
-                    
                     const questionCard = document.createElement('div');
                     questionCard.className = 'question-card';
                     questionCard.innerHTML = `
@@ -133,16 +139,65 @@
                     `;
                     questionListContainer.appendChild(questionCard);
                 });
-
             } catch (error) {
                 console.error("Error memuat pertanyaan:", error);
                 loader.innerHTML = '<h2>Oops! Terjadi kesalahan.</h2>';
             }
         }
         
-        // ... (Kode event listener untuk hapus tidak berubah)
-        
+        questionListContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-delete-question')) {
+                questionIdToDelete = e.target.dataset.questionId;
+                deleteModal.style.display = 'flex';
+            }
+        });
+
+        cancelDeleteBtn.addEventListener('click', () => {
+            questionIdToDelete = null;
+            deleteModal.style.display = 'none';
+        });
+
+        // --- AWAL PENYEMPURNAAN LOGIKA HAPUS ---
+        confirmDeleteBtn.addEventListener('click', async () => {
+            if (!questionIdToDelete || !currentUser) return;
+
+            confirmDeleteBtn.textContent = 'Menghapus...';
+            confirmDeleteBtn.disabled = true;
+
+            try {
+                const batch = writeBatch(db);
+
+                // 1. Hapus dokumen pertanyaan utama
+                const questionRef = doc(db, 'pertanyaan', questionIdToDelete);
+                batch.delete(questionRef);
+
+                // 2. Cari dan hapus catatan riwayat kuota yang sesuai di `userData`
+                const historyRef = collection(db, "userData", currentUser.uid, "questionCreationTimestamp");
+                const q = query(historyRef, where("pertanyaanId", "==", questionIdToDelete));
+                const historySnapshot = await getDocs(q);
+
+                if (!historySnapshot.empty) {
+                    historySnapshot.forEach(doc => {
+                        batch.delete(doc.ref); // Tambahkan perintah hapus ke batch
+                    });
+                }
+                
+                await batch.commit();
+                await loadUserQuestions(currentUser.uid); // Muat ulang daftar
+
+            } catch (error) {
+                console.error("Gagal menghapus pertanyaan:", error);
+                alert('Terjadi kesalahan saat menghapus.');
+            } finally {
+                questionIdToDelete = null;
+                deleteModal.style.display = 'none';
+                confirmDeleteBtn.textContent = 'Ya, Hapus';
+                confirmDeleteBtn.disabled = false;
+            }
+        });
+        // --- AKHIR PENYEMPURNAAN ---
     </script>
 </body>
 </html>
+
 
