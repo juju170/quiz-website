@@ -16,6 +16,7 @@
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 1.1rem; }
         .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #ccc; box-sizing: border-box; font-family: 'Baloo 2', sans-serif; font-size: 1rem; }
+        .input-group .info-text { font-size: 0.9rem; color: #666; margin-top: 5px; }
         .kuota-container { text-align: center; padding: 15px; background-color: #e3f2fd; border: 2px solid #90caf9; border-radius: 10px; margin-bottom: 25px; font-weight: 700; }
         .kuota-container .sisa { font-size: 1.5rem; color: #0288d1; }
         .kuota-container .info { font-size: 0.9rem; color: #555; margin-top: 5px; }
@@ -44,22 +45,23 @@
             <p>Satu pertanyaan yang kamu buat sangat berarti!</p>
         </header>
         <main>
-            <div id="kuota-container" class="kuota-container">
-                Memeriksa kuota...
-            </div>
+            <div id="kuota-container" class="kuota-container">Memeriksa kuota...</div>
             <form id="question-form" class="form-container">
                 <fieldset id="form-fieldset" disabled>
                     <div class="input-group">
                         <label for="pertanyaan-teks">Tulis Pertanyaanmu</label>
-                        <textarea id="pertanyaan-teks" placeholder="Contoh: Apa ibu kota Indonesia?" required rows="3"></textarea>
+                        <textarea id="pertanyaan-teks" placeholder="Contoh: Hewan yang suka mengejar tikus adalah..." required rows="3"></textarea>
                     </div>
+                    
                     <div class="input-group">
                         <label for="tipe-soal">Pilih Tipe Soal</label>
                         <select id="tipe-soal" required>
                             <option value="pilihan_ganda" selected>Pilihan Ganda</option>
                             <option value="esai">Esai</option>
+                            <option value="susun_huruf">Susun Huruf</option>
                         </select>
                     </div>
+
                      <div class="input-group">
                         <label for="kategori-pilihan">Pilih Kategori Soal</label>
                         <select id="kategori-pilihan" required>
@@ -75,20 +77,31 @@
                         <input type="checkbox" id="is-harian">
                         <label for="is-harian">Jadikan Pertanyaan Harian juga?</label>
                     </div>
+                    
                     <div id="pilihan-ganda-container">
-                        <hr>
-                        <label style="font-weight:700; font-size: 1.1rem;">Tulis 4 Pilihan Jawaban (pilih satu yang benar)</label>
-                        <div id="answer-options-container" class="answer-options">
-                            <!-- Diisi oleh JS -->
-                        </div>
+                        <hr><label style="font-weight:700;">Tulis 4 Pilihan Jawaban (pilih satu yang benar)</label>
+                        <div id="answer-options-container" class="answer-options"></div>
                     </div>
+
                     <div id="esai-container" style="display: none;">
-                        <hr>
-                        <label for="kunci-jawaban-esai" style="font-weight:700; font-size: 1.1rem;">Tulis Kunci Jawaban / Kata Kunci</label>
+                        <hr><label for="kunci-jawaban-esai" style="font-weight:700;">Tulis Kunci Jawaban / Kata Kunci</label>
+                        <div class="input-group"><textarea id="kunci-jawaban-esai" placeholder="Tulis jawaban yang dianggap benar..." rows="4"></textarea></div>
+                    </div>
+
+                    <div id="susun-huruf-container" style="display: none;">
+                        <hr><label style="font-weight:700;">Pengaturan Soal Susun Huruf</label>
                         <div class="input-group">
-                            <textarea id="kunci-jawaban-esai" placeholder="Tulis jawaban yang dianggap benar..." rows="4"></textarea>
+                            <label for="jawaban-susun-huruf">Jawaban Benar</label>
+                            <input type="text" id="jawaban-susun-huruf" placeholder="Contoh: KUCING (hanya huruf, tanpa spasi)">
+                            <p class="info-text">Jawaban akan otomatis diubah menjadi huruf kapital.</p>
+                        </div>
+                        <div class="input-group">
+                            <label for="pengecoh-susun-huruf">Huruf Pengecoh (Opsional)</label>
+                            <input type="text" id="pengecoh-susun-huruf" placeholder="Contoh: ABJDX">
+                            <p class="info-text">Total huruf unik (dari jawaban + pengecoh) maksimal 10.</p>
                         </div>
                     </div>
+
                     <div class="submit-section">
                         <button type="submit" id="submit-btn" class="btn btn-submit">Simpan Pertanyaan ✅</button>
                     </div>
@@ -111,57 +124,46 @@
             messagingSenderId: "216895655168",
             appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
         };
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- DEKLARASI ELEMEN ---
-        const kuotaContainer = document.getElementById('kuota-container');
         const formFieldset = document.getElementById('form-fieldset');
         const questionForm = document.getElementById('question-form');
         const messageBox = document.getElementById('message-box');
         const tipeSoalSelect = document.getElementById('tipe-soal');
+        
         const pilihanGandaContainer = document.getElementById('pilihan-ganda-container');
         const esaiContainer = document.getElementById('esai-container');
-        const answerOptionsContainer = document.getElementById('answer-options-container');
-        const kunciJawabanEsai = document.getElementById('kunci-jawaban-esai');
-
+        const susunHurufContainer = document.getElementById('susun-huruf-container');
+        
+        const kuotaContainer = document.getElementById('kuota-container');
         let currentUser = null;
         const MAX_QUOTA = 5;
-        
-        /* ===== PERBAIKAN KUNCI ADA DI SINI ===== */
-        tipeSoalSelect.addEventListener('change', () => {
-            const isEsai = tipeSoalSelect.value === 'esai';
-            
-            pilihanGandaContainer.style.display = isEsai ? 'none' : 'block';
-            esaiContainer.style.display = isEsai ? 'block' : 'none';
-            
-            // Ambil semua input di dalam kontainer pilihan ganda
-            const pgInputs = pilihanGandaContainer.querySelectorAll('input');
-            
-            // Nonaktifkan semua input pilihan ganda jika tipe soal adalah esai
-            pgInputs.forEach(input => {
-                input.disabled = isEsai;
-            });
 
-            // Atur required untuk kunci jawaban esai
-            kunciJawabanEsai.required = isEsai;
-        });
+        function handleTipeSoalChange() {
+            const tipe = tipeSoalSelect.value;
+            pilihanGandaContainer.style.display = tipe === 'pilihan_ganda' ? 'block' : 'none';
+            esaiContainer.style.display = tipe === 'esai' ? 'block' : 'none';
+            susunHurufContainer.style.display = tipe === 'susun_huruf' ? 'block' : 'none';
+            
+            // Atur atribut required & disabled untuk validasi
+            pilihanGandaContainer.querySelectorAll('input').forEach(i => i.disabled = (tipe !== 'pilihan_ganda'));
+            document.getElementById('kunci-jawaban-esai').required = (tipe === 'esai');
+            document.getElementById('jawaban-susun-huruf').required = (tipe === 'susun_huruf');
+        }
+        tipeSoalSelect.addEventListener('change', handleTipeSoalChange);
 
         function renderAnswerOptions() {
-            let optionsHTML = '';
-            for (let i = 1; i <= 4; i++) {
-                optionsHTML += `
-                    <div class="answer-option">
-                        <input type="radio" name="correct-answer" value="${i-1}" ${i === 1 ? 'checked' : ''} required>
-                        <input type="text" class="jawaban-teks" placeholder="Pilihan Jawaban ${i}" required>
-                    </div>
-                `;
-            }
-            answerOptionsContainer.innerHTML = optionsHTML;
+            const container = document.getElementById('answer-options-container');
+            container.innerHTML = Array.from({ length: 4 }, (_, i) => `
+                <div class="answer-option">
+                    <input type="radio" name="correct-answer" value="${i}" ${i === 0 ? 'checked' : ''} required>
+                    <input type="text" class="jawaban-teks" placeholder="Pilihan Jawaban ${i + 1}" required>
+                </div>
+            `).join('');
         }
-
+        
         async function checkAndDisplayQuota(user) {
             const userDocRef = doc(db, 'userData', user.uid);
             const userDocSnap = await getDoc(userDocRef);
@@ -172,10 +174,10 @@
                 recentCreations = timestamps.filter(ts => ts.toDate() > oneWeekAgo);
             }
             const sisaKuota = MAX_QUOTA - recentCreations.length;
-            kuotaContainer.innerHTML = `<div class="sisa">Sisa Kuota Pertanyaan: ${sisaKuota} / ${MAX_QUOTA}</div><div class="info">Satu kuota akan kembali 7 hari setelah digunakan.</div>`;
+            kuotaContainer.innerHTML = `<div class="sisa">Sisa Kuota: ${sisaKuota}/${MAX_QUOTA}</div>`;
             if (sisaKuota <= 0) {
                 formFieldset.disabled = true;
-                kuotaContainer.innerHTML += `<div class="info" style="color:red; margin-top:8px;">Kuota Anda habis.</div>`;
+                kuotaContainer.innerHTML += `<div class="info" style="color:red;">Kuota habis.</div>`;
             } else {
                 formFieldset.disabled = false;
             }
@@ -185,10 +187,9 @@
             if (user) {
                 currentUser = user;
                 renderAnswerOptions();
-                tipeSoalSelect.dispatchEvent(new Event('change')); // Panggil event change saat awal load
+                handleTipeSoalChange();
                 await checkAndDisplayQuota(user);
             } else {
-                alert("Anda harus login untuk membuat pertanyaan.");
                 window.location.href = 'login.html';
             }
         });
@@ -196,9 +197,6 @@
         questionForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             formFieldset.disabled = true;
-
-            const userDocRef = doc(db, 'userData', currentUser.uid);
-            // ... (sisa logika kuota sama seperti sebelumnya)
 
             try {
                 const batch = writeBatch(db);
@@ -218,42 +216,51 @@
                     batch.set(pertanyaanRef, dataPertanyaan);
                     const jawabanInputs = document.querySelectorAll('.jawaban-teks');
                     const correctIndex = document.querySelector('input[name="correct-answer"]:checked').value;
-                    
-                    jawabanInputs.forEach((jawabanInput, index) => {
+                    jawabanInputs.forEach((input, index) => {
                         const jawabanRef = doc(collection(pertanyaanRef, "jawaban"));
-                        batch.set(jawabanRef, {
-                            teksJawaban: jawabanInput.value,
-                            benar: index == correctIndex
-                        });
+                        batch.set(jawabanRef, { teksJawaban: input.value, benar: index == correctIndex });
                     });
-
                 } else if (tipeSoal === 'esai') {
-                    const kunciJawaban = kunciJawabanEsai.value;
-                    dataPertanyaan.kunciJawaban = kunciJawaban;
+                    dataPertanyaan.kunciJawaban = document.getElementById('kunci-jawaban-esai').value;
+                    batch.set(pertanyaanRef, dataPertanyaan);
+                } else if (tipeSoal === 'susun_huruf') {
+                    const jawaban = document.getElementById('jawaban-susun-huruf').value.toUpperCase().replace(/[^A-Z]/g, '');
+                    const pengecoh = document.getElementById('pengecoh-susun-huruf').value.toUpperCase().replace(/[^A-Z]/g, '');
+                    if (!jawaban) {
+                        throw new Error("Jawaban benar untuk Susun Huruf tidak boleh kosong.");
+                    }
+                    const hurufJawaban = [...new Set(jawaban.split(''))];
+                    const hurufPengecoh = [...new Set(pengecoh.split(''))];
+                    const semuaHurufUnik = new Set([...hurufJawaban, ...hurufPengecoh]);
+
+                    if (semuaHurufUnik.size > 10) {
+                        throw new Error(`Total huruf unik tidak boleh lebih dari 10. (Anda memberikan ${semuaHurufUnik.size})`);
+                    }
+                    
+                    dataPertanyaan.jawabanBenar = jawaban;
+                    dataPertanyaan.pilihanHuruf = [...semuaHurufUnik].sort(() => Math.random() - 0.5).join('');
                     batch.set(pertanyaanRef, dataPertanyaan);
                 }
                 
-                // ... (logika menyimpan timestamp dan commit batch tetap sama)
+                const userDocRef = doc(db, 'userData', currentUser.uid);
                 const userDocSnap = await getDoc(userDocRef);
-                let currentTimestamps = [];
-                if (userDocSnap.exists() && userDocSnap.data().questionCreationTimestamps) {
-                    currentTimestamps = userDocSnap.data().questionCreationTimestamps;
-                }
-                currentTimestamps.push(Timestamp.now());
-                batch.set(userDocRef, { questionCreationTimestamps: currentTimestamps }, { merge: true });
+                const timestamps = userDocSnap.exists() ? (userDocSnap.data().questionCreationTimestamps || []) : [];
+                timestamps.push(Timestamp.now());
+                batch.set(userDocRef, { questionCreationTimestamps: timestamps }, { merge: true });
                 
                 await batch.commit();
                 
                 showMessage('success', 'Pertanyaan berhasil disimpan!');
                 questionForm.reset();
-                renderAnswerOptions(); 
-                tipeSoalSelect.dispatchEvent(new Event('change'));
+                handleTipeSoalChange();
+                renderAnswerOptions();
                 await checkAndDisplayQuota(currentUser);
 
             } catch (error) {
                 console.error("Error:", error);
-                showMessage('error', 'Terjadi kesalahan saat menyimpan.');
-                formFieldset.disabled = false; // Aktifkan lagi jika gagal
+                showMessage('error', error.message || 'Terjadi kesalahan saat menyimpan.');
+            } finally {
+                await checkAndDisplayQuota(currentUser);
             }
         });
         
@@ -261,9 +268,11 @@
             messageBox.className = `message ${type}`;
             messageBox.textContent = text;
             messageBox.style.display = 'block';
-            setTimeout(() => { messageBox.style.display = 'none'; }, 4000);
+            setTimeout(() => { messageBox.style.display = 'none'; }, 5000);
         }
     </script>
 </body>
 </html>
 
+
+    
