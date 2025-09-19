@@ -112,13 +112,20 @@
             
             let q;
             const pertanyaanRef = collection(db, "pertanyaan");
+            
+            // --- AWAL PERUBAHAN LOGIKA ---
             if (isHarian) {
+                // Kuis Harian: Hanya ambil soal yang secara eksplisit ditandai sebagai harian.
                 q = query(pertanyaanRef, where("isHarian", "==", true), limit(10));
             } else if (category) {
-                q = query(pertanyaanRef, where("kategori", "==", category), limit(10));
+                // Kuis Kategori: Ambil soal dari kategori tertentu, TETAPI kecualikan yang harian.
+                // 'not-in' [true] akan mengambil soal dengan isHarian: false atau yang tidak punya field isHarian.
+                q = query(pertanyaanRef, where("kategori", "==", category), where("isHarian", "not-in", [true]), limit(10));
             } else {
-                q = query(pertanyaanRef, limit(10));
+                // Kuis Umum: Ambil soal acak, TETAPI kecualikan yang harian.
+                q = query(pertanyaanRef, where("isHarian", "not-in", [true]), limit(10));
             }
+            // --- AKHIR PERUBAHAN LOGIKA ---
 
             try {
                 allQuestions = await fetchQuestions(q);
@@ -240,7 +247,6 @@
             document.getElementById('check-esai-btn').onclick = () => checkEsaiAnswer(question.answer);
         }
 
-        // --- AWAL FUNGSI BARU ---
         function checkMultipleChoiceAnswer(button, selectedAnswer, correctAnswer) {
             const allButtons = document.querySelectorAll('.answer-btn');
             allButtons.forEach(btn => btn.disabled = true); // Nonaktifkan semua tombol
@@ -259,7 +265,6 @@
                 showFeedback(false, `Salah! Jawaban yang benar adalah "${correctAnswer}"`);
             }
         }
-        // --- AKHIR FUNGSI BARU ---
 
         function checkWordAnswer(correctAnswer) {
             const slots = document.querySelectorAll('.answer-slots-container .answer-slot');
@@ -331,5 +336,4 @@
     </script>
 </body>
 </html>
-
 
