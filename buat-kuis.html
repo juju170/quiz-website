@@ -53,6 +53,13 @@
                         <label for="pertanyaan-teks">Tulis Pertanyaanmu</label>
                         <textarea id="pertanyaan-teks" placeholder="Contoh: Apa ibu kota Indonesia?" required rows="3"></textarea>
                     </div>
+                    <div class="input-group">
+                        <label for="tipe-soal">Pilih Tipe Soal</label>
+                        <select id="tipe-soal" required>
+                            <option value="pilihan_ganda" selected>Pilihan Ganda</option>
+                            <option value="esai">Esai</option>
+                        </select>
+                    </div>
                      <div class="input-group">
                         <label for="kategori-pilihan">Pilih Kategori Soal</label>
                         <select id="kategori-pilihan" required>
@@ -68,12 +75,18 @@
                         <input type="checkbox" id="is-harian">
                         <label for="is-harian">Jadikan Pertanyaan Harian juga?</label>
                     </div>
-                    <hr>
-                    <label style="font-weight:700; font-size: 1.1rem;">Tulis 4 Pilihan Jawaban (pilih satu yang benar)</label>
-                    
-                    <!-- === BAGIAN YANG DIPERBAIKI === -->
-                    <div id="answer-options-container" class="answer-options">
-                        <!-- Konten ini akan diisi oleh JavaScript -->
+                                        <div id="pilihan-ganda-container">
+                        <hr>
+                        <label style="font-weight:700; font-size: 1.1rem;">Tulis 4 Pilihan Jawaban (pilih satu yang benar)</label>
+                        <div id="answer-options-container" class="answer-options">
+                            </div>
+                    </div>
+                    <div id="esai-container" style="display: none;">
+                        <hr>
+                        <label for="kunci-jawaban-esai" style="font-weight:700; font-size: 1.1rem;">Tulis Kunci Jawaban / Kata Kunci</label>
+                        <div class="input-group">
+                            <textarea id="kunci-jawaban-esai" placeholder="Tulis jawaban yang dianggap benar atau kata kunci penting yang harus ada dalam jawaban siswa. Contoh: klorofil, cahaya matahari, oksigen" rows="4"></textarea>
+                        </div>
                     </div>
                     <!-- ============================ -->
 
@@ -103,6 +116,20 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
+        const tipeSoalSelect = document.getElementById('tipe-soal');
+        const pilihanGandaContainer = document.getElementById('pilihan-ganda-container')
+       const esaiContainer = document.getElementById('esai-container');
+        tipeSoalSelect.addEventListener('change', () => {
+            if (tipeSoalSelect.value === 'esai') {
+                pilihanGandaContainer.style.display = 'none';
+                esaiContainer.style.display = 'block';
+            } else {
+                pilihanGandaContainer.style.display = 'block';
+                esaiContainer.style.display = 'none';
+            }
+        });
+
 
         const kuotaContainer = document.getElementById('kuota-container');
         const formFieldset = document.getElementById('form-fieldset');
@@ -175,35 +202,57 @@
                  showMessage('error', 'Kuota Anda sudah habis.');
                  return;
             }
-
             try {
                 const batch = writeBatch(db);
                 const pertanyaanRef = doc(collection(db, "pertanyaan"));
-                batch.set(pertanyaanRef, {
-                    teksPertanyaan: document.getElementById('pertanyaan-teks').value,
-                    kategori: document.getElementById('kategori-pilihan').value,
-                    isHarian: document.getElementById('is-harian').checked,
-                    dibuatOleh: currentUser.uid,
-                    dibuatPada: Timestamp.now()
-                });
+                const tipeSoal = document.getElementById('tipe-soal').value;
 
-                const jawabanInputs = document.querySelectorAll('.jawaban-teks');
-                const radioButtons = document.querySelectorAll('input[type="radio"]');
-                const correctIndex = Array.from(radioButtons).findIndex(radio => radio.checked);
-                
-                if (correctIndex === -1) {
-                    showMessage('error', 'Pilih salah satu jawaban yang benar.');
-                    return;
-                }
-
-                jawabanInputs.forEach((jawabanInput, index) => {
-                    const jawabanRef = doc(collection(pertanyaanRef, "jawaban"));
-                    batch.set(jawabanRef, {
-                        teksJawaban: jawabanInput.value,
-                        benar: index === correctIndex
+                // Logika utama penyimpanan berdasarkan Tipe Soal
+                if (tipeSoal === 'pilihan_ganda') {
+                    batch.set(pertanyaanRef, {
+                        teksPertanyaan: document.getElementById('pertanyaan-teks').value,
+                        kategori: document.getElementById('kategori-pilihan').value,
+                        isHarian: document.getElementById('is-harian').checked,
+                        dibuatOleh: currentUser.uid,
+                        dibuatPada: Timestamp.now(),
+                        tipeSoal: 'pilihan_ganda' // Menyimpan tipe soal
                     });
-                });
+
+                    const jawabanInputs = document.querySelectorAll('.jawaban-teks');
+                    const radioButtons = document.querySelectorAll('input[type="radio"]');
+                    const correctIndex = Array.from(radioButtons).findIndex(radio => radio.checked);
+                    
+                    if (correctIndex === -1) {
+                        showMessage('error', 'Pilih salah satu jawaban yang benar.');
+                        return;
+                    }
+
+                    jawabanInputs.forEach((jawabanInput, index) => {
+                        const jawabanRef = doc(collection(pertanyaanRef, "jawaban"));
+                        batch.set(jawabanRef, {
+                            teksJawaban: jawabanInput.value,
+                            benar: index === correctIndex
+                        });
+                    });
+
+                } else if (tipeSoal === 'esai') {
+                    const kunciJawaban = document.getElementById('kunci-jawaban-esai').value;
+                    if (!kunciJawaban) {
+                         showMessage('error', 'Kunci jawaban untuk soal esai tidak boleh kosong.');
+                         return;
+                    }
+                    batch.set(pertanyaanRef, {
+                        teksPertanyaan: document.getElementById('pertanyaan-teks').value,
+                        kategori: document.getElementById('kategori-pilihan').value,
+                        isHarian: document.getElementById('is-harian').checked,
+                        dibuatOleh: currentUser.uid,
+                        dibuatPada: Timestamp.now(),
+                        tipeSoal: 'esai', // Menyimpan tipe soal
+                        kunciJawaban: kunciJawaban // Menyimpan kunci jawaban esai
+                    });
+                }
                 
+                // Kode untuk menyimpan timestamp dan commit batch tetap sama
                 currentTimestamps.push(Timestamp.now());
                 batch.set(userDocRef, { questionCreationTimestamps: currentTimestamps }, { merge: true });
                 
@@ -211,13 +260,15 @@
                 
                 showMessage('success', 'Pertanyaan berhasil disimpan! Kuota Anda berkurang satu.');
                 questionForm.reset();
-                renderAnswerOptions(); // Buat ulang pilihan jawaban setelah reset
+                tipeSoalSelect.dispatchEvent(new Event('change')); // Reset tampilan form ke default
+                renderAnswerOptions(); 
                 await checkAndDisplayQuota(currentUser);
 
             } catch (error) {
                 console.error("Error:", error);
                 showMessage('error', 'Terjadi kesalahan saat menyimpan.');
             }
+
         });
         
         function showMessage(type, text) {
@@ -229,5 +280,3 @@
     </script>
 </body>
 </html>
-
-
