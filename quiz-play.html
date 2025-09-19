@@ -22,8 +22,41 @@
         .answer-btn.wrong { background-color: var(--red-wrong); color: white; border-color: #c62828; }
         .next-btn { margin-top: 15px; background-color: var(--orange-next); color: white; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: 800; border-radius: 30px; cursor: pointer; visibility: hidden; border-bottom: 4px solid #f57c00; }
         .susun-huruf-wrapper { margin-top: 15px; }
-        .answer-slots-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; min-height: 60px; }
-        .answer-slot { width: 50px; height: 60px; background-color: #e0e0e0; border-bottom: 5px solid #bdbdbd; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: 800; }
+        
+        /* --- AWAL PERUBAHAN TAMPILAN SUSUN HURUF --- */
+        .answer-slots-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: nowrap; /* Mencegah item turun ke baris baru */
+            overflow-x: auto; /* Membuat kontainer bisa di-scroll horizontal */
+            -webkit-overflow-scrolling: touch; /* Scrolling halus di iOS */
+            scrollbar-width: thin; /* Scrollbar tipis untuk Firefox */
+            scrollbar-color: #bdbdbd #f1f1f1; /* Warna scrollbar untuk Firefox */
+            gap: 10px;
+            margin-bottom: 25px;
+            min-height: 60px;
+            padding: 5px 5px 10px 5px; /* Padding agar tidak terlalu mepet & ada ruang untuk scrollbar */
+        }
+        .answer-slots-container::-webkit-scrollbar { height: 8px; }
+        .answer-slots-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .answer-slots-container::-webkit-scrollbar-thumb { background: #bdbdbd; border-radius: 4px; }
+        .answer-slots-container::-webkit-scrollbar-thumb:hover { background: #888; }
+        
+        .answer-slot {
+            width: 50px;
+            height: 60px;
+            flex-shrink: 0; /* Mencegah kotak menyusut */
+            background-color: #e0e0e0;
+            border-bottom: 5px solid #bdbdbd;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: 800;
+        }
+        /* --- AKHIR PERUBAHAN TAMPILAN SUSUN HURUF --- */
+
         .letter-choices-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
         .letter-choice-btn { width: 55px; height: 55px; font-size: 1.8rem; background-color: #81d4fa; border: none; border-bottom: 5px solid #29b6f6; border-radius: 15px; font-family: 'Baloo 2', sans-serif; font-weight: 700; cursor: pointer; transition: all 0.2s; }
         .susun-huruf-actions { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
@@ -75,6 +108,12 @@
                 if (type === 'pilihan_ganda') {
                     questionData.options = data.pilihanJawaban;
                 }
+                // --- AWAL PERUBAHAN LOGIKA FETCH SUSUN HURUF ---
+                if (type === 'susun_huruf') {
+                    // Gunakan field `pilihanHuruf` jika ada, jika tidak (untuk soal lama), gunakan `jawabanBenar`
+                    questionData.letterPool = data.pilihanHuruf || data.jawabanBenar;
+                }
+                // --- AKHIR PERUBAHAN LOGIKA FETCH SUSUN HURUF ---
                 questions.push(questionData);
             });
             return questions;
@@ -113,19 +152,13 @@
             let q;
             const pertanyaanRef = collection(db, "pertanyaan");
             
-            // --- AWAL PERUBAHAN LOGIKA ---
             if (isHarian) {
-                // Kuis Harian: Hanya ambil soal yang secara eksplisit ditandai sebagai harian.
                 q = query(pertanyaanRef, where("isHarian", "==", true), limit(10));
             } else if (category) {
-                // Kuis Kategori: Ambil soal dari kategori tertentu, TETAPI kecualikan yang harian.
-                // 'not-in' [true] akan mengambil soal dengan isHarian: false atau yang tidak punya field isHarian.
                 q = query(pertanyaanRef, where("kategori", "==", category), where("isHarian", "not-in", [true]), limit(10));
             } else {
-                // Kuis Umum: Ambil soal acak, TETAPI kecualikan yang harian.
                 q = query(pertanyaanRef, where("isHarian", "not-in", [true]), limit(10));
             }
-            // --- AKHIR PERUBAHAN LOGIKA ---
 
             try {
                 allQuestions = await fetchQuestions(q);
@@ -186,7 +219,10 @@
             const choicesContainer = document.createElement('div');
             choicesContainer.className = 'letter-choices-container';
             
-            const letterChoices = shuffle(question.answer.split(''));
+            // --- AWAL PERUBAHAN LOGIKA PEMILIHAN HURUF ---
+            // Gunakan `letterPool` yang berisi jawaban + pengecoh
+            const letterChoices = shuffle(question.letterPool.split(''));
+            // --- AKHIR PERUBAHAN LOGIKA PEMILIHAN HURUF ---
 
             letterChoices.forEach((letter, index) => {
                 const btn = document.createElement('button');
@@ -249,14 +285,13 @@
 
         function checkMultipleChoiceAnswer(button, selectedAnswer, correctAnswer) {
             const allButtons = document.querySelectorAll('.answer-btn');
-            allButtons.forEach(btn => btn.disabled = true); // Nonaktifkan semua tombol
+            allButtons.forEach(btn => btn.disabled = true);
 
             if (selectedAnswer === correctAnswer) {
                 button.classList.add('correct');
                 showFeedback(true, "Jawaban Benar!");
             } else {
                 button.classList.add('wrong');
-                // Tandai jawaban yang benar
                 allButtons.forEach(btn => {
                     if (btn.textContent === correctAnswer) {
                         btn.classList.add('correct');
