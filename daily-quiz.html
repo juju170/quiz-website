@@ -24,8 +24,46 @@
         .btn-start:hover { background-color: #76c87a; transform: translateY(-2px); }
         .btn-secondary { background-color: #ffb74d; color: white; border-bottom: 4px solid #f57c00; }
         .btn-secondary:hover { background-color: #ffc971; transform: translateY(-2px); }
-        .btn-back { background-color: #f0f0f0; color: #777; margin-top: 10px; font-size: 1rem; box-shadow: none; border: 2px solid #ddd; }
-        .btn-back:hover { background-color: #e0e0e0; border-color: #ccc; }
+            <style>
+        /* Hanya untuk demo, agar halaman bisa di-scroll */
+        body {
+            height: 200vh;
+            margin: 0;
+            padding-bottom: 100px; /* Memberi ruang di bawah agar tidak tertutup tombol */
+            font-family: sans-serif;
+        }
+
+        /* -- GAYA UNTUK TOMBOL BERANDA -- */
+        .tombol-beranda {
+            position: fixed; /* Membuat posisi tombol tetap saat di-scroll */
+            bottom: 20px;
+            right: 20px;
+            
+            background-color: #FFC107; /* Warna kuning amber yang cerah */
+            color: #333; /* Warna teks gelap agar mudah dibaca */
+            
+            padding: 12px 20px; /* Jarak antara teks dan tepi tombol */
+            border-radius: 50px; /* Sudut cembung/bulat sempurna (pill shape) */
+            
+            display: flex; /* Mengaktifkan flexbox untuk alignment */
+            align-items: center; /* Menengahkan teks dan ikon secara vertikal */
+            gap: 8px; /* Jarak antara emoji dan teks "Beranda" */
+            
+            font-family: 'Baloo 2', sans-serif; /* Menggunakan font yang sesuai tema */
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none; /* Menghilangkan garis bawah pada link */
+            
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Efek bayangan halus */
+            transition: transform 0.2s ease, box-shadow 0.2s ease; /* Animasi halus */
+            z-index: 1000; /* Memastikan tombol selalu di lapisan paling atas */
+        }
+
+        .tombol-beranda:hover {
+            transform: translateY(-3px); /* Sedikit terangkat saat disentuh */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Bayangan lebih jelas */
+        }
+    </style>
     </style>
 </head>
 <body>
@@ -49,7 +87,10 @@
             <a href="quiz-play.html?harian=true" id="start-quiz-btn" class="btn btn-start">Mulai Sekarang ➡️</a>
             <!-- --- AKHIR PERUBAHAN --- -->
             <a href="themes.html" class="btn btn-secondary">Pilih Tema Lain 📚</a>
-            <a href="index.html" class="btn btn-back">⬅️ Kembali ke Beranda</a>
+            <a href="index.html" class="tombol-beranda" title="Kembali ke Beranda">
+        <span>🏠</span>
+        <span>Beranda</span>
+            </a>
         </div>
     </div>
 </body>
