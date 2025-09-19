@@ -12,35 +12,8 @@
         body { font-family: 'Baloo 2', sans-serif; margin: 0; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; color: var(--text-dark); padding: 15px; box-sizing: border-box; }
         .quiz-container { position: relative; background-color: white; padding: 20px 30px 30px 30px; border-radius: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); width: 100%; max-width: 600px; text-align: center; border: 5px solid white; animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        
-        /* --- PERBAIKAN: Tombol Keluar Kuis --- */
-        .btn-quit-quiz {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background-color: #f1f1f1;
-            color: #888;
-            border: 2px solid #ddd;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-decoration: none;
-            font-size: 1.2rem;
-            font-weight: 700;
-            transition: all 0.2s ease;
-            z-index: 10;
-        }
-        .btn-quit-quiz:hover {
-            background-color: #e57373;
-            color: white;
-            border-color: #e57373;
-            transform: scale(1.1) rotate(90deg);
-        }
-        /* ------------------------------------ */
-
+        .btn-quit-quiz { position: absolute; top: 15px; right: 15px; background-color: #f1f1f1; color: #888; border: 2px solid #ddd; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 1.2rem; font-weight: 700; transition: all 0.2s ease; z-index: 10; }
+        .btn-quit-quiz:hover { background-color: #e57373; color: white; border-color: #e57373; transform: scale(1.1) rotate(90deg); }
         .progress-container { margin-bottom: 15px; }
         .progress-text { font-weight: 700; margin-bottom: 8px; font-size: 1.1rem; }
         .progress-bar-visual { background-color: #e0e0e0; border-radius: 20px; height: 20px; overflow: hidden; border: 2px solid #cfd8dc; }
@@ -48,7 +21,7 @@
         .question-box { background-color: var(--blue-light); padding: 20px; border-radius: 15px; margin-bottom: 25px; min-height: 80px; display: flex; justify-content: center; align-items: center; border-left: 8px solid var(--blue-main); }
         .question-text { font-size: 1.8rem; font-weight: 800; color: var(--blue-main); margin: 0; }
         .answer-options { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        .answer-btn { border: none; padding: 20px; border-radius: 15px; font-size: 1.5rem; font-family: 'Baloo 2', sans-serif; font-weight: 700; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border-bottom: 6px solid; }
+        .answer-btn { border: none; padding: 20px; border-radius: 15px; font-size: 1.5rem; font-family: 'Baloo 2', sans-serif; font-weight: 700; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s; border-bottom: 6px solid; }
         .answer-btn:hover:not(:disabled) { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
         .answer-btn:nth-child(4n+1) { background-color: #81d4fa; border-color: #29b6f6; }
         .answer-btn:nth-child(4n+2) { background-color: #a5d6a7; border-color: #66bb6a; }
@@ -80,9 +53,7 @@
 </head>
 <body>
     <div class="quiz-container">
-        <!-- PERBAIKAN: Tombol Keluar / Kembali ke Beranda -->
         <a href="index.html" class="btn-quit-quiz" title="Keluar dari Kuis">✖️</a>
-
         <div id="quiz-screen">
             <div id="loader-container" class="loader-container"><h2 id="loader-text">Memuat Kuis...</h2><div class="spinner"></div></div>
             <div id="quiz-content" style="display:none;">
@@ -110,6 +81,7 @@
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
         import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
+        // --- Konfigurasi Firebase ---
         const firebaseConfig = {
             apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
             authDomain: "forumwidara.firebaseapp.com",
@@ -118,11 +90,11 @@
             messagingSenderId: "216895655168",
             appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
         };
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-
+        
+        // --- Elemen DOM ---
         const loaderContainer = document.getElementById('loader-container');
         const loaderText = document.getElementById('loader-text');
         const quizContent = document.getElementById('quiz-content');
@@ -137,10 +109,12 @@
         const starsContainer = document.getElementById('stars-container');
         const retryBtn = document.getElementById('retry-btn');
         
+        // --- State Kuis ---
         let quizData = [];
         let currentQuestionIndex = 0;
         let score = 0;
 
+        // --- Logika Utama ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 const urlParams = new URLSearchParams(window.location.search);
@@ -148,15 +122,12 @@
                 const mode = urlParams.get('mode');
 
                 if (mode === 'harian') {
-                    loaderText.textContent = 'Memuat Kuis Harian... 🗓️';
                     retryBtn.href = `quiz-play.html?mode=harian`;
                     loadDailyQuiz();
                 } else if (theme) {
-                    loaderText.textContent = `Memuat Kuis Tema ${theme}... ✨`;
                     retryBtn.href = `quiz-play.html?theme=${theme}`;
                     loadQuizByTheme(theme);
                 } else {
-                    loaderText.textContent = 'Menyiapkan Kuis Acak... 🎲';
                     retryBtn.href = `quiz-play.html`;
                     loadRandomQuiz();
                 }
@@ -168,9 +139,8 @@
 
         async function fetchQuestions(q) {
             const querySnapshot = await getDocs(q);
-            if (querySnapshot.empty) {
-                throw new Error("Tidak ada pertanyaan yang ditemukan.");
-            }
+            if (querySnapshot.empty) throw new Error("Tidak ada pertanyaan yang ditemukan.");
+            
             let allQuestions = [];
             for (const questionDoc of querySnapshot.docs) {
                 const questionData = questionDoc.data();
@@ -187,19 +157,10 @@
                             options.push(answerData.teksJawaban);
                             if(answerData.benar) correctAnswer = answerData.teksJawaban;
                         });
-                        allQuestions.push({ 
-                            type: 'pilihan_ganda',
-                            question: questionData.teksPertanyaan, 
-                            options: options, 
-                            answer: correctAnswer 
-                        });
+                        allQuestions.push({ type: 'pilihan_ganda', question: questionData.teksPertanyaan, options, answer: correctAnswer });
                     }
                 } else if (questionType === 'esai') {
-                    allQuestions.push({
-                        type: 'esai',
-                        question: questionData.teksPertanyaan,
-                        answerKey: questionData.kunciJawaban || 'Tidak ada kunci jawaban.'
-                    });
+                    allQuestions.push({ type: 'esai', question: questionData.teksPertanyaan, answerKey: questionData.kunciJawaban || '' });
                 }
             }
             return allQuestions;
@@ -208,41 +169,32 @@
         async function loadDailyQuiz() {
             try {
                 const q = query(collection(db, 'pertanyaan'), where('isHarian', '==', true));
-                let allQuestions = await fetchQuestions(q);
-                quizData = shuffle(allQuestions).slice(0, 5);
-                if (quizData.length === 0) throw new Error("Tidak ada pertanyaan harian yang valid.");
+                quizData = shuffle(await fetchQuestions(q)).slice(0, 5);
+                if (quizData.length === 0) throw new Error("Tidak ada soal harian.");
                 startQuiz();
-            } catch (error) {
-                handleLoadError(error);
-            }
+            } catch (error) { handleLoadError(error); }
         }
 
         async function loadQuizByTheme(theme) {
              try {
                 const q = query(collection(db, 'pertanyaan'), where('kategori', '==', theme));
-                let allQuestions = await fetchQuestions(q);
-                quizData = shuffle(allQuestions).slice(0, 10);
-                if (quizData.length === 0) throw new Error(`Tidak ada pertanyaan valid untuk tema "${theme}".`);
+                quizData = shuffle(await fetchQuestions(q)).slice(0, 10);
+                if (quizData.length === 0) throw new Error(`Tidak ada soal untuk tema "${theme}".`);
                 startQuiz();
-            } catch (error) {
-                handleLoadError(error);
-            }
+            } catch (error) { handleLoadError(error); }
         }
         
         async function loadRandomQuiz() {
             try {
                 const q = query(collection(db, 'pertanyaan'));
-                let allQuestions = await fetchQuestions(q);
-                quizData = shuffle(allQuestions).slice(0, 10);
+                quizData = shuffle(await fetchQuestions(q)).slice(0, 10);
                 if (quizData.length === 0) throw new Error("Belum ada pertanyaan di database.");
                 startQuiz();
-            } catch (error) {
-                handleLoadError(error);
-            }
+            } catch (error) { handleLoadError(error); }
         }
 
         function handleLoadError(error) {
-            console.error("Error memuat kuis:", error);
+            console.error("Error:", error);
             loaderContainer.innerHTML = `<h2>Gagal memuat kuis.</h2><p>${error.message}</p><a href='index.html'>Kembali</a>`;
         }
         
@@ -253,7 +205,13 @@
             score = 0;
             loadQuestion();
         }
+        
+        function goToNextQuestion() {
+            currentQuestionIndex++;
+            loadQuestion();
+        }
 
+        /* ===== PERUBAHAN KUNCI 1: ALUR SOAL ESAI ===== */
         function loadQuestion() {
             if (currentQuestionIndex < quizData.length) {
                 const currentQuestion = quizData[currentQuestionIndex];
@@ -261,6 +219,8 @@
                 progressBarFill.style.width = `${((currentQuestionIndex + 1) / quizData.length) * 100}%`;
                 questionText.textContent = currentQuestion.question;
                 answerOptions.innerHTML = '';
+                document.getElementById('feedback-box').innerHTML = '';
+                nextBtn.style.visibility = 'hidden';
 
                 if (currentQuestion.type === 'pilihan_ganda') {
                     shuffle(currentQuestion.options).forEach(option => {
@@ -272,54 +232,71 @@
                     });
                 } else if (currentQuestion.type === 'esai') {
                     const esaiTextarea = document.createElement('textarea');
+                    esaiTextarea.id = 'esai-answer-area';
                     esaiTextarea.placeholder = 'Ketik jawabanmu di sini...';
                     esaiTextarea.rows = 5;
                     esaiTextarea.style.cssText = "width: 100%; font-size: 1.2rem; padding: 10px; border-radius: 10px; border: 2px solid #ccc; box-sizing: border-box; font-family: 'Baloo 2', sans-serif;";
                     
                     const submitEsaiBtn = document.createElement('button');
-                    submitEsaiBtn.textContent = 'Lihat Kunci Jawaban';
-                    submitEsaiBtn.className = 'btn next-btn'; // Menggunakan style yang mirip tombol lanjut
-                    submitEsaiBtn.style.visibility = 'visible'; // Langsung terlihat
+                    submitEsaiBtn.textContent = 'Kunci Jawaban';
+                    submitEsaiBtn.className = 'btn next-btn';
+                    submitEsaiBtn.style.visibility = 'visible';
                     submitEsaiBtn.style.marginTop = '15px';
                     
                     submitEsaiBtn.addEventListener('click', () => {
                         submitEsaiBtn.disabled = true;
                         esaiTextarea.disabled = true;
-                        document.getElementById('feedback-box').innerHTML = `<div style="font-size:1.1rem; text-align:left; background-color:#eef; padding:15px; border-radius:10px;"><b>Kunci Jawaban:</b><br>${currentQuestion.answerKey}</div>`;
+                        
+                        // Cek jawaban esai
+                        const userAnswer = esaiTextarea.value.trim().toLowerCase();
+                        const correctAnswer = currentQuestion.answerKey.trim().toLowerCase();
+                        
+                        if (userAnswer === correctAnswer && userAnswer !== '') {
+                            score++;
+                            document.getElementById('feedback-box').innerHTML = '<span style="color:var(--green-correct);">Benar 🎉</span>';
+                        } else {
+                            document.getElementById('feedback-box').innerHTML = `<div style="font-size:1.1rem; text-align:left; background-color:#fff3e0; padding:15px; border-radius:10px; color: #e65100;"><b>Jawabanmu Kurang Tepat.</b><br><b style="color:#333">Kunci Jawaban:</b><br>${currentQuestion.answerKey}</div>`;
+                        }
                         nextBtn.style.visibility = 'visible';
                     });
 
                     answerOptions.appendChild(esaiTextarea);
                     answerOptions.appendChild(submitEsaiBtn);
                 }
-
-                document.getElementById('feedback-box').innerHTML = '';
-                nextBtn.style.visibility = 'hidden';
             } else {
                 showResults();
             }
         }
 
+        /* ===== PERUBAHAN KUNCI 2: ALUR PILIHAN GANDA ===== */
         function selectAnswer(button, selectedOption, correctAnswer) {
             Array.from(answerOptions.children).forEach(btn => btn.disabled = true);
             const feedbackBox = document.getElementById('feedback-box');
+
             if (selectedOption === correctAnswer) {
+                // Jawaban Benar
                 score++;
                 button.classList.add('correct');
-                feedbackBox.innerHTML = '<span style="color:var(--green-correct);">Benar 🎉</span>';
+                feedbackBox.innerHTML = '<span style="color:var(--green-correct);">Benar! Lanjut... 🎉</span>';
+                
+                // Otomatis lanjut setelah 1 detik
+                setTimeout(() => {
+                    goToNextQuestion();
+                }, 1000);
+
             } else {
+                // Jawaban Salah
                 button.classList.add('wrong');
                 feedbackBox.innerHTML = '<span style="color:var(--red-wrong);">Salah 😅</span>';
                 const correctButton = Array.from(answerOptions.children).find(btn => btn.textContent === correctAnswer);
                 if (correctButton) correctButton.classList.add('reveal-correct');
+                
+                // Tampilkan tombol Lanjut untuk diklik manual
+                nextBtn.style.visibility = 'visible';
             }
-            nextBtn.style.visibility = 'visible';
         }
 
-        nextBtn.addEventListener('click', () => {
-            currentQuestionIndex++;
-            loadQuestion();
-        });
+        nextBtn.addEventListener('click', goToNextQuestion);
 
         function showResults() {
             quizScreen.style.display = 'none';
@@ -341,4 +318,5 @@
     </script>
 </body>
 </html>
+
 
