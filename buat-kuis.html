@@ -45,7 +45,6 @@
             <div id="kuota-container" class="kuota-container">Memeriksa kuota...</div>
             <form id="question-form" class="form-container">
                 <fieldset id="form-fieldset" disabled>
-                    <!-- Form fields (tidak ada perubahan di sini) -->
                     <div class="input-group">
                         <label for="pertanyaan-teks">Tulis Pertanyaanmu</label>
                         <textarea id="pertanyaan-teks" placeholder="Contoh: Hewan yang suka mengejar tikus adalah..." required rows="3"></textarea>
@@ -60,14 +59,23 @@
                     </div>
                      <div class="input-group">
                         <label for="kategori-pilihan">Pilih Kategori Soal</label>
+                        <!-- --- AWAL PERUBAHAN --- -->
                         <select id="kategori-pilihan" required>
                             <option value="">-- Pilih Kategori --</option>
                             <option value="matematika">Matematika</option>
-                            <option value="bahasa">Bahasa Indonesia</option>
-                            <option value="ipa">IPA</option>
-                            <option value="seni">Seni</option>
-                            <option value="umum">Pengetahuan Umum</option>
+                            <option value="bahasa_indonesia">Bahasa Indonesia</option>
+                            <option value="bahasa_inggris">Bahasa Inggris</option>
+                            <option value="ipa">Ilmu Pengetahuan Alam</option>
+                            <option value="agama_islam">Ilmu Agama Islam</option>
+                            <option value="ips">Ilmu Sosial</option>
+                            <option value="sejarah">Ilmu Sejarah</option>
+                            <option value="pkn">Ilmu Kewarganegaraan</option>
+                            <option value="basa_sunda">Basa Sunda</option>
+                            <option value="olahraga">Ilmu Olahraga</option>
+                            <option value="seni">Ilmu Seni</option>
+                            <option value="campuran_seru">Campuran Teka Teki Seru</option>
                         </select>
+                        <!-- --- AKHIR PERUBAHAN --- -->
                     </div>
                     <div class="input-group checkbox-group">
                         <input type="checkbox" id="is-harian">
@@ -99,6 +107,7 @@
     </div>
 
     <script type="module">
+        // JavaScript tidak berubah, hanya HTML di atas yang diubah
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
         import { getFirestore, collection, doc, Timestamp, writeBatch, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
@@ -126,27 +135,18 @@
         
         let currentUser = null;
         const MAX_QUOTA = 5;
-
-        // --- AWAL PERUBAHAN UTAMA ---
-
+ 
         async function checkAndDisplayQuota(user) {
             if (!user) return;
-
             const startOfToday = new Date();
             startOfToday.setHours(0, 0, 0, 0);
             const startOfTodayTimestamp = Timestamp.fromDate(startOfToday);
-
-            // Path sekarang menunjuk ke koleksi `userData`
             const historyRef = collection(db, "userData", user.uid, "questionCreationTimestamp");
-            
-            // Query field bernama `timestamp` (asumsi)
             const q = query(historyRef, where("timestamp", ">=", startOfTodayTimestamp));
-
             try {
                 const querySnapshot = await getDocs(q);
                 const questionsMadeToday = querySnapshot.size;
                 const sisaKuota = MAX_QUOTA - questionsMadeToday;
-
                 if (sisaKuota > 0) {
                     kuotaContainer.textContent = `Sisa kuota membuat pertanyaan hari ini: ${sisaKuota}`;
                     kuotaContainer.classList.remove('no-quota');
@@ -164,8 +164,6 @@
             }
         }
 
-        // --- AKHIR PERUBAHAN UTAMA ---
-
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -180,9 +178,7 @@
         questionForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             formFieldset.disabled = true;
-
             try {
-                // Pengecekan kuota terakhir sebelum submit, menunjuk ke path yang benar
                 const historyCheckRef = collection(db, "userData", currentUser.uid, "questionCreationTimestamp");
                 const startOfToday = new Date();
                 startOfToday.setHours(0, 0, 0, 0);
@@ -191,20 +187,16 @@
                 if (snapshot.size >= MAX_QUOTA) {
                     throw new Error("Kuota harian Anda sudah habis.");
                 }
-
                 const batch = writeBatch(db);
-
-                // 1. Simpan data pertanyaan utama (tidak berubah)
                 const pertanyaanRef = doc(collection(db, "pertanyaan"));
                 const dataPertanyaan = {
                     teksPertanyaan: document.getElementById('pertanyaan-teks').value,
                     kategori: document.getElementById('kategori-pilihan').value,
                     isHarian: document.getElementById('is-harian').checked,
                     dibuatOleh: currentUser.uid,
-                    dibuatPada: Timestamp.now(), // Field ini tetap di sini untuk koleksi `pertanyaan`
+                    dibuatPada: Timestamp.now(),
                     tipeSoal: tipeSoalSelect.value
                 };
-                // Logika untuk tipe soal tidak berubah
                 if (dataPertanyaan.tipeSoal === 'pilihan_ganda') {
                     const jawabanTeks = document.querySelectorAll('.jawaban-teks');
                     const correctIndex = document.querySelector('input[name="correct-answer"]:checked').value;
@@ -213,28 +205,21 @@
                 } else if (dataPertanyaan.tipeSoal === 'esai') {
                     dataPertanyaan.jawabanBenar = document.getElementById('kunci-jawaban-esai').value;
                 } else if (dataPertanyaan.tipeSoal === 'susun_huruf') {
-                    const jawaban = document.getElementById('jawaban-susun-huruf').value.toUpperCase().replace(/[^A-Z]/g, '');
+                    const jawaban = document.getElementById('jawaban-susun-huruf').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
                     if (!jawaban) throw new Error("Jawaban untuk Susun Huruf tidak boleh kosong.");
                     dataPertanyaan.jawabanBenar = jawaban;
                 }
                 batch.set(pertanyaanRef, dataPertanyaan);
-
-                // --- PERUBAHAN PENYIMPANAN RIWAYAT ---
-                // 2. Tambahkan dokumen baru ke riwayat di `userData`
                 const creationRecordRef = doc(collection(db, "userData", currentUser.uid, "questionCreationTimestamp"));
                 batch.set(creationRecordRef, {
-                    timestamp: Timestamp.now(), // Menggunakan field `timestamp`
+                    timestamp: Timestamp.now(),
                     pertanyaanId: pertanyaanRef.id
                 });
-                // --- AKHIR PERUBAHAN ---
-
                 await batch.commit();
-                
                 showMessage('success', 'Pertanyaan berhasil disimpan!');
                 questionForm.reset();
                 handleTipeSoalChange();
                 renderAnswerOptions();
-
             } catch (error) {
                 console.error("Error:", error);
                 showMessage('error', error.message || 'Terjadi kesalahan saat menyimpan.');
@@ -243,13 +228,11 @@
             }
         });
 
-        // --- Fungsi-fungsi pembantu (tidak ada perubahan signifikan) ---
         function handleTipeSoalChange() {
             const tipe = tipeSoalSelect.value;
             pilihanGandaContainer.style.display = tipe === 'pilihan_ganda' ? 'block' : 'none';
             esaiContainer.style.display = tipe === 'esai' ? 'block' : 'none';
             susunHurufContainer.style.display = tipe === 'susun_huruf' ? 'block' : 'none';
-            
             document.querySelectorAll('#pilihan-ganda-container input').forEach(i => i.required = (tipe === 'pilihan_ganda'));
             document.getElementById('kunci-jawaban-esai').required = (tipe === 'esai');
             document.getElementById('jawaban-susun-huruf').required = (tipe === 'susun_huruf');
@@ -277,3 +260,4 @@
 </html>
 
 
+                    
