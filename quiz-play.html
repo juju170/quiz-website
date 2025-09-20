@@ -190,6 +190,7 @@
                 audio.controls = true;
                 const source = document.createElement('source');
                 source.src = getGoogleDriveDirectLink(questionData.audioUrl);
+                source.type = "audio/mpeg";
                 audio.appendChild(source);
                 mediaContainer.appendChild(audio);
             }
