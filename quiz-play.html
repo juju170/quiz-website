@@ -11,6 +11,21 @@
         :root { --blue-light: #e3f2fd; --blue-main: #0288d1; --green-correct: #4caf50; --red-wrong: #f44336; --orange-next: #ff9800; --yellow-explanation: #fff9c4; }
         body { font-family: 'Baloo 2', sans-serif; margin: 0; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; box-sizing: border-box; }
         .quiz-container { position: relative; background-color: white; padding: 20px 30px 30px 30px; border-radius: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); width: 100%; max-width: 600px; text-align: center; }
+        
+        /* --- CSS BARU UNTUK NAMA PEMBUAT --- */
+        .creator-info {
+            position: absolute;
+            top: 20px;
+            left: 25px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #555;
+            background-color: #f0f0f0;
+            padding: 5px 12px;
+            border-radius: 15px;
+            z-index: 5; /* Pastikan di bawah tombol keluar */
+        }
+
         .btn-quit-quiz { position: absolute; top: 15px; right: 15px; background-color: #f1f1f1; color: #888; border: 2px solid #ddd; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 1.2rem; font-weight: 700; transition: all 0.2s ease; z-index: 10; }
         .btn-quit-quiz:hover { transform: scale(1.1) rotate(90deg); }
         .question-box { background-color: var(--blue-light); padding: 20px; border-radius: 15px; margin-bottom: 25px; min-height: 80px; display: flex; flex-direction: column; justify-content: center; align-items: center; border-left: 8px solid var(--blue-main); }
@@ -46,8 +61,9 @@
     </div>
 
     <script type="module">
+        // --- PENAMBAHAN 'doc' dan 'getDoc' UNTUK MENGAMBIL DATA PENGGUNA ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, where, limit, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
@@ -64,10 +80,8 @@
         let allQuestions = [];
         let currentQuestionIndex = 0;
         let score = 0;
+        const userCache = {}; // Variabel untuk menyimpan data pengguna agar tidak di-load berulang kali
 
-        // --- PENGATURAN SUARA ---
-        // FIX: Mengubah link GitHub ke format "raw" agar bisa diputar.
-        // Link Anda sebelumnya mengarah ke halaman web GitHub, bukan file audionya langsung.
         const correctSound = new Audio('https://raw.githubusercontent.com/juju170/quiz-website/e7fe1bcc58cc86542724a090f068553510594eb4/correct.mp3');
         const wrongSound = new Audio('https://raw.githubusercontent.com/juju170/quiz-website/e7fe1bcc58cc86542724a090f068553510594eb4/wrong.mp3');
         const resultSounds = {
@@ -77,19 +91,48 @@
             belajar: 'https://raw.githubusercontent.com/juju170/quiz-website/e7fe1bcc58cc86542724a090f068553510594eb4/duh0.mp3'
         };
         
+        // --- FUNGSI BARU UNTUK MENGAMBIL DATA PENGGUNA ---
+        async function getUserData(userId) {
+            if (!userId) return { nama: 'Komunitas' }; // Nama default jika soal tidak punya data pembuat
+            if (userCache[userId]) {
+                return userCache[userId]; // Ambil dari cache jika sudah ada
+            }
+            try {
+                const userRef = doc(db, "users", userId);
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                    const userData = userSnap.data();
+                    userCache[userId] = userData; // Simpan ke cache
+                    return userData;
+                } else {
+                    // Jika user tidak ditemukan, beri nama default
+                    userCache[userId] = { nama: 'Pengguna Anonim' }; 
+                    return userCache[userId];
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+                return { nama: 'Komunitas' }; // Nama default jika terjadi error
+            }
+        }
+        
         function getGoogleDriveDirectLink(url) {
             if (!url || !url.includes('drive.google.com')) return url;
             const fileId = url.match(/d\/(.+?)\//);
             return fileId && fileId[1] ? `https://drive.google.com/uc?export=download&id=${fileId[1]}` : url;
         }
 
+        // --- FUNGSI fetchQuestions DIMODIFIKASI ---
         async function fetchQuestions(quizQuery) {
             const snapshot = await getDocs(quizQuery);
-            return snapshot.docs.map(doc => {
-                const data = doc.data();
+            // Gunakan Promise.all agar pengambilan data pembuat berjalan bersamaan
+            const questionsPromises = snapshot.docs.map(async (document) => {
+                const data = document.data();
+                const creatorData = await getUserData(data.dibuatOleh); // Ambil data pembuat soal
+
                 const type = data.tipeSoal || 'pilihan_ganda';
                 const questionData = {
-                    id: doc.id,
+                    id: document.id,
+                    creatorName: creatorData.nama, // Simpan nama pembuat di data soal
                     type: type,
                     question: data.teksPertanyaan,
                     answer: data.jawabanBenar,
@@ -105,11 +148,16 @@
                 }
                 return questionData;
             });
+            return Promise.all(questionsPromises);
         }
 
+        // --- TAMPILAN KUIS DIMODIFIKASI ---
         function loadQuizUI() {
             quizContainer.innerHTML = `
                 <a href="index.html" class="btn-quit-quiz">&times;</a>
+                <!-- ELEMEN BARU UNTUK NAMA PEMBUAT -->
+                <div id="creator-info" class="creator-info"></div>
+                
                 <div>
                     <p>Pertanyaan <span id="question-number"></span> dari <span id="total-questions"></span> | Skor: <span id="score">0</span></p>
                 </div>
@@ -153,25 +201,25 @@
                 
                 const dummyQuestions = [
                     {
-                        type: 'pilihan_ganda', kategori: 'matematika',
+                        type: 'pilihan_ganda', kategori: 'matematika', creatorName: 'Komunitas',
                         question: 'Hasil dari 8 x 7 adalah...',
                         options: ['54', '56', '63', '49'], answer: '56',
                         explanations: ['Ini adalah hasil dari 6 x 9. Coba hitung lagi perkalian 8!', '', 'Ini adalah hasil dari 7 x 9. Kamu sudah dekat!', 'Ini adalah hasil dari 7 x 7. Ingat, soalnya adalah 8 x 7.']
                     },
                     {
-                        type: 'pilihan_ganda', kategori: 'ipa',
+                        type: 'pilihan_ganda', kategori: 'ipa', creatorName: 'Komunitas',
                         question: 'Proses tumbuhan membuat makanannya sendiri disebut...',
                         options: ['Respirasi', 'Evaporasi', 'Fotosintesis', 'Adaptasi'], answer: 'Fotosintesis',
                         explanations: ['Respirasi adalah proses pernapasan makhluk hidup.', 'Evaporasi adalah proses penguapan air.', '', 'Adaptasi adalah cara makhluk hidup menyesuaikan diri dengan lingkungannya.']
                     },
                     {
-                        type: 'pilihan_ganda', kategori: 'bahasa_indonesia',
+                        type: 'pilihan_ganda', kategori: 'bahasa_indonesia', creatorName: 'Komunitas',
                         question: 'Sinonim dari kata "Cepat" adalah...',
                         options: ['Lambat', 'Lekas', 'Jauh', 'Besar'], answer: 'Lekas',
                         explanations: ['Lambat adalah antonim (lawan kata) dari cepat.', '', 'Jauh berkaitan dengan jarak, bukan kecepatan.', 'Besar berkaitan dengan ukuran, bukan kecepatan.']
                     },
                     {
-                        type: 'pilihan_ganda', kategori: 'campuran_seru',
+                        type: 'pilihan_ganda', kategori: 'campuran_seru', creatorName: 'Komunitas',
                         question: 'Dengarkan suara ini. Suara hewan apakah ini?',
                         audioUrl: 'https://raw.githubusercontent.com/juju170/quiz-website/main/cat-meow.mp3', // CONTOH URL DUMMY
                         options: ['Anjing', 'Kucing', 'Sapi', 'Ayam'], answer: 'Kucing',
@@ -191,9 +239,15 @@
                 quizContainer.innerHTML = '<h2>Terjadi kesalahan saat memuat kuis. Coba lagi nanti.</h2>';
             }
         }
-
+        
+        // --- FUNGSI loadQuestion DIMODIFIKASI ---
         function loadQuestion() {
             const questionData = allQuestions[currentQuestionIndex];
+            
+            // Tampilkan nama pembuat soal
+            const creatorInfo = document.getElementById('creator-info');
+            creatorInfo.textContent = `Dibuat oleh: ${questionData.creatorName || 'Komunitas'}`;
+            
             document.getElementById('question-number').textContent = currentQuestionIndex + 1;
             document.getElementById('total-questions').textContent = allQuestions.length;
             document.getElementById('score').textContent = score;
@@ -218,13 +272,11 @@
 
         function renderPilihanGandaUI(question) {
             const answerOptions = document.getElementById('answer-options');
-            // FIX: Mengacak urutan pilihan jawaban agar lebih dinamis
             const shuffledOptions = shuffle([...question.options]);
             shuffledOptions.forEach(option => {
                 const button = document.createElement('button');
                 button.textContent = option;
                 button.className = 'answer-btn';
-                // Memberi data asli dari `question.options` untuk mencari index penjelasan
                 button.onclick = () => checkMultipleChoiceAnswer(button, option, question.answer, question.options, question.explanations);
                 answerOptions.appendChild(button);
             });
@@ -275,14 +327,13 @@
             const correctAnswers = score / 10;
             const percentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
             
-            // FIX: Memperbaiki logika if/else dan emoji, serta menyederhanakan menjadi 4 kategori
             let result = {};
             if (percentage === 100) {
                 result = { emoji: '🥳', message: 'WAH KAMU JENIUS', sound: resultSounds.genius };
             } else if (percentage >= 70) {
                 result = { emoji: '🤩', message: 'WAH KAMU HEBAT', sound: resultSounds.hebat };
             } else if (percentage >= 50) {
-                result = { emoji: '🥰', message: 'WAH KAMU KEREN!', sound: resultSounds.keren };
+                result = { emoji: '👍', message: 'WAH KAMU KEREN!', sound: resultSounds.keren };
             } else {
                 result = { emoji: '🤔', message: 'BELAJAR LAGI YA!', sound: resultSounds.belajar };
             }
@@ -327,5 +378,4 @@
     </script>
 </body>
 </html>
-
 
