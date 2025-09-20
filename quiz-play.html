@@ -10,10 +10,8 @@
     <style>
         :root { --blue-light: #e3f2fd; --blue-main: #0288d1; --green-correct: #4caf50; --red-wrong: #f44336; --orange-next: #ff9800; --yellow-explanation: #fff9c4; }
         body { font-family: 'Baloo 2', sans-serif; margin: 0; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; box-sizing: border-box; }
-        /* --- PERUBAHAN: Padding atas ditambah agar ada ruang untuk nama pembuat --- */
         .quiz-container { position: relative; background-color: white; padding: 45px 30px 30px 30px; border-radius: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); width: 100%; max-width: 600px; text-align: center; }
         
-        /* --- PERUBAHAN: Posisi disesuaikan agar lebih ke atas --- */
         .creator-info {
             position: absolute;
             top: 15px;
@@ -193,34 +191,7 @@
             try {
                 allQuestions = await fetchQuestions(q);
                 
-                const dummyQuestions = [
-                    {
-                        type: 'pilihan_ganda', kategori: 'matematika', creatorName: 'Komunitas',
-                        question: 'Hasil dari 8 x 7 adalah...',
-                        options: ['54', '56', '63', '49'], answer: '56',
-                        explanations: ['Ini adalah hasil dari 6 x 9. Coba hitung lagi perkalian 8!', '', 'Ini adalah hasil dari 7 x 9. Kamu sudah dekat!', 'Ini adalah hasil dari 7 x 7. Ingat, soalnya adalah 8 x 7.']
-                    },
-                    {
-                        type: 'pilihan_ganda', kategori: 'ipa', creatorName: 'Komunitas',
-                        question: 'Proses tumbuhan membuat makanannya sendiri disebut...',
-                        options: ['Respirasi', 'Evaporasi', 'Fotosintesis', 'Adaptasi'], answer: 'Fotosintesis',
-                        explanations: ['Respirasi adalah proses pernapasan makhluk hidup.', 'Evaporasi adalah proses penguapan air.', '', 'Adaptasi adalah cara makhluk hidup menyesuaikan diri dengan lingkungannya.']
-                    },
-                    {
-                        type: 'pilihan_ganda', kategori: 'bahasa_indonesia', creatorName: 'Komunitas',
-                        question: 'Sinonim dari kata "Cepat" adalah...',
-                        options: ['Lambat', 'Lekas', 'Jauh', 'Besar'], answer: 'Lekas',
-                        explanations: ['Lambat adalah antonim (lawan kata) dari cepat.', '', 'Jauh berkaitan dengan jarak, bukan kecepatan.', 'Besar berkaitan dengan ukuran, bukan kecepatan.']
-                    },
-                    {
-                        type: 'pilihan_ganda', kategori: 'campuran_seru', creatorName: 'Komunitas',
-                        question: 'Dengarkan suara ini. Suara hewan apakah ini?',
-                        audioUrl: 'https://raw.githubusercontent.com/juju170/quiz-website/main/cat-meow.mp3',
-                        options: ['Anjing', 'Kucing', 'Sapi', 'Ayam'], answer: 'Kucing',
-                        explanations: ['Suara anjing adalah menggonggong.', '', 'Suara sapi adalah melenguh.', 'Suara ayam adalah berkokok atau berkotek.']
-                    }
-                ];
-                allQuestions = allQuestions.concat(dummyQuestions);
+                // --- KODE SOAL DUMMY SUDAH DIHAPUS DARI SINI ---
 
                 if (allQuestions.length === 0) {
                     quizContainer.innerHTML = '<h2>Oops! Tidak ada pertanyaan untuk kategori ini.</h2><a href="index.html">Kembali</a>';
