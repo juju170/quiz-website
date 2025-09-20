@@ -27,7 +27,6 @@
         .answer-btn.wrong { background-color: var(--red-wrong); color: white; border-color: #c62828; }
         .next-btn { margin-top: 15px; background-color: var(--orange-next); color: white; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: 800; border-radius: 30px; cursor: pointer; visibility: hidden; border-bottom: 4px solid #f57c00; }
         
-        /* -- STYLE BARU UNTUK FEEDBACK & TOAST -- */
         .feedback-box { min-height: 40px; font-size: 1.6rem; font-weight: 700; margin-top: 15px; }
         .feedback-explanation { font-size: 1rem; font-weight: 400; color: #5f5c3a; margin-top: 10px; background-color: var(--yellow-explanation); padding: 12px; border-radius: 8px; border-left: 5px solid #fbc02d; text-align: left; }
         
@@ -35,7 +34,6 @@
         .toast-message { background: white; padding: 30px 40px; border-radius: 25px; text-align: center; box-shadow: 0 10px 50px rgba(0,0,0,0.2); animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-origin: center; width: 90%; max-width: 500px; }
         .toast-emoji { font-size: 5rem; animation: popIn 0.6s 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
         .toast-message .btn { padding: 12px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 1.1rem; }
-        /* -- AKHIR STYLE BARU -- */
 
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
         @keyframes scaleIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -68,16 +66,16 @@
         let score = 0;
 
         // --- PENGATURAN SUARA ---
-        // GANTI URL placeholder ini dengan URL 'raw' dari file audio di repositori GitHub Anda
-        const correctSound = new Audio('https://github.com/juju170/quiz-website/blob/e7fe1bcc58cc86542724a090f068553510594eb4/correct.mp3');
-        const wrongSound = new Audio('https://github.com/juju170/quiz-website/blob/e7fe1bcc58cc86542724a090f068553510594eb4/wrong.mp3');
+        // FIX: Mengubah link GitHub ke format "raw" agar bisa diputar.
+        // Link Anda sebelumnya mengarah ke halaman web GitHub, bukan file audionya langsung.
+        const correctSound = new Audio('https://raw.githubusercontent.com/juju170/quiz-website/e7fe1bcc58cc86542724a090f068553510594eb4/correct.mp3');
+        const wrongSound = new Audio('https://raw.githubusercontent.com/juju170/quiz-website/e7fe1bcc58cc86542724a090f068553510594eb4/wrong.mp3');
         const resultSounds = {
-            genius: 'https://github.com/juju170/quiz-website/blob/e7fe1bcc58cc86542724a090f068553510594eb4/yay100.mp3',
-            hebat: 'https://github.com/juju170/quiz-website/blob/e7fe1bcc58cc86542724a090f068553510594eb4/wowlebih70.mp3',
-            keren: 'https://github.com/juju170/quiz-website/blob/e7fe1bcc58cc86542724a090f068553510594eb4/hmm10.mp3',
-            belajar: 'https://github.com/juju170/quiz-website/blob/e7fe1bcc58cc86542724a090f068553510594eb4/duh0.mp3'
+            genius: 'https://raw.githubusercontent.com/juju170/quiz-website/e7fe1bcc58cc86542724a090f068553510594eb4/yay100.mp3',
+            hebat: 'https://raw.githubusercontent.com/juju170/quiz-website/e7fe1bcc58cc86542724a090f068553510594eb4/wowlebih70.mp3',
+            keren: 'https://raw.githubusercontent.com/juju170/quiz-website/e7fe1bcc58cc86542724a090f068553510594eb4/hmm10.mp3',
+            belajar: 'https://raw.githubusercontent.com/juju170/quiz-website/e7fe1bcc58cc86542724a090f068553510594eb4/duh0.mp3'
         };
-        // --- AKHIR PENGATURAN SUARA ---
         
         function getGoogleDriveDirectLink(url) {
             if (!url || !url.includes('drive.google.com')) return url;
@@ -100,7 +98,7 @@
                 };
                 if (type === 'pilihan_ganda') {
                     questionData.options = data.pilihanJawaban;
-                    questionData.explanations = data.penjelasanPilihan || []; // Ambil data penjelasan
+                    questionData.explanations = data.penjelasanPilihan || [];
                 }
                 if (type === 'susun_huruf') {
                     questionData.letterPool = data.pilihanHuruf || data.jawabanBenar;
@@ -153,7 +151,6 @@
             try {
                 allQuestions = await fetchQuestions(q);
                 
-                // --- KUMPULAN SOAL DUMMY ---
                 const dummyQuestions = [
                     {
                         type: 'pilihan_ganda', kategori: 'matematika',
@@ -176,13 +173,12 @@
                     {
                         type: 'pilihan_ganda', kategori: 'campuran_seru',
                         question: 'Dengarkan suara ini. Suara hewan apakah ini?',
-                        audioUrl: 'https://raw.githubusercontent.com/username/repo/main/audio/cat-meow.mp3', // GANTI URL INI
+                        audioUrl: 'https://raw.githubusercontent.com/juju170/quiz-website/main/cat-meow.mp3', // CONTOH URL DUMMY
                         options: ['Anjing', 'Kucing', 'Sapi', 'Ayam'], answer: 'Kucing',
                         explanations: ['Suara anjing adalah menggonggong.', '', 'Suara sapi adalah melenguh.', 'Suara ayam adalah berkokok atau berkotek.']
                     }
                 ];
                 allQuestions = allQuestions.concat(dummyQuestions);
-                // --- AKHIR SOAL DUMMY ---
 
                 if (allQuestions.length === 0) {
                     quizContainer.innerHTML = '<h2>Oops! Tidak ada pertanyaan untuk kategori ini.</h2><a href="index.html">Kembali</a>';
@@ -217,41 +213,39 @@
 
             if (questionData.type === 'pilihan_ganda') {
                 renderPilihanGandaUI(questionData);
-            } else if (questionData.type === 'susun_huruf') {
-                // ... (word scramble UI logic is the same)
-            } else if (questionData.type === 'esai') {
-                // ... (essay UI logic is the same)
             }
         }
 
         function renderPilihanGandaUI(question) {
             const answerOptions = document.getElementById('answer-options');
-            const options = shuffle([...question.options]);
-            options.forEach(option => {
+            // FIX: Mengacak urutan pilihan jawaban agar lebih dinamis
+            const shuffledOptions = shuffle([...question.options]);
+            shuffledOptions.forEach(option => {
                 const button = document.createElement('button');
                 button.textContent = option;
                 button.className = 'answer-btn';
+                // Memberi data asli dari `question.options` untuk mencari index penjelasan
                 button.onclick = () => checkMultipleChoiceAnswer(button, option, question.answer, question.options, question.explanations);
                 answerOptions.appendChild(button);
             });
         }
         
-        function checkMultipleChoiceAnswer(button, selectedAnswer, correctAnswer, allOptions, explanations) {
+        function checkMultipleChoiceAnswer(button, selectedAnswer, correctAnswer, originalOptions, explanations) {
             document.querySelectorAll('.answer-btn').forEach(btn => btn.disabled = true);
 
             if (selectedAnswer === correctAnswer) {
                 button.classList.add('correct');
-                correctSound.play().catch(e => console.error("Audio play failed:", e));
+                correctSound.play().catch(e => console.warn("Audio 'correct' gagal diputar:", e.message));
                 showFeedback(true, "Jawaban Benar!");
             } else {
                 button.classList.add('wrong');
-                wrongSound.play().catch(e => console.error("Audio play failed:", e));
+                wrongSound.play().catch(e => console.warn("Audio 'wrong' gagal diputar:", e.message));
                 
                 document.querySelectorAll('.answer-btn').forEach(btn => {
                     if (btn.textContent === correctAnswer) btn.classList.add('correct');
                 });
                 
-                const wrongIndex = allOptions.indexOf(selectedAnswer);
+                const wrongIndex = originalOptions.indexOf(selectedAnswer);
                 const explanation = (explanations && explanations[wrongIndex]) ? explanations[wrongIndex] : '';
                 const feedbackMessage = `Salah! Jawaban yang benar adalah "${correctAnswer}"`;
                 showFeedback(false, feedbackMessage, explanation);
@@ -281,14 +275,15 @@
             const correctAnswers = score / 10;
             const percentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
             
+            // FIX: Memperbaiki logika if/else dan emoji, serta menyederhanakan menjadi 4 kategori
             let result = {};
             if (percentage === 100) {
                 result = { emoji: '🥳', message: 'WAH KAMU JENIUS', sound: resultSounds.genius };
-            } else if (percentage > 70) {
+            } else if (percentage >= 70) {
                 result = { emoji: '🤩', message: 'WAH KAMU HEBAT', sound: resultSounds.hebat };
-            } else if (percentage > 50) {
+            } else if (percentage >= 50) {
                 result = { emoji: '🥰', message: 'WAH KAMU KEREN!', sound: resultSounds.keren };
-            } else (percentage > 10) {
+            } else {
                 result = { emoji: '🤔', message: 'BELAJAR LAGI YA!', sound: resultSounds.belajar };
             }
 
@@ -313,7 +308,7 @@
 
             if (result.sound) {
                 const resultSoundPlayer = new Audio(result.sound);
-                resultSoundPlayer.play().catch(e => console.error("Result audio play failed:", e));
+                resultSoundPlayer.play().catch(e => console.warn("Audio hasil kuis gagal diputar:", e.message));
             }
             quizContainer.style.display = 'none';
         }
