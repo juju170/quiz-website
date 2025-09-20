@@ -12,19 +12,7 @@
         body { font-family: 'Baloo 2', sans-serif; margin: 0; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; box-sizing: border-box; }
         .quiz-container { position: relative; background-color: white; padding: 45px 30px 30px 30px; border-radius: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); width: 100%; max-width: 600px; text-align: center; }
         
-        .creator-info {
-            position: absolute;
-            top: 15px;
-            left: 20px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: #555;
-            background-color: #f0f0f0;
-            padding: 5px 12px;
-            border-radius: 15px;
-            z-index: 5;
-        }
-
+        .creator-info { position: absolute; top: 15px; left: 20px; font-size: 0.9rem; font-weight: 700; color: #555; background-color: #f0f0f0; padding: 5px 12px; border-radius: 15px; z-index: 5; }
         .btn-quit-quiz { position: absolute; top: 15px; right: 15px; background-color: #f1f1f1; color: #888; border: 2px solid #ddd; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 1.2rem; font-weight: 700; transition: all 0.2s ease; z-index: 10; }
         .btn-quit-quiz:hover { transform: scale(1.1) rotate(90deg); }
         .question-box { background-color: var(--blue-light); padding: 20px; border-radius: 15px; margin-bottom: 25px; min-height: 80px; display: flex; flex-direction: column; justify-content: center; align-items: center; border-left: 8px solid var(--blue-main); }
@@ -35,12 +23,25 @@
 
         .question-text { font-size: 1.8rem; font-weight: 800; color: var(--blue-main); margin: 0; }
         .answer-options { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        .answer-btn { border: none; padding: 15px; border-radius: 15px; font-family: 'Baloo 2', sans-serif; font-weight: 700; cursor: pointer; font-size: 1.5rem; border-bottom: 6px solid; transition: transform 0.1s ease; }
+        .answer-btn, .btn-action-word { border: none; padding: 15px; border-radius: 15px; font-family: 'Baloo 2', sans-serif; font-weight: 700; cursor: pointer; }
+        .answer-btn { font-size: 1.5rem; border-bottom: 6px solid; transition: transform 0.1s ease; }
         .answer-btn:active { transform: translateY(3px); border-bottom-width: 3px; }
         .answer-btn.correct { background-color: var(--green-correct); color: white; border-color: #388e3c; animation: pulse 0.5s; }
         .answer-btn.wrong { background-color: var(--red-wrong); color: white; border-color: #c62828; }
         .next-btn { margin-top: 15px; background-color: var(--orange-next); color: white; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: 800; border-radius: 30px; cursor: pointer; visibility: hidden; border-bottom: 4px solid #f57c00; }
         
+        /* --- STYLE UNTUK ESAI & SUSUN HURUF --- */
+        .esai-wrapper textarea { width: 100%; padding: 15px; font-family: 'Baloo 2', sans-serif; font-size: 1.2rem; border-radius: 10px; border: 3px solid #ccc; box-sizing: border-box; min-height: 120px; }
+        .susun-huruf-wrapper { margin-top: 15px; }
+        .answer-slots-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; min-height: 60px; padding: 5px; }
+        .answer-slot { width: 50px; height: 60px; background-color: #e0e0e0; border-bottom: 5px solid #bdbdbd; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: 800; }
+        .letter-choices-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .letter-choice-btn { width: 55px; height: 55px; font-size: 1.8rem; background-color: #81d4fa; border: none; border-bottom: 5px solid #29b6f6; border-radius: 15px; font-family: 'Baloo 2', sans-serif; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .susun-huruf-actions { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
+        .btn-action-word { background-color: #ffb74d; color: white; padding: 10px 25px; font-size: 1rem; border-radius: 20px; }
+        .btn-check-word { background-color: #66bb6a; }
+        /* --- AKHIR STYLE --- */
+
         .feedback-box { min-height: 40px; font-size: 1.6rem; font-weight: 700; margin-top: 15px; }
         .feedback-explanation { font-size: 1rem; font-weight: 400; color: #5f5c3a; margin-top: 10px; background-color: var(--yellow-explanation); padding: 12px; border-radius: 8px; border-left: 5px solid #fbc02d; text-align: left; }
         
@@ -91,20 +92,12 @@
         
         async function getUserData(userId) {
             if (!userId) return { nama: 'Komunitas' };
-            if (userCache[userId]) {
-                return userCache[userId];
-            }
+            if (userCache[userId]) return userCache[userId];
             try {
                 const userRef = doc(db, "users", userId);
                 const userSnap = await getDoc(userRef);
-                if (userSnap.exists()) {
-                    const userData = userSnap.data();
-                    userCache[userId] = userData;
-                    return userData;
-                } else {
-                    userCache[userId] = { nama: 'Pengguna Anonim' }; 
-                    return userCache[userId];
-                }
+                userCache[userId] = userSnap.exists() ? userSnap.data() : { nama: 'Pengguna Anonim' };
+                return userCache[userId];
             } catch (error) {
                 console.error("Error fetching user data:", error);
                 return { nama: 'Komunitas' };
@@ -137,6 +130,7 @@
                     questionData.options = data.pilihanJawaban;
                     questionData.explanations = data.penjelasanPilihan || [];
                 }
+                // FIX: Reading 'pilihanHuruf' field for susun_huruf questions
                 if (type === 'susun_huruf') {
                     questionData.letterPool = data.pilihanHuruf || data.jawabanBenar;
                 }
@@ -149,7 +143,6 @@
             quizContainer.innerHTML = `
                 <a href="index.html" class="btn-quit-quiz">&times;</a>
                 <div id="creator-info" class="creator-info"></div>
-                
                 <div>
                     <p>Pertanyaan <span id="question-number"></span> dari <span id="total-questions"></span> | Skor: <span id="score">0</span></p>
                 </div>
@@ -190,8 +183,6 @@
 
             try {
                 allQuestions = await fetchQuestions(q);
-                
-                // --- KODE SOAL DUMMY SUDAH DIHAPUS DARI SINI ---
 
                 if (allQuestions.length === 0) {
                     quizContainer.innerHTML = '<h2>Oops! Tidak ada pertanyaan untuk kategori ini.</h2><a href="index.html">Kembali</a>';
@@ -208,9 +199,7 @@
         function loadQuestion() {
             const questionData = allQuestions[currentQuestionIndex];
             
-            const creatorInfo = document.getElementById('creator-info');
-            creatorInfo.textContent = `Dibuat oleh: ${questionData.creatorName || 'Komunitas'}`;
-            
+            document.getElementById('creator-info').textContent = `Dibuat oleh: ${questionData.creatorName || 'Komunitas'}`;
             document.getElementById('question-number').textContent = currentQuestionIndex + 1;
             document.getElementById('total-questions').textContent = allQuestions.length;
             document.getElementById('score').textContent = score;
@@ -228,8 +217,13 @@
                 mediaContainer.innerHTML += `<audio controls src="${getGoogleDriveDirectLink(questionData.audioUrl)}"></audio>`;
             }
 
+            // FIX: Added logic to call rendering functions for 'esai' and 'susun_huruf'
             if (questionData.type === 'pilihan_ganda') {
                 renderPilihanGandaUI(questionData);
+            } else if (questionData.type === 'susun_huruf') {
+                renderSusunHurufUI(questionData);
+            } else if (questionData.type === 'esai') {
+                renderEsaiUI(questionData);
             }
         }
 
@@ -245,9 +239,109 @@
             });
         }
         
+        // --- START: NEW RENDERING AND CHECKING FUNCTIONS ---
+        function renderSusunHurufUI(question) {
+            const answerOptions = document.getElementById('answer-options');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'susun-huruf-wrapper';
+            
+            const slotsContainer = document.createElement('div');
+            slotsContainer.className = 'answer-slots-container';
+            for (let i = 0; i < question.answer.length; i++) {
+                slotsContainer.innerHTML += `<div class="answer-slot"></div>`;
+            }
+
+            const choicesContainer = document.createElement('div');
+            choicesContainer.className = 'letter-choices-container';
+            const letterChoices = shuffle((question.letterPool || question.answer).split(''));
+
+            letterChoices.forEach((letter, index) => {
+                const btn = document.createElement('button');
+                btn.id = `choice-btn-${index}`;
+                btn.textContent = letter;
+                btn.className = 'letter-choice-btn';
+                btn.onclick = () => {
+                    const emptySlot = slotsContainer.querySelector('.answer-slot:not(.filled)');
+                    if (emptySlot) {
+                        emptySlot.textContent = letter;
+                        emptySlot.classList.add('filled');
+                        emptySlot.dataset.sourceBtnId = btn.id;
+                        btn.style.visibility = 'hidden';
+                    }
+                };
+                choicesContainer.appendChild(btn);
+            });
+
+            const actions = document.createElement('div');
+            actions.className = 'susun-huruf-actions';
+            
+            const backspaceBtn = document.createElement('button');
+            backspaceBtn.textContent = 'Hapus';
+            backspaceBtn.className = 'btn-action-word';
+            backspaceBtn.onclick = () => {
+                const filledSlots = slotsContainer.querySelectorAll('.answer-slot.filled');
+                if (filledSlots.length > 0) {
+                    const lastFilledSlot = filledSlots[filledSlots.length - 1];
+                    const sourceBtnId = lastFilledSlot.dataset.sourceBtnId;
+                    if (sourceBtnId) document.getElementById(sourceBtnId).style.visibility = 'visible';
+                    lastFilledSlot.textContent = '';
+                    lastFilledSlot.classList.remove('filled');
+                }
+            };
+
+            const checkBtn = document.createElement('button');
+            checkBtn.textContent = 'Periksa';
+            checkBtn.className = 'btn-action-word btn-check-word';
+            checkBtn.onclick = () => checkWordAnswer(question.answer);
+            
+            actions.append(backspaceBtn, checkBtn);
+            wrapper.append(slotsContainer, choicesContainer, actions);
+            answerOptions.appendChild(wrapper);
+        }
+
+        function renderEsaiUI(question) {
+            const answerOptions = document.getElementById('answer-options');
+            answerOptions.innerHTML = `
+                <div class="esai-wrapper">
+                    <textarea id="esai-answer" placeholder="Ketik jawabanmu di sini..."></textarea>
+                    <button id="check-esai-btn" class="btn-action-word btn-check-word" style="margin-top: 10px;">Periksa Jawaban</button>
+                </div>
+            `;
+            document.getElementById('check-esai-btn').onclick = () => checkEsaiAnswer(question.answer);
+        }
+
+        function checkWordAnswer(correctAnswer) {
+            const slots = document.querySelectorAll('.answer-slots-container .answer-slot');
+            const userAnswer = Array.from(slots).map(slot => slot.textContent).join('');
+            
+            if (userAnswer.toUpperCase() === correctAnswer.toUpperCase()) {
+                slots.forEach(slot => { slot.style.backgroundColor = 'var(--green-correct)'; slot.style.color = 'white'; });
+                correctSound.play().catch(e => console.warn(e.message));
+                showFeedback(true, "Jawaban Benar!");
+            } else {
+                slots.forEach(slot => { slot.style.backgroundColor = 'var(--red-wrong)'; slot.style.color = 'white'; });
+                wrongSound.play().catch(e => console.warn(e.message));
+                showFeedback(false, `Salah! Jawaban: ${correctAnswer}`);
+            }
+             document.querySelectorAll('.letter-choice-btn, .btn-action-word').forEach(btn => btn.disabled = true);
+        }
+        
+        function checkEsaiAnswer(correctAnswer) {
+            const userAnswer = document.getElementById('esai-answer').value;
+            // Simple check: if user's answer includes the keyword. Case-insensitive.
+            if (userAnswer.toLowerCase().includes(correctAnswer.toLowerCase())) {
+                 correctSound.play().catch(e => console.warn(e.message));
+                 showFeedback(true, "Jawabanmu Tepat!");
+            } else {
+                 wrongSound.play().catch(e => console.warn(e.message));
+                 showFeedback(false, `Kurang Tepat. Jawaban yang diharapkan: ${correctAnswer}`);
+            }
+             document.getElementById('check-esai-btn').disabled = true;
+        }
+        // --- END: NEW FUNCTIONS ---
+
         function checkMultipleChoiceAnswer(button, selectedAnswer, correctAnswer, originalOptions, explanations) {
             document.querySelectorAll('.answer-btn').forEach(btn => btn.disabled = true);
-
             if (selectedAnswer === correctAnswer) {
                 button.classList.add('correct');
                 correctSound.play().catch(e => console.warn("Audio 'correct' gagal diputar:", e.message));
@@ -255,11 +349,9 @@
             } else {
                 button.classList.add('wrong');
                 wrongSound.play().catch(e => console.warn("Audio 'wrong' gagal diputar:", e.message));
-                
                 document.querySelectorAll('.answer-btn').forEach(btn => {
                     if (btn.textContent === correctAnswer) btn.classList.add('correct');
                 });
-                
                 const wrongIndex = originalOptions.indexOf(selectedAnswer);
                 const explanation = (explanations && explanations[wrongIndex]) ? explanations[wrongIndex] : '';
                 const feedbackMessage = `Salah! Jawaban yang benar adalah "${correctAnswer}"`;
@@ -275,7 +367,6 @@
             const feedbackBox = document.getElementById('feedback-box');
             feedbackBox.innerHTML = `<span>${message}</span>`;
             feedbackBox.style.color = isCorrect ? 'var(--green-correct)' : 'var(--red-wrong)';
-            
             if (explanation) {
                 const explanationEl = document.createElement('div');
                 explanationEl.className = 'feedback-explanation';
@@ -296,7 +387,7 @@
             } else if (percentage >= 70) {
                 result = { emoji: '🤩', message: 'WAH KAMU HEBAT', sound: resultSounds.hebat };
             } else if (percentage >= 50) {
-                result = { emoji: '👍', message: 'WAH KAMU KEREN!', sound: resultSounds.keren };
+                result = { emoji: '🥰', message: 'WAH KAMU KEREN!', sound: resultSounds.keren };
             } else {
                 result = { emoji: '🤔', message: 'BELAJAR LAGI YA!', sound: resultSounds.belajar };
             }
@@ -319,7 +410,6 @@
             
             document.body.appendChild(toastContainer);
             toastContainer.style.display = 'flex';
-
             if (result.sound) {
                 const resultSoundPlayer = new Audio(result.sound);
                 resultSoundPlayer.play().catch(e => console.warn("Audio hasil kuis gagal diputar:", e.message));
