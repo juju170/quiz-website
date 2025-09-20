@@ -71,7 +71,9 @@
         let currentQuestionIndex = 0;
         let score = 0;
         
-        // --- FUNGSI BARU UNTUK KONVERSI LINK GOOGLE DRIVE ---
+        // Fungsi ini tidak perlu diubah.
+        // Fungsi ini sudah cukup pintar untuk hanya mengubah link Google Drive
+        // dan membiarkan link lain (seperti dari GitHub) apa adanya.
         function getGoogleDriveDirectLink(url) {
             if (!url || !url.includes('drive.google.com')) return url;
             const fileId = url.match(/d\/(.+?)\//);
@@ -92,7 +94,6 @@
                     type: type,
                     question: data.teksPertanyaan,
                     answer: data.jawabanBenar,
-                    // --- AMBIL DATA MEDIA ---
                     imageUrl: data.urlGambar || null,
                     audioUrl: data.urlSuara || null,
                 };
@@ -115,7 +116,6 @@
                     <p>Skor: <span id="score">0</span></p>
                 </div>
                 <div class="question-box">
-                    <!-- --- CONTAINER UNTUK MEDIA --- -->
                     <div id="media-container"></div>
                     <h2 id="question-text" class="question-text"></h2>
                 </div>
@@ -156,6 +156,25 @@
                     quizContainer.innerHTML = '<h2>Oops! Tidak ada pertanyaan untuk kategori ini.</h2><a href="index.html">Kembali</a>';
                     return;
                 }
+                
+                // --- PERTANYAAN DUMMY DITAMBAHKAN DI SINI ---
+                // Ini adalah contoh soal yang mengambil audio dari GitHub.
+                // Ganti URL di bawah dengan link 'raw' dari file MP3 di repositori Anda.
+                const dummyQuestion = {
+                    type: 'pilihan_ganda',
+                    question: 'Dengarkan suara ini. Suara hewan apakah ini? (Soal dari GitHub)',
+                    
+                    // GANTI URL DI BAWAH INI
+                    // Format: https://raw.githubusercontent.com/NAMA_PENGGUNA/NAMA_REPOSITORI/main/folder/nama_file.mp3
+                    audioUrl: 'https://raw.githubusercontent.com/username/repo-name/main/audios/sample.mp3', 
+                    
+                    options: ['Anjing', 'Kucing', 'Sapi', 'Ayam'],
+                    answer: 'Kucing',
+                    id: 'dummy-github-question'
+                };
+                allQuestions.unshift(dummyQuestion); // Menambahkan soal dummy ke paling depan
+                // --- AKHIR DARI PERTANYAAN DUMMY ---
+                
                 allQuestions = shuffle(allQuestions);
                 loadQuestion();
             } catch(error) {
@@ -174,9 +193,8 @@
             document.getElementById('feedback-box').innerHTML = '';
             document.getElementById('next-btn').style.visibility = 'hidden';
 
-            // --- AWAL LOGIKA TAMPILAN MEDIA ---
             const mediaContainer = document.getElementById('media-container');
-            mediaContainer.innerHTML = ''; // Kosongkan dulu
+            mediaContainer.innerHTML = ''; 
 
             if (questionData.imageUrl) {
                 const img = document.createElement('img');
@@ -189,13 +207,12 @@
                 const audio = document.createElement('audio');
                 audio.controls = true;
                 const source = document.createElement('source');
+                // getGoogleDriveDirectLink akan secara otomatis melewatkan URL GitHub tanpa mengubahnya
                 source.src = getGoogleDriveDirectLink(questionData.audioUrl);
                 source.type = "audio/mpeg";
                 audio.appendChild(source);
                 mediaContainer.appendChild(audio);
             }
-            // --- AKHIR LOGIKA TAMPILAN MEDIA ---
-
 
             if (questionData.type === 'pilihan_ganda') {
                 renderPilihanGandaUI(questionData);
@@ -367,6 +384,8 @@
         }
         
         function shuffle(array) {
+            // Kita pastikan soal dummy tidak ikut diacak posisinya jika kita ingin selalu di depan
+            // Namun untuk sekarang, biarkan ikut teracak agar lebih natural
             let currentIndex = array.length, randomIndex;
             while (currentIndex > 0) {
                 randomIndex = Math.floor(Math.random() * currentIndex);
