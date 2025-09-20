@@ -288,9 +288,7 @@
                 result = { emoji: '🤩', message: 'WAH KAMU HEBAT', sound: resultSounds.hebat };
             } else if (percentage > 50) {
                 result = { emoji: '🥰', message: 'WAH KAMU KEREN!', sound: resultSounds.keren };
-            } else if (percentage > 10) {
-                result = { emoji: '☺️', message: 'JANGAN PATAH SEMANGAT!', sound: null };
-            } else {
+            } else (percentage > 10) {
                 result = { emoji: '🤔', message: 'BELAJAR LAGI YA!', sound: resultSounds.belajar };
             }
 
