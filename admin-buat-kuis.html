@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin: Buat Soal Tantangan - Komunitas Ceria 2SD</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Baloo 2', sans-serif; margin: 0; background-color: #f4f6f8; color: #333; padding-bottom: 100px; }
+        .container { max-width: 800px; margin: 30px auto; padding: 20px; }
+        .page-header { text-align: center; margin-bottom: 30px; }
+        .page-header h1 { font-size: 2.5rem; margin: 0; color: #4a5568; }
+        .form-section { background-color: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2 { margin-top: 0; border-bottom: 3px solid #e2e8f0; padding-bottom: 10px; color: #2d3748; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 700; }
+        .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #cbd5e0; box-sizing: border-box; font-family: 'Baloo 2', sans-serif; font-size: 1rem; }
+        .btn-submit { width: 100%; padding: 15px; border: none; background-color: #03a9f4; color: white; font-size: 1.2rem; font-weight: 800; border-radius: 10px; cursor: pointer; border-bottom: 4px solid #0288d1; margin-top: 20px; }
+        .message { text-align: center; padding: 12px; border-radius: 8px; font-weight: 700; margin-top: 20px; display: none; }
+        .message.success { background-color: #c6f6d5; color: #2f855a; }
+        .message.error { background-color: #fed7d7; color: #c53030; }
+        .tombol-beranda { position: fixed; bottom: 20px; right: 20px; background-color: #FFC107; color: #333; padding: 12px 20px; border-radius: 50px; display: flex; align-items: center; gap: 8px; font-size: 1.1rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); transition: transform 0.2s ease, box-shadow 0.2s ease; z-index: 1000; }
+        .tombol-beranda:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); }
+        .sub-group { border-left: 4px solid #03a9f4; padding-left: 15px; margin-top: 10px; }
+        .dynamic-list .list-item { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+        .dynamic-list .list-item input { flex-grow: 1; }
+        .btn-add, .btn-remove { padding: 5px 10px; font-size: 0.9rem; border-radius: 5px; border: none; color: white; cursor: pointer; }
+        .btn-add { background-color: #4caf50; }
+        .btn-remove { background-color: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="page-header">
+            <h1>Buat Soal Tantangan Baru 📝</h1>
+        </header>
+
+        <section class="form-section">
+            <form id="question-form">
+                <!-- Bagian Umum -->
+                <div class="input-group">
+                    <label for="kategori">Kategori Soal</label>
+                    <input type="text" id="kategori" placeholder="Contoh: matematika, ipa, bahasa indonesia" required>
+                </div>
+                <div class="input-group">
+                    <label for="question-type">Pilih Tipe Soal</label>
+                    <select id="question-type" required>
+                        <option value="">-- Pilih Tipe --</option>
+                        <option value="pilihan-ganda">Pilihan Ganda (2 Opsi)</option>
+                        <option value="benar-salah">Benar atau Salah</option>
+                        <option value="esai">Esai Singkat</option>
+                        <option value="susun-huruf">Susun Huruf</option>
+                        <option value="susun-kata">Susun Kata</option>
+                        <option value="pencocokkan">Pencocokkan</option>
+                    </select>
+                </div>
+
+                <!-- Container untuk Form Dinamis -->
+                <div id="dynamic-form-container"></div>
+                
+                <button type="submit" class="btn-submit">Simpan Soal</button>
+                <div id="message-box" class="message"></div>
+            </form>
+        </section>
+    </div>
+    <a href="index.html" class="tombol-beranda" title="Kembali ke Beranda"><span>🏠</span><span>Beranda</span></a>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+        authDomain: "forumwidara.firebaseapp.com",
+        projectId: "forumwidara",
+        storageBucket: "forumwidara.firebasestorage.app",
+        messagingSenderId: "216895655168",
+        appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const questionTypeSelect = document.getElementById('question-type');
+    const dynamicFormContainer = document.getElementById('dynamic-form-container');
+    const mainForm = document.getElementById('question-form');
+    const messageBox = document.getElementById('message-box');
+
+    questionTypeSelect.addEventListener('change', (e) => {
+        renderForm(e.target.value);
+    });
+
+    function renderForm(type) {
+        let html = `
+            <div class="input-group">
+                <label for="pertanyaan">Teks Pertanyaan</label>
+                <textarea id="pertanyaan" rows="3" required></textarea>
+            </div>
+        `;
+
+        switch (type) {
+            case 'pilihan-ganda':
+                html += `
+                    <div class="input-group">
+                        <label>Opsi Jawaban</label>
+                        <div class="sub-group">
+                            <input type="text" id="optionA" placeholder="Teks Jawaban A" required>
+                            <input type="text" id="optionB" placeholder="Teks Jawaban B" style="margin-top:10px;" required>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Jawaban yang Benar</label>
+                        <select id="jawabanBenar-pg" required><option value="A">A</option><option value="B">B</option></select>
+                    </div>
+                    <div class="input-group">
+                        <label for="penjelasanSalah">Penjelasan Jika Jawaban Salah</label>
+                        <textarea id="penjelasanSalah" rows="2" placeholder="Contoh: Jawaban yang benar adalah A karena..."></textarea>
+                    </div>
+                `;
+                break;
+            case 'benar-salah':
+                 html += `
+                    <div class="input-group">
+                        <label>Jawaban yang Benar</label>
+                        <select id="jawabanBenar-bs" required><option value="true">Benar</option><option value="false">Salah</option></select>
+                    </div>
+                     <div class="input-group">
+                        <label for="penjelasanSalah">Penjelasan Jika Jawaban Salah</label>
+                        <textarea id="penjelasanSalah" rows="2" placeholder="Contoh: Jawaban yang benar adalah 'Benar' karena..."></textarea>
+                    </div>
+                `;
+                break;
+            case 'esai':
+                html += `
+                    <div class="input-group">
+                        <label for="jawabanBenar-esai">Kata Kunci Jawaban (opsional)</label>
+                        <input type="text" id="jawabanBenar-esai" placeholder="Pisahkan dengan koma, contoh: presiden, pertama">
+                    </div>
+                `;
+                break;
+            case 'susun-huruf':
+                html += `
+                    <div class="input-group">
+                        <label for="jawabanBenar-sh">Jawaban Benar (Kata)</label>
+                        <input type="text" id="jawabanBenar-sh" placeholder="Contoh: INDONESIA" required>
+                    </div>
+                `;
+                break;
+            case 'susun-kata':
+                 html += `
+                    <div class="input-group">
+                        <label for="kataAcak">Kata yang Diacak</label>
+                        <input type="text" id="kataAcak" placeholder="Tulis kata dipisah spasi, contoh: adalah ibukota Jakarta Indonesia" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Alternatif Jawaban Benar</label>
+                        <div id="correct-answers-list" class="dynamic-list">
+                            <div class="list-item">
+                                <input type="text" class="correct-answer" placeholder="Contoh: Jakarta adalah ibukota Indonesia" required>
+                                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">X</button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-add" id="add-answer-btn" style="margin-top:10px;">+ Tambah Jawaban</button>
+                    </div>
+                `;
+                break;
+            case 'pencocokkan':
+                html += `
+                     <div class="input-group">
+                        <label>Pasangan Jawaban</label>
+                        <div id="matching-pairs-list" class="dynamic-list">
+                            <div class="list-item">
+                                <input type="text" class="match-a" placeholder="Kolom A" required>
+                                <span>=</span>
+                                <input type="text" class="match-b" placeholder="Kolom B" required>
+                                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">X</button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-add" id="add-pair-btn" style="margin-top:10px;">+ Tambah Pasangan</button>
+                    </div>
+                `;
+                break;
+        }
+        dynamicFormContainer.innerHTML = html;
+        attachDynamicListeners(type);
+    }
+    
+    function attachDynamicListeners(type) {
+        if (type === 'susun-kata') {
+            document.getElementById('add-answer-btn').addEventListener('click', () => {
+                const list = document.getElementById('correct-answers-list');
+                const newItem = document.createElement('div');
+                newItem.className = 'list-item';
+                newItem.innerHTML = `
+                    <input type="text" class="correct-answer" placeholder="Jawaban benar lainnya" required>
+                    <button type="button" class="btn-remove" onclick="this.parentElement.remove()">X</button>
+                `;
+                list.appendChild(newItem);
+            });
+        }
+        if (type === 'pencocokkan') {
+            document.getElementById('add-pair-btn').addEventListener('click', () => {
+                const list = document.getElementById('matching-pairs-list');
+                const newItem = document.createElement('div');
+                newItem.className = 'list-item';
+                newItem.innerHTML = `
+                    <input type="text" class="match-a" placeholder="Kolom A" required>
+                    <span>=</span>
+                    <input type="text" class="match-b" placeholder="Kolom B" required>
+                    <button type="button" class="btn-remove" onclick="this.parentElement.remove()">X</button>
+                `;
+                list.appendChild(newItem);
+            });
+        }
+    }
+
+    mainForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const kategori = document.getElementById('kategori').value.toLowerCase();
+        const tipeSoal = questionTypeSelect.value;
+        const pertanyaan = document.getElementById('pertanyaan').value;
+        
+        if (!kategori || !tipeSoal || !pertanyaan) {
+            showMessage('error', 'Kategori, Tipe Soal, dan Pertanyaan harus diisi.');
+            return;
+        }
+
+        let soalData = { kategori, tipeSoal, pertanyaan };
+        
+        try {
+            switch(tipeSoal) {
+                case 'pilihan-ganda':
+                    soalData.pilihan = [document.getElementById('optionA').value, document.getElementById('optionB').value];
+                    const selectedAnswer = document.getElementById('jawabanBenar-pg').value;
+                    soalData.jawabanBenar = selectedAnswer === 'A' ? soalData.pilihan[0] : soalData.pilihan[1];
+                    soalData.penjelasanSalah = document.getElementById('penjelasanSalah').value;
+                    break;
+                case 'benar-salah':
+                    soalData.jawabanBenar = document.getElementById('jawabanBenar-bs').value === 'true';
+                    soalData.penjelasanSalah = document.getElementById('penjelasanSalah').value;
+                    break;
+                case 'esai':
+                    const keywords = document.getElementById('jawabanBenar-esai').value.split(',').map(k => k.trim()).filter(k => k);
+                    soalData.kataKunciJawaban = keywords;
+                    break;
+                case 'susun-huruf':
+                    soalData.jawabanBenar = document.getElementById('jawabanBenar-sh').value.toUpperCase();
+                    break;
+                case 'susun-kata':
+                    soalData.kataAcak = document.getElementById('kataAcak').value.split(' ').map(k => k.trim()).filter(k => k);
+                    soalData.jawabanBenar = Array.from(document.querySelectorAll('.correct-answer')).map(input => input.value);
+                    if(soalData.jawabanBenar.length === 0 || soalData.jawabanBenar[0] === '') throw new Error("Harus ada minimal satu jawaban benar.");
+                    break;
+                case 'pencocokkan':
+                    soalData.kolomA = Array.from(document.querySelectorAll('.match-a')).map(input => input.value);
+                    soalData.kolomB = Array.from(document.querySelectorAll('.match-b')).map(input => input.value);
+                    if(soalData.kolomA.length === 0 || soalData.kolomA[0] === '') throw new Error("Harus ada minimal satu pasangan.");
+                    break;
+            }
+
+            await addDoc(collection(db, "soalTantangan"), soalData);
+            showMessage('success', 'Soal baru berhasil disimpan!');
+            mainForm.reset();
+            dynamicFormContainer.innerHTML = '';
+        } catch (error) {
+            console.error("Gagal menyimpan soal:", error);
+            showMessage('error', `Gagal menyimpan soal: ${error.message}`);
+        }
+    });
+
+    function showMessage(type, text) {
+        messageBox.className = `message ${type}`;
+        messageBox.textContent = text;
+        messageBox.style.display = 'block';
+        setTimeout(() => { messageBox.style.display = 'none'; }, 4000);
+    }
+</script>
+</body>
+</html>
+
