@@ -8,26 +8,29 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --blue-light: #e3f2fd; --blue-main: #0288d1; --green-correct: #4caf50; --red-wrong: #f44336; --orange-next: #ff9800; --yellow-explanation: #fff9c4; }
+        :root { --blue-light: #e3f2fd; --blue-main: #0288d1; --green-correct: #4caf50; --red-wrong: #f44336; --orange-next: #ff9800; }
         body { font-family: 'Baloo 2', sans-serif; margin: 0; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; box-sizing: border-box; }
         .quiz-container { position: relative; background-color: white; padding: 45px 30px 30px 30px; border-radius: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); width: 100%; max-width: 600px; text-align: center; }
-        .btn-quit-quiz { position: absolute; top: 15px; right: 15px; background-color: #f1f1f1; color: #888; border: 2px solid #ddd; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 1.2rem; font-weight: 700; transition: all 0.2s ease; z-index: 10; }
-        .btn-quit-quiz:hover { transform: scale(1.1) rotate(90deg); }
-        .question-box { background-color: var(--blue-light); padding: 20px; border-radius: 15px; margin-bottom: 25px; min-height: 80px; display: flex; flex-direction: column; justify-content: center; align-items: center; border-left: 8px solid var(--blue-main); }
+        .btn-quit-quiz { position: absolute; top: 15px; right: 15px; background-color: #f1f1f1; color: #888; border: 2px solid #ddd; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 1.2rem; font-weight: 700; z-index: 10; }
+        .question-box { background-color: var(--blue-light); padding: 20px; border-radius: 15px; margin-bottom: 25px; border-left: 8px solid var(--blue-main); }
         .question-text { font-size: 1.8rem; font-weight: 800; color: var(--blue-main); margin: 0; }
+        #answer-container { min-height: 150px; display: flex; flex-direction: column; justify-content: center; }
         .answer-options { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        .answer-btn { border: none; padding: 15px; border-radius: 15px; font-family: 'Baloo 2', sans-serif; font-weight: 700; cursor: pointer; font-size: 1.5rem; border-bottom: 6px solid; transition: transform 0.1s ease; }
-        .answer-btn:active { transform: translateY(3px); border-bottom-width: 3px; }
-        .answer-btn.correct { background-color: var(--green-correct); color: white; border-color: #388e3c; animation: pulse 0.5s; }
+        .answer-btn { border: none; padding: 15px; border-radius: 15px; font-family: 'Baloo 2', sans-serif; font-weight: 700; cursor: pointer; font-size: 1.5rem; border-bottom: 6px solid; }
+        .answer-btn.correct { background-color: var(--green-correct); color: white; border-color: #388e3c; }
         .answer-btn.wrong { background-color: var(--red-wrong); color: white; border-color: #c62828; }
+        .esai-wrapper textarea { width: 100%; padding: 15px; font-size: 1.2rem; border-radius: 10px; border: 3px solid #ccc; box-sizing: border-box; min-height: 120px; }
+        .susun-huruf-wrapper { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .answer-slots { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+        .answer-slot { width: 50px; height: 60px; background-color: #e0e0e0; border-bottom: 5px solid #bdbdbd; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: 800; }
+        .letter-choices { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+        .letter-choice { width: 55px; height: 55px; font-size: 1.8rem; background-color: #81d4fa; border: none; border-bottom: 5px solid #29b6f6; border-radius: 15px; cursor: pointer; }
+        .btn-check-answer { background-color: var(--green-correct); color: white; border: none; padding: 12px 30px; font-size: 1.1rem; border-radius: 25px; cursor: pointer; border-bottom: 4px solid #388e3c; margin-top: 15px; }
         .next-btn { margin-top: 25px; background-color: var(--orange-next); color: white; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: 800; border-radius: 30px; cursor: pointer; visibility: hidden; border-bottom: 4px solid #f57c00; }
-        #toast-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
-        .toast-message { background: white; padding: 30px 40px; border-radius: 25px; text-align: center; box-shadow: 0 10px 50px rgba(0,0,0,0.2); animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-origin: center; width: 90%; max-width: 500px; }
-        .toast-emoji { font-size: 5rem; animation: popIn 0.6s 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+        #toast-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .toast-message { background: white; padding: 30px 40px; border-radius: 25px; text-align: center; width: 90%; max-width: 500px; }
+        .toast-emoji { font-size: 5rem; }
         .toast-message .btn { padding: 12px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 1.1rem; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
-        @keyframes scaleIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @keyframes popIn { 0% { transform: scale(0); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
@@ -36,12 +39,10 @@
     </div>
 
 <script type="module">
-    // --- IMPORTS ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, collection, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // --- KONFIGURASI FIREBASE ---
     const firebaseConfig = {
         apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
         authDomain: "forumwidara.firebaseapp.com",
@@ -54,21 +55,17 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // --- VARIABEL GLOBAL ---
     const quizContainer = document.getElementById('quiz-container');
     let allQuestions = [];
     let currentQuestionIndex = 0;
     let score = 0;
-    let currentUser = null;
-    
-    // --- FUNGSI UTAMA ---
+
     onAuthStateChanged(auth, (user) => {
-        if (user) {
-            currentUser = user;
-            startQuiz();
-        } else {
+        if (!user) {
             alert("Kamu harus login untuk bermain kuis!");
             window.location.href = 'index.html';
+        } else {
+            startQuiz();
         }
     });
     
@@ -76,21 +73,17 @@
         loadQuizUI();
         const params = new URLSearchParams(window.location.search);
         const category = params.get('kategori');
-        
         if (!category) {
-            quizContainer.innerHTML = '<h2>Kategori tidak ditemukan.</h2><a href="index.html" class="btn">Kembali</a>';
+            quizContainer.innerHTML = '<h2>Kategori tidak ditemukan.</h2><a href="index.html">Kembali</a>';
             return;
         }
 
-        const pertanyaanRef = collection(db, "pertanyaan");
-        const q = query(pertanyaanRef, where("kategori", "==", category), limit(10));
-
+        const q = query(collection(db, "pertanyaan"), where("kategori", "==", category), limit(10));
         try {
             const querySnapshot = await getDocs(q);
             allQuestions = querySnapshot.docs.map(doc => doc.data());
-
             if (allQuestions.length === 0) {
-                quizContainer.innerHTML = `<h2>Oops! Belum ada pertanyaan untuk kategori "${category}".</h2><a href="index.html" class="btn">Kembali</a>`;
+                quizContainer.innerHTML = `<h2>Oops! Belum ada pertanyaan untuk kategori ini.</h2><a href="index.html">Kembali</a>`;
                 return;
             }
             allQuestions = shuffle(allQuestions);
@@ -112,100 +105,154 @@
     function loadQuizUI() {
         quizContainer.innerHTML = `
             <a href="index.html" class="btn-quit-quiz" title="Keluar">×</a>
-            <div class="question-box">
-                <h2 id="question-text" class="question-text"></h2>
-            </div>
-            <div id="answer-options" class="answer-options"></div>
+            <div class="question-box"><h2 id="question-text" class="question-text"></h2></div>
+            <div id="answer-container"></div>
             <button id="next-btn" class="next-btn">Lanjut ❯</button>
         `;
         document.getElementById('next-btn').addEventListener('click', () => {
             currentQuestionIndex++;
-            if (currentQuestionIndex < allQuestions.length) {
-                loadQuestion();
-            } else {
-                showResults();
-            }
+            (currentQuestionIndex < allQuestions.length) ? loadQuestion() : showResults();
         });
     }
 
     function loadQuestion() {
-        const question = allQuestions[currentQuestionIndex];
-        // Menggunakan "teksPertanyaan" sesuai dari buat-kuis.html
-        document.getElementById('question-text').textContent = question.teksPertanyaan;
         document.getElementById('next-btn').style.visibility = 'hidden';
-        
-        const answerOptionsContainer = document.getElementById('answer-options');
-        answerOptionsContainer.innerHTML = '';
+        const question = allQuestions[currentQuestionIndex];
+        document.getElementById('question-text').textContent = question.teksPertanyaan;
 
-        // Menggunakan "tipeSoal" dan "pilihan_ganda" sesuai dari buat-kuis.html
-        if (question.tipeSoal === 'pilihan_ganda') {
-            // Menggunakan "pilihanJawaban" sesuai dari buat-kuis.html
-            const options = shuffle([...question.pilihanJawaban]);
-            options.forEach(option => {
-                const button = document.createElement('button');
-                button.className = 'answer-btn';
-                button.textContent = option;
-                button.style.backgroundColor = '#4fc3f7';
-                button.style.borderColor = '#039be5';
-                button.onclick = () => checkAnswer(button, option, question.jawabanBenar);
-                answerOptionsContainer.appendChild(button);
-            });
-        } else {
-            answerOptionsContainer.innerHTML = `<p>Tipe soal "${question.tipeSoal}" belum didukung untuk dimainkan.</p>`;
-            document.getElementById('next-btn').style.visibility = 'visible';
+        const answerContainer = document.getElementById('answer-container');
+        answerContainer.innerHTML = '';
+
+        switch (question.tipeSoal) {
+            case 'pilihan_ganda':
+                renderPilihanGanda(question, answerContainer);
+                break;
+            case 'esai':
+                renderEsai(question, answerContainer);
+                break;
+            case 'susun_huruf':
+                renderSusunHuruf(question, answerContainer);
+                break;
+            default:
+                answerContainer.innerHTML = `<p>Tipe soal tidak didukung.</p>`;
+                document.getElementById('next-btn').style.visibility = 'visible';
         }
     }
 
-    function checkAnswer(button, selectedAnswer, correctAnswer) {
-        document.querySelectorAll('.answer-btn').forEach(btn => {
-            btn.disabled = true;
-            if (btn.textContent === correctAnswer) {
-                btn.classList.add('correct');
-            }
+    function renderPilihanGanda(question, container) {
+        const answerOptions = document.createElement('div');
+        answerOptions.className = 'answer-options';
+        const options = shuffle([...question.pilihanJawaban]);
+        options.forEach(option => {
+            const button = document.createElement('button');
+            button.className = 'answer-btn';
+            button.textContent = option;
+            button.style.backgroundColor = '#4fc3f7';
+            button.style.borderColor = '#039be5';
+            button.onclick = () => checkAnswer(option === question.jawabanBenar, answerOptions.querySelectorAll('button'), button, question.jawabanBenar);
+            answerOptions.appendChild(button);
+        });
+        container.appendChild(answerOptions);
+    }
+
+    function renderEsai(question, container) {
+        container.innerHTML = `
+            <div class="esai-wrapper">
+                <textarea id="esai-answer" placeholder="Ketik jawabanmu di sini..."></textarea>
+                <button id="check-esai-btn" class="btn-check-answer">Periksa Jawaban</button>
+            </div>
+        `;
+        document.getElementById('check-esai-btn').onclick = () => {
+            const userAnswer = document.getElementById('esai-answer').value;
+            const isCorrect = userAnswer.toLowerCase().includes(question.jawabanBenar.toLowerCase());
+            checkAnswer(isCorrect, [document.getElementById('check-esai-btn')]);
+        };
+    }
+
+    function renderSusunHuruf(question, container) {
+        let currentAnswer = [];
+        const wrapper = document.createElement('div');
+        wrapper.className = 'susun-huruf-wrapper';
+        
+        const answerSlots = document.createElement('div');
+        answerSlots.className = 'answer-slots';
+        for (let i = 0; i < question.jawabanBenar.length; i++) {
+            answerSlots.innerHTML += `<div class="answer-slot"></div>`;
+        }
+        
+        const letterChoices = document.createElement('div');
+        letterChoices.className = 'letter-choices';
+        const choices = shuffle(question.pilihanHuruf.split(''));
+        choices.forEach(letter => {
+            const button = document.createElement('button');
+            button.className = 'letter-choice';
+            button.textContent = letter;
+            button.onclick = () => {
+                if (currentAnswer.length < question.jawabanBenar.length) {
+                    currentAnswer.push(letter);
+                    answerSlots.children[currentAnswer.length - 1].textContent = letter;
+                    button.disabled = true;
+                    button.style.opacity = '0.5';
+                }
+            };
+            letterChoices.appendChild(button);
         });
 
-        if (selectedAnswer === correctAnswer) {
+        const checkBtn = document.createElement('button');
+        checkBtn.className = 'btn-check-answer';
+        checkBtn.textContent = 'Cek Kata';
+        checkBtn.onclick = () => {
+            const isCorrect = currentAnswer.join('') === question.jawabanBenar;
+            checkAnswer(isCorrect, letterChoices.querySelectorAll('button'));
+        };
+
+        wrapper.append(answerSlots, letterChoices, checkBtn);
+        container.appendChild(wrapper);
+    }
+    
+    function checkAnswer(isCorrect, allControls, selectedControl = null, correctAnswer = null) {
+        allControls.forEach(c => c.disabled = true);
+        if (isCorrect) {
             score += 10;
-            button.classList.add('correct');
+            if (selectedControl && selectedControl.classList.contains('answer-btn')) {
+                selectedControl.classList.add('correct');
+            }
         } else {
-            button.classList.add('wrong');
+            if (selectedControl && selectedControl.classList.contains('answer-btn')) {
+                selectedControl.classList.add('wrong');
+                allControls.forEach(btn => {
+                    if (btn.textContent === correctAnswer) btn.classList.add('correct');
+                });
+            }
         }
         document.getElementById('next-btn').style.visibility = 'visible';
     }
     
     function showResults() {
-        const totalQuestions = allQuestions.length;
         const correctAnswers = score / 10;
-        const percentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+        const percentage = Math.round((correctAnswers / allQuestions.length) * 100);
         
-        let result = {};
-        if (percentage === 100) result = { emoji: '🏆', message: 'SEMPURNA!' };
-        else if (percentage >= 70) result = { emoji: '🎉', message: 'HEBAT!' };
-        else if (percentage >= 50) result = { emoji: '👍', message: 'KEREN!' };
-        else result = { emoji: '🤔', message: 'COBA LAGI YA!' };
+        let result = (percentage === 100) ? { emoji: '🏆', msg: 'SEMPURNA!' } :
+                     (percentage >= 70) ? { emoji: '🎉', msg: 'HEBAT!' } :
+                     (percentage >= 50) ? { emoji: '👍', msg: 'KEREN!' } :
+                                          { emoji: '🤔', msg: 'COBA LAGI!' };
 
-        const toastContainer = document.createElement('div');
-        toastContainer.id = 'toast-container';
-        
-        toastContainer.innerHTML = `
-            <div class="toast-message">
-                <div class="toast-emoji">${result.emoji}</div>
-                <h2 style="font-size: 2.5rem; margin-top:10px; margin-bottom: 10px;">${result.message}</h2>
-                <p>Skor Akhir Kamu:</p>
-                <h1 style="font-size: 4rem; margin: 0; color: var(--blue-main);">${score}</h1>
-                <p>Kamu benar ${correctAnswers} dari ${totalQuestions} pertanyaan (${percentage}%)!</p>
-                <div style="margin-top: 25px; display: grid; gap: 10px;">
-                    <a href="${window.location.href}" class="btn" style="background-color:var(--green-correct); color:white;">Main Lagi</a>
-                    <a href="index.html" class="btn" style="background-color:#f1f1f1;">Menu Utama</a>
+        quizContainer.innerHTML = `
+            <div id="toast-container" style="display:flex; position:static; background:none; backdrop-filter:none;">
+                <div class="toast-message">
+                    <div class="toast-emoji">${result.emoji}</div>
+                    <h2>${result.msg}</h2>
+                    <p>Skor Akhir: <strong>${score}</strong></p>
+                    <p>Benar ${correctAnswers} dari ${allQuestions.length} soal (${percentage}%)!</p>
+                    <div style="margin-top: 25px; display: grid; gap: 10px;">
+                        <a href="${window.location.href}" class="btn" style="background-color:var(--green-correct); color:white;">Main Lagi</a>
+                        <a href="index.html" class="btn" style="background-color:#f1f1f1;">Menu Utama</a>
+                    </div>
                 </div>
-            </div>
-        `;
-        
-        document.body.appendChild(toastContainer);
-        toastContainer.style.display = 'flex';
-        quizContainer.style.display = 'none';
+            </div>`;
     }
 </script>
 </body>
 </html>
+
 
