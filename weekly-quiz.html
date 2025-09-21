@@ -11,7 +11,7 @@
         body {
             font-family: 'Baloo 2', sans-serif;
             margin: 0;
-            background-color: #ede7f6; /* Warna ungu muda */
+            background-color: #ede7f6;
             color: #333;
             display: flex;
             justify-content: center;
@@ -30,9 +30,6 @@
         }
         #loading-state, #quiz-state, #result-state {
             text-align: center;
-        }
-        #result-state {
-            display: none; /* Sembunyikan hasil di awal */
         }
         .question-header {
             text-align: center;
@@ -89,11 +86,9 @@
             cursor: pointer;
             border-bottom: 4px solid #ffa000;
         }
-        /* Result State Styling */
         .result-title { font-size: 2.8rem; font-weight: 800; color: #673ab7; }
         .result-score { font-size: 1.5rem; color: #555; margin-bottom: 30px; }
         .result-score span { font-size: 2rem; font-weight: 800; color: #03a9f4; }
-        
         .badge-unlocked {
             background-color: #fff9c4;
             padding: 25px;
@@ -125,34 +120,26 @@
 </head>
 <body>
     <div class="container">
-        <!-- 1. Loading State -->
         <div id="loading-state">
             <h1>Mempersiapkan Tantangan...</h1>
             <p>Harap tunggu sebentar ya!</p>
         </div>
 
-        <!-- 2. Quiz State (disembunyikan di awal) -->
         <div id="quiz-state" style="display: none;">
             <div class="question-header">
                 <h2 id="question-counter">Pertanyaan 1/10</h2>
             </div>
             <p id="question-text">Pertanyaan akan muncul di sini.</p>
-            <div id="options-grid" class="options-grid">
-                <!-- Pilihan jawaban akan dibuat oleh JavaScript -->
-            </div>
+            <div id="options-grid" class="options-grid"></div>
             <div class="quiz-footer">
                 <button id="next-button" class="btn-next">Lanjut</button>
             </div>
         </div>
 
-        <!-- 3. Result State (disembunyikan di awal) -->
         <div id="result-state" style="display: none;">
             <h1 class="result-title">Kuis Selesai!</h1>
             <p class="result-score">Skor Kamu: <span id="final-score">0</span>%</p>
-            
-            <!-- Tempat untuk notifikasi lencana -->
             <div id="badge-notification" style="display: none;"></div>
-
             <p id="result-feedback" class="result-feedback">Pesan hasil akan muncul di sini.</p>
             <div class="result-actions">
                 <a href="index.html">Kembali ke Beranda</a>
@@ -161,11 +148,11 @@
     </div>
 
 <script type="module">
-    // Import fungsi Firebase yang dibutuhkan
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, collection, getDocs, query, where, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+    // Ganti dengan konfigurasi Firebase Anda
     const firebaseConfig = {
         apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
         authDomain: "forumwidara.firebaseapp.com",
@@ -179,19 +166,16 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Elemen UI
     const loadingState = document.getElementById('loading-state');
     const quizState = document.getElementById('quiz-state');
     const resultState = document.getElementById('result-state');
 
-    // Variabel global untuk kuis
     let currentUser = null;
     let questions = [];
     let currentQuestionIndex = 0;
     let userAnswers = [];
     let activeChallenge = null;
 
-    // Cek status login pengguna
     onAuthStateChanged(auth, (user) => {
         if (user) {
             currentUser = user;
@@ -202,9 +186,7 @@
         }
     });
     
-    // Fungsi utama untuk memulai kuis
     async function startQuiz() {
-        // 1. Ambil data tantangan yang sedang aktif
         const challengeQuery = query(collection(db, "tantanganMingguan"), where("aktif", "==", true));
         const challengeSnapshot = await getDocs(challengeQuery);
 
@@ -213,29 +195,31 @@
             return;
         }
         activeChallenge = challengeSnapshot.docs[0].data();
-        activeChallenge.id = challengeSnapshot.docs[0].id; // simpan ID tantangannya
+        activeChallenge.id = challengeSnapshot.docs[0].id;
 
-        // 2. Ambil soal berdasarkan kategori dari tantangan
+        // PERUBAHAN: Mengambil soal dari koleksi "soal" yang sudah disamakan
         const questionsQuery = query(collection(db, "soal"), where("kategori", "==", activeChallenge.kategori));
         const questionsSnapshot = await getDocs(questionsQuery);
 
         if (questionsSnapshot.empty) {
-            loadingState.innerHTML = `<h1>Oops!</h1><p>Belum ada soal untuk kategori "${activeChallenge.kategori}".</p>`;
+            loadingState.innerHTML = `<h1>Oops!</h1><p>Belum ada soal untuk kategori "${activeChallenge.kategori}". Pastikan kategori di tantangan dan soal sama persis.</p>`;
             return;
         }
 
         questions = questionsSnapshot.docs.map(doc => doc.data());
-        // Acak urutan soal
         questions.sort(() => Math.random() - 0.5);
         
-        // 3. Tampilkan kuis
         loadingState.style.display = 'none';
         quizState.style.display = 'block';
         displayQuestion();
     }
 
-    // Fungsi untuk menampilkan pertanyaan
     function displayQuestion() {
+        if (currentQuestionIndex >= questions.length) {
+            showResults();
+            return;
+        }
+
         const question = questions[currentQuestionIndex];
         document.getElementById('question-counter').textContent = `Pertanyaan ${currentQuestionIndex + 1}/${questions.length}`;
         document.getElementById('question-text').textContent = question.pertanyaan;
@@ -250,7 +234,6 @@
             optionsGrid.appendChild(button);
         });
 
-        // Ubah teks tombol di pertanyaan terakhir
         if (currentQuestionIndex === questions.length - 1) {
             document.getElementById('next-button').textContent = "Selesai!";
         } else {
@@ -258,16 +241,12 @@
         }
     }
 
-    // Fungsi saat user memilih jawaban
     function selectOption(button, optionText) {
-        // Hapus seleksi dari tombol lain
         document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
-        // Tambahkan seleksi ke tombol yang diklik
         button.classList.add('selected');
         userAnswers[currentQuestionIndex] = optionText;
     }
 
-    // Event listener untuk tombol Lanjut/Selesai
     document.getElementById('next-button').addEventListener('click', () => {
         if (userAnswers[currentQuestionIndex] === undefined) {
             alert("Pilih jawaban dulu ya!");
@@ -282,10 +261,10 @@
         }
     });
 
-    // Fungsi untuk menghitung skor dan menampilkan hasil
     async function showResults() {
         let correctAnswers = 0;
         for (let i = 0; i < questions.length; i++) {
+            // PERUBAHAN: Memeriksa field "jawaban" yang sudah disamakan
             if (userAnswers[i] === questions[i].jawaban) {
                 correctAnswers++;
             }
@@ -297,20 +276,16 @@
 
         document.getElementById('final-score').textContent = score;
 
-        // Cek apakah skor memenuhi syarat untuk mendapatkan lencana
         const badgeRequirement = activeChallenge.syaratLencana[0];
         if (score >= badgeRequirement.syaratSkor) {
             document.getElementById('result-feedback').textContent = "Luar biasa! Kamu berhasil menyelesaikan tantangan!";
-            // Panggil fungsi untuk memberikan lencana
             await awardBadge(badgeRequirement.lencanaId);
         } else {
             document.getElementById('result-feedback').textContent = "Kerja bagus! Terus berlatih ya, coba lagi di tantangan berikutnya!";
         }
     }
     
-    // Fungsi untuk memberikan lencana kepada pengguna
     async function awardBadge(badgeId) {
-        // 1. Ambil data lencana dari koleksi 'lencana'
         const badgeDocRef = doc(db, "lencana", badgeId);
         const badgeDoc = await getDoc(badgeDocRef);
 
@@ -320,8 +295,7 @@
         }
         const badgeData = badgeDoc.data();
 
-        // 2. Simpan lencana ke sub-koleksi 'lencanaKu' milik pengguna
-        // INI ADALAH BAGIAN INTEGRASI BARU
+        // Menyimpan lencana ke sub-koleksi pengguna, ini sudah benar.
         const userBadgeRef = doc(db, `users/${currentUser.uid}/lencanaKu`, badgeId);
         await setDoc(userBadgeRef, {
             namaLencana: badgeData.nama,
@@ -329,7 +303,6 @@
             diperolehPada: serverTimestamp()
         });
         
-        // 3. Tampilkan notifikasi bahwa lencana berhasil didapat
         const badgeNotif = document.getElementById('badge-notification');
         badgeNotif.innerHTML = `
             <div class="badge-unlocked">
@@ -342,7 +315,6 @@
         `;
         badgeNotif.style.display = 'block';
     }
-
 </script>
 </body>
 </html>
