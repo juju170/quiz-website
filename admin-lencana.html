@@ -13,7 +13,7 @@
             margin: 0;
             background-color: #f4f6f8;
             color: #333;
-            padding-bottom: 100px; /* Memberi ruang untuk tombol beranda */
+            padding-bottom: 100px;
         }
         .container {
             max-width: 1000px;
@@ -120,36 +120,27 @@
         }
         .message.success { background-color: #c6f6d5; color: #2f855a; }
         .message.error { background-color: #fed7d7; color: #c53030; }
-        
-        /* === STYLE TOMBOL BERANDA BARU === */
         .tombol-beranda {
-            position: fixed; /* Membuat posisi tombol tetap saat di-scroll */
+            position: fixed;
             bottom: 20px;
             right: 20px;
-            
-            background-color: #FFC107; /* Warna kuning amber yang cerah */
-            color: #333; /* Warna teks gelap agar mudah dibaca */
-            
-            padding: 12px 20px; /* Jarak antara teks dan tepi tombol */
-            border-radius: 50px; /* Sudut cembung/bulat sempurna (pill shape) */
-            
-            display: flex; /* Mengaktifkan flexbox untuk alignment */
-            align-items: center; /* Menengahkan teks dan ikon secara vertikal */
-            gap: 8px; /* Jarak antara emoji dan teks "Beranda" */
-            
-            font-family: 'Baloo 2', sans-serif; /* Menggunakan font yang sesuai tema */
+            background-color: #FFC107;
+            color: #333;
+            padding: 12px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             font-size: 1.1rem;
             font-weight: 700;
-            text-decoration: none; /* Menghilangkan garis bawah pada link */
-            
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Efek bayangan halus */
-            transition: transform 0.2s ease, box-shadow 0.2s ease; /* Animasi halus */
-            z-index: 1000; /* Memastikan tombol selalu di lapisan paling atas */
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            z-index: 1000;
         }
-
         .tombol-beranda:hover {
-            transform: translateY(-3px); /* Sedikit terangkat saat disentuh */
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Bayangan lebih jelas */
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
@@ -169,7 +160,7 @@
                     </div>
                     <div class="input-group">
                         <label for="lencana-deskripsi">Deskripsi</label>
-                        <textarea id="lencana-deskripsi" rows="3" placeholder="Contoh: Menyelesaikan 5 kuis matematika" required></textarea>
+                        <textarea id="lencana-deskripsi" rows="3" placeholder="Contoh: Menyelesaikan tantangan matematika" required></textarea>
                     </div>
                     <div class="input-group">
                         <label for="lencana-ikon">URL Ikon Lencana</label>
@@ -189,7 +180,6 @@
         </div>
     </div>
     
-    <!-- === TOMBOL BERANDA BARU === -->
     <a href="index.html" class="tombol-beranda" title="Kembali ke Beranda">
         <span>🏠</span>
         <span>Beranda</span>
@@ -198,16 +188,17 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+        // Ganti dengan konfigurasi Firebase Anda
         const firebaseConfig = {
-    apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
-    authDomain: "forumwidara.firebaseapp.com",
-    projectId: "forumwidara",
-    storageBucket: "forumwidara.firebasestorage.app",
-    messagingSenderId: "216895655168",
-    appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
-  };
+            apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+            authDomain: "forumwidara.firebaseapp.com",
+            projectId: "forumwidara",
+            storageBucket: "forumwidara.firebasestorage.app",
+            messagingSenderId: "216895655168",
+            appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+        };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -217,7 +208,6 @@
         const lencanaList = document.getElementById('lencana-list');
         const messageBox = document.getElementById('message-box');
         
-        // Cek login, halaman ini seharusnya hanya bisa diakses oleh admin/ortu
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 loadLencana();
@@ -227,7 +217,6 @@
             }
         });
 
-        // Fungsi untuk menampilkan pesan
         function showMessage(type, text) {
             messageBox.className = `message ${type}`;
             messageBox.textContent = text;
@@ -235,13 +224,13 @@
             setTimeout(() => { messageBox.style.display = 'none'; }, 3000);
         }
 
-        // Fungsi untuk memuat dan menampilkan semua lencana dari Firestore
         async function loadLencana() {
             try {
+                // Koleksi yang digunakan adalah "lencana", ini sudah benar.
                 const q = query(collection(db, "lencana"));
                 const querySnapshot = await getDocs(q);
                 
-                lencanaList.innerHTML = ''; // Kosongkan daftar sebelum diisi
+                lencanaList.innerHTML = ''; 
 
                 if (querySnapshot.empty) {
                     lencanaList.innerHTML = '<p>Belum ada lencana yang dibuat.</p>';
@@ -269,7 +258,6 @@
             }
         }
 
-        // Event listener untuk form tambah lencana
         lencanaForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const nama = document.getElementById('lencana-nama').value;
@@ -277,6 +265,7 @@
             const ikon = document.getElementById('lencana-ikon').value;
 
             try {
+                // Menyimpan lencana ke koleksi "lencana", ini sudah benar.
                 await addDoc(collection(db, "lencana"), {
                     nama: nama,
                     deskripsi: deskripsi,
@@ -285,7 +274,7 @@
                 
                 showMessage('success', 'Lencana baru berhasil disimpan!');
                 lencanaForm.reset();
-                loadLencana(); // Muat ulang daftar untuk menampilkan lencana baru
+                loadLencana();
 
             } catch (error) {
                 console.error("Gagal menyimpan lencana:", error);
