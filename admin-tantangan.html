@@ -13,7 +13,7 @@
             margin: 0;
             background-color: #f4f6f8;
             color: #333;
-            padding-bottom: 100px; /* Memberi ruang untuk tombol beranda */
+            padding-bottom: 100px;
         }
         .container {
             max-width: 1000px;
@@ -124,36 +124,27 @@
         }
         .message.success { background-color: #c6f6d5; color: #2f855a; }
         .message.error { background-color: #fed7d7; color: #c53030; }
-        
-        /* === STYLE TOMBOL BERANDA BARU === */
         .tombol-beranda {
-            position: fixed; /* Membuat posisi tombol tetap saat di-scroll */
+            position: fixed;
             bottom: 20px;
             right: 20px;
-            
-            background-color: #FFC107; /* Warna kuning amber yang cerah */
-            color: #333; /* Warna teks gelap agar mudah dibaca */
-            
-            padding: 12px 20px; /* Jarak antara teks dan tepi tombol */
-            border-radius: 50px; /* Sudut cembung/bulat sempurna (pill shape) */
-            
-            display: flex; /* Mengaktifkan flexbox untuk alignment */
-            align-items: center; /* Menengahkan teks dan ikon secara vertikal */
-            gap: 8px; /* Jarak antara emoji dan teks "Beranda" */
-            
-            font-family: 'Baloo 2', sans-serif; /* Menggunakan font yang sesuai tema */
+            background-color: #FFC107;
+            color: #333;
+            padding: 12px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             font-size: 1.1rem;
             font-weight: 700;
-            text-decoration: none; /* Menghilangkan garis bawah pada link */
-            
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Efek bayangan halus */
-            transition: transform 0.2s ease, box-shadow 0.2s ease; /* Animasi halus */
-            z-index: 1000; /* Memastikan tombol selalu di lapisan paling atas */
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            z-index: 1000;
         }
-
         .tombol-beranda:hover {
-            transform: translateY(-3px); /* Sedikit terangkat saat disentuh */
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Bayangan lebih jelas */
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
@@ -173,7 +164,7 @@
                     </div>
                     <div class="input-group">
                         <label for="tantangan-kategori">Kategori Kuis</label>
-                        <input type="text" id="tantangan-kategori" placeholder="Contoh: matematika" required>
+                        <input type="text" id="tantangan-kategori" placeholder="Contoh: matematika (harus sama dengan kategori soal)" required>
                     </div>
                     <div class="input-group">
                         <label for="lencana-hadiah">Pilih Lencana Hadiah</label>
@@ -199,7 +190,6 @@
         </div>
     </div>
     
-    <!-- === TOMBOL BERANDA BARU === -->
     <a href="index.html" class="tombol-beranda" title="Kembali ke Beranda">
         <span>🏠</span>
         <span>Beranda</span>
@@ -210,6 +200,7 @@
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+        // Ganti dengan konfigurasi Firebase Anda
         const firebaseConfig = {
             apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
             authDomain: "forumwidara.firebaseapp.com",
@@ -247,6 +238,7 @@
 
         async function loadLencanaDropdown() {
             try {
+                // Mengambil data dari koleksi "lencana", ini sudah benar.
                 const q = query(collection(db, "lencana"));
                 const querySnapshot = await getDocs(q);
                 lencanaDropdown.innerHTML = '<option value="">-- Pilih Lencana --</option>';
@@ -269,6 +261,7 @@
 
         async function loadTantangan() {
             try {
+                // Mengambil data dari koleksi "tantanganMingguan", ini sudah benar.
                 const q = query(collection(db, "tantanganMingguan"), orderBy("createdAt", "desc"));
                 const querySnapshot = await getDocs(q);
                 
@@ -292,7 +285,6 @@
                     tantanganList.appendChild(card);
                 });
 
-                // Tambah event listener untuk tombol nonaktifkan
                 document.querySelectorAll('.btn-deactivate').forEach(button => {
                     button.addEventListener('click', async (e) => {
                         const docId = e.target.dataset.id;
@@ -321,8 +313,8 @@
                 return;
             }
 
-            // 1. Nonaktifkan semua tantangan yang sedang aktif
             try {
+                // 1. Nonaktifkan semua tantangan yang sedang aktif
                 const q = query(collection(db, "tantanganMingguan"), where("aktif", "==", true));
                 const activeChallenges = await getDocs(q);
                 for (const docSnap of activeChallenges.docs) {
@@ -330,12 +322,11 @@
                     await updateDoc(docRef, { aktif: false });
                 }
             
-                // 2. Tambahkan tantangan baru sebagai yang aktif
+                // 2. Tambahkan tantangan baru ke koleksi "tantanganMingguan", ini sudah benar.
                 await addDoc(collection(db, "tantanganMingguan"), {
                     tema: tema,
                     kategori: kategori,
                     aktif: true,
-                    pemenangId: null, // Penting untuk logika satu pemenang
                     syaratLencana: [{
                         lencanaId: lencanaId,
                         syaratSkor: syaratSkor
