@@ -11,13 +11,9 @@
         :root { --blue-light: #e3f2fd; --blue-main: #0288d1; --green-correct: #4caf50; --red-wrong: #f44336; --orange-next: #ff9800; --yellow-explanation: #fff9c4; }
         body { font-family: 'Baloo 2', sans-serif; margin: 0; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; box-sizing: border-box; }
         .quiz-container { position: relative; background-color: white; padding: 45px 30px 30px 30px; border-radius: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); width: 100%; max-width: 600px; text-align: center; }
-        .creator-info { position: absolute; top: 15px; left: 20px; font-size: 0.9rem; font-weight: 700; color: #555; background-color: #f0f0f0; padding: 5px 12px; border-radius: 15px; z-index: 5; }
         .btn-quit-quiz { position: absolute; top: 15px; right: 15px; background-color: #f1f1f1; color: #888; border: 2px solid #ddd; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 1.2rem; font-weight: 700; transition: all 0.2s ease; z-index: 10; }
         .btn-quit-quiz:hover { transform: scale(1.1) rotate(90deg); }
         .question-box { background-color: var(--blue-light); padding: 20px; border-radius: 15px; margin-bottom: 25px; min-height: 80px; display: flex; flex-direction: column; justify-content: center; align-items: center; border-left: 8px solid var(--blue-main); }
-        #media-container { margin-bottom: 15px; width: 100%; }
-        #media-container img { max-width: 100%; height: auto; border-radius: 10px; max-height: 300px; }
-        #media-container audio { width: 100%; margin-top: 10px; }
         .question-text { font-size: 1.8rem; font-weight: 800; color: var(--blue-main); margin: 0; }
         .answer-options { display: grid; grid-template-columns: 1fr; gap: 15px; }
         .answer-btn { border: none; padding: 15px; border-radius: 15px; font-family: 'Baloo 2', sans-serif; font-weight: 700; cursor: pointer; font-size: 1.5rem; border-bottom: 6px solid; transition: transform 0.1s ease; }
@@ -25,8 +21,6 @@
         .answer-btn.correct { background-color: var(--green-correct); color: white; border-color: #388e3c; animation: pulse 0.5s; }
         .answer-btn.wrong { background-color: var(--red-wrong); color: white; border-color: #c62828; }
         .next-btn { margin-top: 25px; background-color: var(--orange-next); color: white; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: 800; border-radius: 30px; cursor: pointer; visibility: hidden; border-bottom: 4px solid #f57c00; }
-        .feedback-box { min-height: 40px; font-size: 1.6rem; font-weight: 700; margin-top: 15px; }
-        .feedback-explanation { font-size: 1rem; font-weight: 400; color: #5f5c3a; margin-top: 10px; background-color: var(--yellow-explanation); padding: 12px; border-radius: 8px; border-left: 5px solid #fbc02d; text-align: left; }
         #toast-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
         .toast-message { background: white; padding: 30px 40px; border-radius: 25px; text-align: center; box-shadow: 0 10px 50px rgba(0,0,0,0.2); animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-origin: center; width: 90%; max-width: 500px; }
         .toast-emoji { font-size: 5rem; animation: popIn 0.6s 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
@@ -45,9 +39,9 @@
     // --- IMPORTS ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, getDocs, query, where, limit, doc, getDoc, updateDoc, arrayUnion, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // --- KONFIGURASI FIREBASE (DIPERBAIKI) ---
+    // --- KONFIGURASI FIREBASE ---
     const firebaseConfig = {
         apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
         authDomain: "forumwidara.firebaseapp.com",
@@ -66,8 +60,6 @@
     let currentQuestionIndex = 0;
     let score = 0;
     let currentUser = null;
-    const correctSound = new Audio('https://actions.google.com/sounds/v1/positive_tones/cascading_glitter.ogg');
-    const wrongSound = new Audio('https://actions.google.com/sounds/v1/alarms/medium_bell_ringing_near.ogg');
     
     // --- FUNGSI UTAMA ---
     onAuthStateChanged(auth, (user) => {
@@ -84,32 +76,28 @@
         loadQuizUI();
         const params = new URLSearchParams(window.location.search);
         const category = params.get('kategori');
-        const isHarian = params.get('harian') === 'true';
         
-        let q;
-        const pertanyaanRef = collection(db, "pertanyaan");
-        
-        if (isHarian) {
-            q = query(pertanyaanRef, where("isHarian", "==", true), limit(10));
-        } else if (category) {
-            q = query(pertanyaanRef, where("kategori", "==", category), limit(10));
-        } else {
-            q = query(pertanyaanRef, limit(10)); // Fallback
+        if (!category) {
+            quizContainer.innerHTML = '<h2>Kategori tidak ditemukan.</h2><a href="index.html" class="btn">Kembali</a>';
+            return;
         }
+
+        const pertanyaanRef = collection(db, "pertanyaan");
+        const q = query(pertanyaanRef, where("kategori", "==", category), limit(10));
 
         try {
             const querySnapshot = await getDocs(q);
-            allQuestions = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            allQuestions = querySnapshot.docs.map(doc => doc.data());
 
             if (allQuestions.length === 0) {
-                quizContainer.innerHTML = '<h2>Oops! Tidak ada pertanyaan untuk kategori ini.</h2><a href="index.html" class="btn">Kembali</a>';
+                quizContainer.innerHTML = `<h2>Oops! Belum ada pertanyaan untuk kategori "${category}".</h2><a href="index.html" class="btn">Kembali</a>`;
                 return;
             }
             allQuestions = shuffle(allQuestions);
             loadQuestion();
         } catch(error) {
             console.error("Gagal memuat pertanyaan:", error);
-            quizContainer.innerHTML = '<h2>Terjadi kesalahan saat memuat kuis. Coba lagi nanti.</h2>';
+            quizContainer.innerHTML = '<h2>Terjadi kesalahan saat memuat kuis.</h2>';
         }
     }
     
@@ -123,13 +111,11 @@
 
     function loadQuizUI() {
         quizContainer.innerHTML = `
-            <a href="index.html" class="btn-quit-quiz" title="Keluar dari Kuis">×</a>
+            <a href="index.html" class="btn-quit-quiz" title="Keluar">×</a>
             <div class="question-box">
-                <div id="media-container"></div>
                 <h2 id="question-text" class="question-text"></h2>
             </div>
             <div id="answer-options" class="answer-options"></div>
-            <div id="feedback-box" class="feedback-box"></div>
             <button id="next-btn" class="next-btn">Lanjut ❯</button>
         `;
         document.getElementById('next-btn').addEventListener('click', () => {
@@ -144,37 +130,35 @@
 
     function loadQuestion() {
         const question = allQuestions[currentQuestionIndex];
-        document.getElementById('question-text').textContent = question.pertanyaan;
+        // Menggunakan "teksPertanyaan" sesuai dari buat-kuis.html
+        document.getElementById('question-text').textContent = question.teksPertanyaan;
         document.getElementById('next-btn').style.visibility = 'hidden';
-        document.getElementById('feedback-box').innerHTML = '';
-        document.getElementById('answer-options').innerHTML = '';
+        
+        const answerOptionsContainer = document.getElementById('answer-options');
+        answerOptionsContainer.innerHTML = '';
 
-        if (question.tipe === 'pilihanGanda') {
-            renderPilihanGandaUI(question);
+        // Menggunakan "tipeSoal" dan "pilihan_ganda" sesuai dari buat-kuis.html
+        if (question.tipeSoal === 'pilihan_ganda') {
+            // Menggunakan "pilihanJawaban" sesuai dari buat-kuis.html
+            const options = shuffle([...question.pilihanJawaban]);
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'answer-btn';
+                button.textContent = option;
+                button.style.backgroundColor = '#4fc3f7';
+                button.style.borderColor = '#039be5';
+                button.onclick = () => checkAnswer(button, option, question.jawabanBenar);
+                answerOptionsContainer.appendChild(button);
+            });
         } else {
-            document.getElementById('answer-options').innerHTML = `<p>Tipe soal "${question.tipe}" belum didukung.</p>`;
+            answerOptionsContainer.innerHTML = `<p>Tipe soal "${question.tipeSoal}" belum didukung untuk dimainkan.</p>`;
             document.getElementById('next-btn').style.visibility = 'visible';
         }
     }
-    
-    function renderPilihanGandaUI(question) {
-        const answerOptionsContainer = document.getElementById('answer-options');
-        const options = shuffle([...question.pilihan]);
-        options.forEach(option => {
-            const button = document.createElement('button');
-            button.className = 'answer-btn';
-            button.textContent = option;
-            button.style.backgroundColor = '#4fc3f7';
-            button.style.borderColor = '#039be5';
-            button.onclick = () => checkMultipleChoiceAnswer(button, option, question.jawaban, question.penjelasan);
-            answerOptionsContainer.appendChild(button);
-        });
-    }
 
-    function checkMultipleChoiceAnswer(button, selectedAnswer, correctAnswer, explanation) {
+    function checkAnswer(button, selectedAnswer, correctAnswer) {
         document.querySelectorAll('.answer-btn').forEach(btn => {
             btn.disabled = true;
-            // Tunjukkan jawaban yang benar
             if (btn.textContent === correctAnswer) {
                 btn.classList.add('correct');
             }
@@ -182,87 +166,17 @@
 
         if (selectedAnswer === correctAnswer) {
             score += 10;
-            showFeedback(true, "Jawaban Kamu Benar!", explanation);
-            correctSound.play();
+            button.classList.add('correct');
         } else {
             button.classList.add('wrong');
-            showFeedback(false, "Jawaban Kamu Salah!", explanation);
-            wrongSound.play();
         }
         document.getElementById('next-btn').style.visibility = 'visible';
     }
-
-    function showFeedback(isCorrect, message, explanation = "") {
-        const feedbackBox = document.getElementById('feedback-box');
-        feedbackBox.innerHTML = `<p style="color: ${isCorrect ? 'var(--green-correct)' : 'var(--red-wrong)'}">${message}</p>`;
-        if (explanation) {
-            feedbackBox.innerHTML += `<div class="feedback-explanation"><strong>Penjelasan:</strong> ${explanation}</div>`;
-        }
-    }
     
-    // --- LOGIKA PEMBERIAN LENCANA (DIPERBAIKI) ---
-    async function checkAndAwardBadges(finalScore) {
-        if (!currentUser) return 0;
-        
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('mode') !== 'weekly') {
-            console.log("Bukan mode mingguan, pemeriksaan lencana dilewati.");
-            return 0; // Return 0 (no badges)
-        }
-
-        try {
-            const challengeQuery = query(collection(db, "tantanganMingguan"), where("aktif", "==", true), limit(1));
-            const challengeSnapshot = await getDocs(challengeQuery);
-            if (challengeSnapshot.empty) {
-                console.log("Tidak ada tantangan mingguan yang aktif.");
-                return 0;
-            }
-
-            const challengeDoc = challengeSnapshot.docs[0];
-            const challenge = challengeDoc.data();
-            const challengeId = challengeDoc.id;
-
-            // PENGECEKAN PENTING 1: Pastikan sudah ada pemenang atau belum
-            if (challenge.pemenangId) {
-                console.log(`Tantangan sudah dimenangkan oleh: ${challenge.pemenangId}.`);
-                return 0;
-            }
-
-            // PENGECEKAN PENTING 2: Pastikan ada syarat lencana di dokumen tantangan
-            if (!challenge.syaratLencana || challenge.syaratLencana.length === 0) {
-                console.log("Tantangan ini tidak memiliki syarat lencana.");
-                return 0;
-            }
-
-            const req = challenge.syaratLencana[0];
-            if (finalScore >= req.syaratSkor) {
-                const userDocRef = doc(db, "siswa", currentUser.uid);
-                await setDoc(userDocRef, { nama: currentUser.displayName || 'Siswa Baru' }, { merge: true });
-
-                await updateDoc(userDocRef, { lencanaDimiliki: arrayUnion(req.lencanaId) });
-                
-                const challengeDocRef = doc(db, "tantanganMingguan", challengeId);
-                await updateDoc(challengeDocRef, { pemenangId: currentUser.uid });
-
-                console.log(`Selamat! Kamu adalah pemenang tantangan ini dan mendapatkan lencana!`);
-                return 1;
-            }
-            
-            return 0; // Skor tidak mencukupi
-        } catch (error) {
-            console.error("Gagal memeriksa atau memberikan lencana:", error);
-            return 0; // Terjadi error
-        }
-    }
-    
-    // --- TAMPILKAN HASIL AKHIR ---
-    async function showResults() {
-        quizContainer.innerHTML = "<h2>Menghitung skormu...</h2>";
+    function showResults() {
         const totalQuestions = allQuestions.length;
         const correctAnswers = score / 10;
         const percentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
-        
-        const newBadgesCount = await checkAndAwardBadges(percentage);
         
         let result = {};
         if (percentage === 100) result = { emoji: '🏆', message: 'SEMPURNA!' };
@@ -273,11 +187,6 @@
         const toastContainer = document.createElement('div');
         toastContainer.id = 'toast-container';
         
-        let badgeMessage = '';
-        if (newBadgesCount > 0) {
-            badgeMessage = `<p style="font-weight:700; color:var(--green-correct);">SELAMAT! KAMU MENJADI PEMENANG TANTANGAN MINGGU INI DAN MENDAPATKAN LENCANA SPESIAL! 🎖️</p>`;
-        }
-
         toastContainer.innerHTML = `
             <div class="toast-message">
                 <div class="toast-emoji">${result.emoji}</div>
@@ -285,10 +194,9 @@
                 <p>Skor Akhir Kamu:</p>
                 <h1 style="font-size: 4rem; margin: 0; color: var(--blue-main);">${score}</h1>
                 <p>Kamu benar ${correctAnswers} dari ${totalQuestions} pertanyaan (${percentage}%)!</p>
-                ${badgeMessage}
                 <div style="margin-top: 25px; display: grid; gap: 10px;">
-                    <a href="${window.location.href}" class="btn" style="background-color:var(--green-correct); color:white;">Main Lagi Kategori Ini</a>
-                    <a href="index.html" class="btn" style="background-color:#f1f1f1;">Kembali ke Menu Utama</a>
+                    <a href="${window.location.href}" class="btn" style="background-color:var(--green-correct); color:white;">Main Lagi</a>
+                    <a href="index.html" class="btn" style="background-color:#f1f1f1;">Menu Utama</a>
                 </div>
             </div>
         `;
@@ -300,5 +208,4 @@
 </script>
 </body>
 </html>
-
 
