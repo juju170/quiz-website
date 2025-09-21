@@ -65,7 +65,6 @@
         .btn.tertiary:hover { background-color: #42a5f5; }
         .btn.admin-badge { background-color: #ba68c8; }
         .btn.admin-badge:hover { background-color: #ab47bc; }
-        /* Style baru untuk tombol admin tantangan */
         .btn.admin-challenge { background-color: #9575cd; }
         .btn.admin-challenge:hover { background-color: #7e57c2; }
 
@@ -149,8 +148,8 @@
         <div class="header-buttons">
             <a href="quiz-menu.html" class="btn">Mulai Kuis 🎲</a>
             <a href="buat-kuis.html" class="btn secondary">Tambah Soal 📚</a>
+            <!-- Tombol Kelola Kuis sekarang tidak memiliki style display:none agar terlihat -->
             <a href="kelola-kuis.html" id="kelola-kuis-btn" class="btn tertiary">Kelola Kuis ⚙️</a>
-            <!-- Tombol Admin Baru Ditambahkan di sini -->
             <a href="admin-tantangan.html" id="kelola-tantangan-btn" class="btn admin-challenge" style="display: none;">Kelola Tantangan ⭐</a>
             <a href="admin-lencana.html" id="kelola-lencana-btn" class="btn admin-badge" style="display: none;">Kelola Lencana 🎖️</a>
         </div>
@@ -218,7 +217,6 @@
   const db = getFirestore(app);
 
   async function loadWeeklyChallengeTheme() {
-    // ... (Fungsi ini tidak diubah) ...
     const titleElement = document.getElementById('weekly-theme-title');
     try {
         const q = query(collection(db, "tantanganMingguan"), where("aktif", "==", true));
@@ -236,7 +234,6 @@
   }
 
   async function loadUserBadges(userId) {
-      // ... (Fungsi ini tidak diubah) ...
       const grid = document.getElementById('koleksi-lencana-grid');
       grid.innerHTML = '';
       if (!userId) {
@@ -275,32 +272,34 @@
   }
 
   onAuthStateChanged(auth, async (user) => {
-    // Definisikan semua tombol admin di sini
+    // Definisikan tombol-tombol
     const kelolaKuisBtn = document.getElementById('kelola-kuis-btn');
     const kelolaLencanaBtn = document.getElementById('kelola-lencana-btn');
-    const kelolaTantanganBtn = document.getElementById('kelola-tantangan-btn'); // Tombol baru
+    const kelolaTantanganBtn = document.getElementById('kelola-tantangan-btn');
     
     if (user) {
+      // Tombol Kelola Kuis selalu terlihat jika user login
+      kelolaKuisBtn.style.display = 'inline-block';
+      
+      // Cek peran untuk tombol-tombol admin
       const userRoleRef = doc(db, "users", user.uid);
       const userRoleSnap = await getDoc(userRoleRef);
 
       if (userRoleSnap.exists() && userRoleSnap.data().peran === 'admin') {
-        // Tampilkan SEMUA tombol admin jika peran adalah 'admin'
-        kelolaKuisBtn.style.display = 'inline-block';
+        // Tampilkan tombol admin jika peran adalah 'admin'
         kelolaLencanaBtn.style.display = 'inline-block';
-        kelolaTantanganBtn.style.display = 'inline-block'; // Tampilkan tombol baru
+        kelolaTantanganBtn.style.display = 'inline-block';
       } else {
-        // Sembunyikan SEMUA jika bukan admin
-        kelolaKuisBtn.style.display = 'none';
+        // Sembunyikan jika bukan admin
         kelolaLencanaBtn.style.display = 'none';
-        kelolaTantanganBtn.style.display = 'none'; // Sembunyikan tombol baru
+        kelolaTantanganBtn.style.display = 'none';
       }
       loadUserBadges(user.uid);
     } else {
-      // Sembunyikan SEMUA jika tidak login
+      // Sembunyikan semua tombol jika tidak login
       kelolaKuisBtn.style.display = 'none';
       kelolaLencanaBtn.style.display = 'none';
-      kelolaTantanganBtn.style.display = 'none'; // Sembunyikan tombol baru
+      kelolaTantanganBtn.style.display = 'none';
       loadUserBadges(null);
     }
   });
@@ -310,4 +309,5 @@
 
 </body>
 </html>
+
 
