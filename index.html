@@ -104,7 +104,6 @@
         }
         .highlight h2 { margin: 0; color: #ff8f00; }
         
-        /* Bagian Koleksi Lencana */
         .badge-collection {
             background-color: white;
             padding: 30px;
@@ -122,6 +121,7 @@
             grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             gap: 25px;
             margin-top: 20px;
+            min-height: 120px;
         }
         .badge-item img {
             width: 80px;
@@ -136,13 +136,6 @@
             color: #333;
             font-size: 0.9rem;
             margin-top: 10px;
-        }
-        
-        footer {
-            background-color: #455a64;
-            color: white;
-            padding: 20px;
-            margin-top: 40px;
         }
     </style>
 </head>
@@ -201,10 +194,6 @@
         </main>
     </div>
 
-    <footer>
-        <p>&copy; 2024 Komunitas Ceria Kelas 2 SD</p>
-    </footer>
-
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -230,7 +219,7 @@
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
             const challengeData = querySnapshot.docs[0].data();
-            titleElement.textContent = `Tema Minggu Ini: ${challengeData.tema} 🐠`;
+            titleElement.textContent = `Tantangan Minggu Ini: ${challengeData.tema} 🐠`;
         } else {
             titleElement.textContent = 'Belum Ada Tantangan Minggu Ini';
         }
@@ -249,6 +238,7 @@
       }
 
       try {
+        // Menggunakan koleksi 'siswa' untuk data lencana
         const userDocRef = doc(db, "siswa", userId);
         const userDocSnap = await getDoc(userDocRef);
 
@@ -258,11 +248,9 @@
         }
 
         const ownedBadgeIds = userDocSnap.data().lencanaDimiliki;
-
         for (const badgeId of ownedBadgeIds) {
             const badgeDocRef = doc(db, "lencana", badgeId);
             const badgeDocSnap = await getDoc(badgeDocRef);
-
             if (badgeDocSnap.exists()) {
                 const badge = badgeDocSnap.data();
                 const badgeElement = document.createElement('div');
@@ -280,15 +268,27 @@
       }
   }
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     const kelolaKuisBtn = document.getElementById('kelola-kuis-btn');
     const kelolaLencanaBtn = document.getElementById('kelola-lencana-btn');
     
     if (user) {
-      kelolaKuisBtn.style.display = 'inline-block';
-      kelolaLencanaBtn.style.display = 'inline-block';
+      // Cek peran pengguna dari koleksi 'users'
+      const userRoleRef = doc(db, "users", user.uid);
+      const userRoleSnap = await getDoc(userRoleRef);
+
+      if (userRoleSnap.exists() && userRoleSnap.data().peran === 'admin') {
+        // Tampilkan tombol admin jika peran adalah 'admin'
+        kelolaKuisBtn.style.display = 'inline-block';
+        kelolaLencanaBtn.style.display = 'inline-block';
+      } else {
+        // Sembunyikan jika bukan admin
+        kelolaKuisBtn.style.display = 'none';
+        kelolaLencanaBtn.style.display = 'none';
+      }
       loadUserBadges(user.uid);
     } else {
+      // Sembunyikan jika tidak login
       kelolaKuisBtn.style.display = 'none';
       kelolaLencanaBtn.style.display = 'none';
       loadUserBadges(null);
@@ -300,5 +300,4 @@
 
 </body>
 </html>
-
 
