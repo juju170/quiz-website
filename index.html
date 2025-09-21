@@ -54,7 +54,6 @@
             font-weight: 700;
             transition: transform 0.2s, background-color 0.2s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border: none;
         }
         .btn:hover {
             background-color: #ffa726;
@@ -64,27 +63,48 @@
         .btn.secondary:hover { background-color: #66bb6a; }
         .btn.tertiary { background-color: #64b5f6; }
         .btn.tertiary:hover { background-color: #42a5f5; }
-        .btn.admin-badge { background-color: #ba68c8; } /* Warna baru untuk lencana */
+        .btn.admin-badge { background-color: #ba68c8; }
         .btn.admin-badge:hover { background-color: #ab47bc; }
 
-        .highlight-link {
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .menu-card {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            text-decoration: none;
+            color: #333;
+            font-weight: 700;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+        }
+        .menu-card .icon {
+            font-size: 3rem;
             display: block;
+            margin-bottom: 10px;
+        }
+        .highlight {
             background-color: #fffde7;
             border: 2px dashed #ffd54f;
             padding: 20px;
             margin: 40px 0;
             border-radius: 15px;
+        }
+        .highlight a {
             text-decoration: none;
             color: inherit;
-            transition: transform 0.2s, box-shadow 0.2s;
         }
-        .highlight-link:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
-        }
-        .highlight-link h2 { margin: 0; color: #ff8f00; }
-
-        /* BAGIAN BARU: KOLEKSI LENCANA */
+        .highlight h2 { margin: 0; color: #ff8f00; }
+        
+        /* Bagian Koleksi Lencana */
         .badge-collection {
             background-color: white;
             padding: 30px;
@@ -103,32 +123,21 @@
             gap: 25px;
             margin-top: 20px;
         }
-        .badge-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            opacity: 0.3; /* Awalnya abu-abu */
-        }
-        .badge-item.owned {
-            opacity: 1; /* Jadi berwarna jika dimiliki */
-        }
         .badge-item img {
             width: 80px;
             height: 80px;
             border-radius: 50%;
             background-color: #eee;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            margin-bottom: 10px;
             object-fit: cover;
         }
         .badge-item p {
             font-weight: 700;
             color: #333;
             font-size: 0.9rem;
-            margin: 0;
+            margin-top: 10px;
         }
-        /* -- End of Bagian Baru -- */
-
+        
         footer {
             background-color: #455a64;
             color: white;
@@ -144,7 +153,6 @@
         <div class="header-buttons">
             <a href="quiz-menu.html" class="btn">Mulai Kuis 🎲</a>
             <a href="buat-kuis.html" class="btn secondary">Tambah Soal 📚</a>
-            <!-- Tombol Admin, awalnya disembunyikan -->
             <a href="kelola-kuis.html" id="kelola-kuis-btn" class="btn tertiary" style="display: none;">Kelola Kuis ⚙️</a>
             <a href="admin-lencana.html" id="kelola-lencana-btn" class="btn admin-badge" style="display: none;">Kelola Lencana 🎖️</a>
         </div>
@@ -152,44 +160,69 @@
 
     <div class="container">
         <main>
-            <!-- Diubah menjadi link ke weekly.html -->
-            <a href="weekly.html" class="highlight-link">
-                <h2 id="weekly-theme-title">Memuat Tantangan Minggu Ini... 🐠</h2>
-            </a>
+            <section class="menu-utama">
+                <h2>Ayo Mulai Belajar & Bermain!</h2>
+                <div class="menu-grid">
+                    <a href="quiz-menu.html" class="menu-card">
+                        <span class="icon">🧩</span>
+                        <span>Main Kuis</span>
+                    </a>
+                    <a href="#" class="menu-card">
+                        <span class="icon">📖</span>
+                        <span>Cerita Interaktif</span>
+                    </a>
+                    <a href="#" class="menu-card">
+                        <span class="icon">🎵</span>
+                        <span>Belajar dengan Audio</span>
+                    </a>
+                    <a href="#" class="menu-card">
+                        <span class="icon">🎨</span>
+                        <span>Mini Games</span>
+                    </a>
+                    <a href="#" class="menu-card">
+                        <span class="icon">⭐</span>
+                        <span>Papan Peringkat</span>
+                    </a>
+                </div>
+            </section>
 
-            <!-- BAGIAN BARU UNTUK MENAMPILKAN LENCANA -->
+            <section class="highlight">
+                <a href="weekly.html">
+                    <h2 id="weekly-theme-title">Memuat Tantangan Minggu Ini...</h2>
+                </a>
+            </section>
+
             <section class="badge-collection">
                 <h2>🏆 Lencana Prestasiku 🏆</h2>
                 <div id="koleksi-lencana-grid">
-                    <p>Memuat koleksi lencanamu...</p>
+                    <p>Login untuk melihat koleksi lencanamu!</p>
                 </div>
             </section>
-            
-            <!-- Bagian komunitas tetap sama -->
-            <!-- ... -->
         </main>
     </div>
+
+    <footer>
+        <p>&copy; 2024 Komunitas Ceria Kelas 2 SD</p>
+    </footer>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { getFirestore, collection, getDocs, doc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   
-  // GANTI DENGAN KONFIGURASI FIREBASE ANDA
   const firebaseConfig = {
-    apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
-    authDomain: "forumwidara.firebaseapp.com",
-    projectId: "forumwidara",
-    storageBucket: "forumwidara.firebasestorage.app",
-    messagingSenderId: "216895655168",
-    appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+    apiKey: "GANTI_DENGAN_API_KEY_ANDA",
+    authDomain: "GANTI_DENGAN_AUTH_DOMAIN_ANDA",
+    projectId: "GANTI_DENGAN_PROJECT_ID_ANDA",
+    storageBucket: "GANTI_DENGAN_STORAGE_BUCKET_ANDA",
+    messagingSenderId: "GANTI_DENGAN_MESSAGING_SENDER_ID_ANDA",
+    appId: "GANTI_DENGAN_APP_ID_ANDA"
   };
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // Fungsi untuk memuat tema tantangan mingguan
   async function loadWeeklyChallengeTheme() {
     const titleElement = document.getElementById('weekly-theme-title');
     try {
@@ -197,7 +230,7 @@
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
             const challengeData = querySnapshot.docs[0].data();
-            titleElement.textContent = `Tantangan Minggu Ini: ${challengeData.tema}`;
+            titleElement.textContent = `Tema Minggu Ini: ${challengeData.tema} 🐠`;
         } else {
             titleElement.textContent = 'Belum Ada Tantangan Minggu Ini';
         }
@@ -207,75 +240,61 @@
     }
   }
 
-  // Fungsi untuk memuat semua lencana dan lencana yang dimiliki user
-  async function loadBadges(userId) {
+  async function loadUserBadges(userId) {
       const grid = document.getElementById('koleksi-lencana-grid');
-      grid.innerHTML = ''; // Kosongkan grid
+      grid.innerHTML = '';
+      if (!userId) {
+          grid.innerHTML = '<p>Login untuk melihat koleksi lencanamu!</p>';
+          return;
+      }
 
       try {
-        // 1. Ambil data lencana yang dimiliki user
-        let ownedBadgeIds = [];
-        if (userId) {
-            const userDocRef = doc(db, "siswa", userId);
-            const userDocSnap = await getDoc(userDocRef);
-            if (userDocSnap.exists() && userDocSnap.data().lencanaDimiliki) {
-                ownedBadgeIds = userDocSnap.data().lencanaDimiliki;
-            }
-        }
+        const userDocRef = doc(db, "siswa", userId);
+        const userDocSnap = await getDoc(userDocRef);
 
-        // 2. Ambil semua lencana yang ada dari koleksi 'lencana'
-        const allBadgesSnapshot = await getDocs(collection(db, "lencana"));
-        
-        if (allBadgesSnapshot.empty) {
-            grid.innerHTML = '<p>Belum ada lencana yang dibuat oleh Admin.</p>';
+        if (!userDocSnap.exists() || !userDocSnap.data().lencanaDimiliki || userDocSnap.data().lencanaDimiliki.length === 0) {
+            grid.innerHTML = '<p>Kamu belum punya lencana. Ayo selesaikan tantangan mingguan!</p>';
             return;
         }
 
-        // 3. Tampilkan semua lencana, beri tanda mana yang sudah dimiliki
-        allBadgesSnapshot.forEach(doc => {
-            const badge = doc.data();
-            const badgeId = doc.id;
-            
-            const isOwned = ownedBadgeIds.includes(badgeId);
+        const ownedBadgeIds = userDocSnap.data().lencanaDimiliki;
 
-            const badgeElement = document.createElement('div');
-            badgeElement.className = `badge-item ${isOwned ? 'owned' : ''}`;
-            badgeElement.innerHTML = `
-                <img src="${badge.ikon}" alt="${badge.nama}" title="${badge.deskripsi}" onerror="this.src='https://placehold.co/80x80/e2e8f0/4a5568?text=🖼️'">
-                <p>${badge.nama}</p>
-            `;
-            grid.appendChild(badgeElement);
-        });
+        for (const badgeId of ownedBadgeIds) {
+            const badgeDocRef = doc(db, "lencana", badgeId);
+            const badgeDocSnap = await getDoc(badgeDocRef);
 
+            if (badgeDocSnap.exists()) {
+                const badge = badgeDocSnap.data();
+                const badgeElement = document.createElement('div');
+                badgeElement.className = 'badge-item';
+                badgeElement.innerHTML = `
+                    <img src="${badge.ikon}" alt="${badge.nama}" title="${badge.deskripsi}" onerror="this.src='https://placehold.co/80x80/e2e8f0/4a5568?text=🖼️'">
+                    <p>${badge.nama}</p>
+                `;
+                grid.appendChild(badgeElement);
+            }
+        }
       } catch (error) {
           console.error("Gagal memuat lencana:", error);
           grid.innerHTML = '<p>Oops! Gagal memuat lencana prestasi.</p>';
       }
   }
 
-  // Cek status login pengguna
   onAuthStateChanged(auth, (user) => {
     const kelolaKuisBtn = document.getElementById('kelola-kuis-btn');
     const kelolaLencanaBtn = document.getElementById('kelola-lencana-btn');
     
     if (user) {
-      // Jika pengguna login, tampilkan tombol admin
       kelolaKuisBtn.style.display = 'inline-block';
       kelolaLencanaBtn.style.display = 'inline-block';
-      
-      // Muat lencana untuk user ini
-      loadBadges(user.uid);
+      loadUserBadges(user.uid);
     } else {
-      // Jika tidak ada pengguna yang login, sembunyikan tombol admin
       kelolaKuisBtn.style.display = 'none';
       kelolaLencanaBtn.style.display = 'none';
-
-      // Tetap tampilkan semua lencana, tapi dalam keadaan abu-abu
-      loadBadges(null);
+      loadUserBadges(null);
     }
   });
 
-  // Panggil fungsi saat halaman pertama kali dimuat
   loadWeeklyChallengeTheme();
 </script>
 
