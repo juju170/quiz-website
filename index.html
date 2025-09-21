@@ -44,6 +44,7 @@
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            justify-content: center;
         }
         .btn {
             background-color: #ffb74d;
@@ -61,12 +62,14 @@
         }
         .btn.secondary { background-color: #81c784; }
         .btn.secondary:hover { background-color: #66bb6a; }
-        .btn.tertiary { background-color: #64b5f6; }
-        .btn.tertiary:hover { background-color: #42a5f5; }
+        
+        /* Tombol Admin */
         .btn.admin-badge { background-color: #ba68c8; }
         .btn.admin-badge:hover { background-color: #ab47bc; }
-        .btn.admin-challenge { background-color: #9575cd; }
-        .btn.admin-challenge:hover { background-color: #7e57c2; }
+        .btn.admin-challenge { background-color: #ef5350; }
+        .btn.admin-challenge:hover { background-color: #e53935; }
+        .btn.admin-create-question { background-color: #673ab7; }
+        .btn.admin-create-question:hover { background-color: #512da8; }
 
         .menu-grid {
             display: grid;
@@ -148,10 +151,10 @@
         <div class="header-buttons">
             <a href="quiz-menu.html" class="btn">Mulai Kuis 🎲</a>
             <a href="buat-kuis.html" class="btn secondary">Tambah Soal 📚</a>
-            <!-- Tombol Kelola Kuis sekarang tidak memiliki style display:none agar terlihat -->
-            <a href="kelola-kuis.html" id="kelola-kuis-btn" class="btn tertiary">Kelola Kuis ⚙️</a>
-            <a href="admin-tantangan.html" id="kelola-tantangan-btn" class="btn admin-challenge" style="display: none;">Kelola Tantangan ⭐</a>
+            <!-- Tombol-tombol Admin -->
             <a href="admin-lencana.html" id="kelola-lencana-btn" class="btn admin-badge" style="display: none;">Kelola Lencana 🎖️</a>
+            <a href="admin-tantangan.html" id="kelola-tantangan-btn" class="btn admin-challenge" style="display: none;">Kelola Tantangan 🏆</a>
+            <a href="admin-buat-soal.html" id="buat-soal-btn" class="btn admin-create-question" style="display: none;">Buat Soal Tantangan 📝</a>
         </div>
     </header>
 
@@ -207,7 +210,7 @@
     apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
     authDomain: "forumwidara.firebaseapp.com",
     projectId: "forumwidara",
-    storageBucket: "forumwidara.appspot.com",
+    storageBucket: "forumwidara.firebasestorage.app",
     messagingSenderId: "216895655168",
     appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
   };
@@ -223,7 +226,7 @@
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
             const challengeData = querySnapshot.docs[0].data();
-            titleElement.textContent = `Tantangan Minggu Ini: ${challengeData.tema} ✨`;
+            titleElement.textContent = `Tantangan Minggu Ini: ${challengeData.tema} 🐠`;
         } else {
             titleElement.textContent = 'Belum Ada Tantangan Minggu Ini';
         }
@@ -233,38 +236,36 @@
     }
   }
 
+  // === FUNGSI DIPERBARUI ===
+  // Fungsi ini sekarang membaca dari sub-koleksi 'lencanaKu' sesuai instruksi kita sebelumnya.
   async function loadUserBadges(userId) {
       const grid = document.getElementById('koleksi-lencana-grid');
-      grid.innerHTML = '';
       if (!userId) {
           grid.innerHTML = '<p>Login untuk melihat koleksi lencanamu!</p>';
           return;
       }
 
       try {
-        const userDocRef = doc(db, "siswa", userId);
-        const userDocSnap = await getDoc(userDocRef);
+        const badgesQuery = collection(db, "users", userId, "lencanaKu");
+        const querySnapshot = await getDocs(badgesQuery);
+        
+        grid.innerHTML = ''; // Kosongkan grid sebelum diisi
 
-        if (!userDocSnap.exists() || !userDocSnap.data().lencanaDimiliki || userDocSnap.data().lencanaDimiliki.length === 0) {
+        if (querySnapshot.empty) {
             grid.innerHTML = '<p>Kamu belum punya lencana. Ayo selesaikan tantangan mingguan!</p>';
             return;
         }
 
-        const ownedBadgeIds = userDocSnap.data().lencanaDimiliki;
-        for (const badgeId of ownedBadgeIds) {
-            const badgeDocRef = doc(db, "lencana", badgeId);
-            const badgeDocSnap = await getDoc(badgeDocRef);
-            if (badgeDocSnap.exists()) {
-                const badge = badgeDocSnap.data();
-                const badgeElement = document.createElement('div');
-                badgeElement.className = 'badge-item';
-                badgeElement.innerHTML = `
-                    <img src="${badge.ikon}" alt="${badge.nama}" title="${badge.deskripsi}" onerror="this.src='https://placehold.co/80x80/e2e8f0/4a5568?text=🖼️'">
-                    <p>${badge.nama}</p>
-                `;
-                grid.appendChild(badgeElement);
-            }
-        }
+        querySnapshot.forEach((doc) => {
+            const badge = doc.data();
+            const badgeElement = document.createElement('div');
+            badgeElement.className = 'badge-item';
+            badgeElement.innerHTML = `
+                <img src="${badge.ikonLencana}" alt="${badge.namaLencana}" title="${badge.namaLencana}" onerror="this.src='https://placehold.co/80x80/e2e8f0/4a5568?text=🖼️'">
+                <p>${badge.namaLencana}</p>
+            `;
+            grid.appendChild(badgeElement);
+        });
       } catch (error) {
           console.error("Gagal memuat lencana:", error);
           grid.innerHTML = '<p>Oops! Gagal memuat lencana prestasi.</p>';
@@ -272,34 +273,30 @@
   }
 
   onAuthStateChanged(auth, async (user) => {
-    // Definisikan tombol-tombol
-    const kelolaKuisBtn = document.getElementById('kelola-kuis-btn');
+    // Ambil semua tombol admin
     const kelolaLencanaBtn = document.getElementById('kelola-lencana-btn');
     const kelolaTantanganBtn = document.getElementById('kelola-tantangan-btn');
+    const buatSoalBtn = document.getElementById('buat-soal-btn');
     
+    // Kelompokkan dalam satu array agar mudah dikelola
+    const adminButtons = [kelolaLencanaBtn, kelolaTantanganBtn, buatSoalBtn];
+
     if (user) {
-      // Tombol Kelola Kuis selalu terlihat jika user login
-      kelolaKuisBtn.style.display = 'inline-block';
-      
-      // Cek peran untuk tombol-tombol admin
+      // Cek peran pengguna dari koleksi 'users'
       const userRoleRef = doc(db, "users", user.uid);
       const userRoleSnap = await getDoc(userRoleRef);
 
       if (userRoleSnap.exists() && userRoleSnap.data().peran === 'admin') {
-        // Tampilkan tombol admin jika peran adalah 'admin'
-        kelolaLencanaBtn.style.display = 'inline-block';
-        kelolaTantanganBtn.style.display = 'inline-block';
+        // Tampilkan semua tombol admin jika peran adalah 'admin'
+        adminButtons.forEach(btn => btn.style.display = 'inline-block');
       } else {
         // Sembunyikan jika bukan admin
-        kelolaLencanaBtn.style.display = 'none';
-        kelolaTantanganBtn.style.display = 'none';
+        adminButtons.forEach(btn => btn.style.display = 'none');
       }
       loadUserBadges(user.uid);
     } else {
-      // Sembunyikan semua tombol jika tidak login
-      kelolaKuisBtn.style.display = 'none';
-      kelolaLencanaBtn.style.display = 'none';
-      kelolaTantanganBtn.style.display = 'none';
+      // Sembunyikan jika tidak login
+      adminButtons.forEach(btn => btn.style.display = 'none');
       loadUserBadges(null);
     }
   });
@@ -309,5 +306,4 @@
 
 </body>
 </html>
-
 
