@@ -85,7 +85,10 @@
             
             document.getElementById('challenge-theme').textContent = challenge.tema;
             document.getElementById('challenge-category').textContent = challenge.kategori;
-            document.getElementById('start-quiz-btn').href = `weekly-quiz.html?kategori=${challenge.kategori}&mode=weekly`;
+            
+            // === PERUBAHAN DI SINI ===
+            // Mengubah link agar mengarah ke weekly-quiz.html
+            document.getElementById('start-quiz-btn').href = `weekly-quiz.html`;
 
             // Load badges
             const badgesGrid = document.getElementById('badges-grid');
