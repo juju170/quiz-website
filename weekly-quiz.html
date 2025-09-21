@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Tantangan Mingguan - Komunitas Ceria 2SD</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Baloo 2', sans-serif;
+            margin: 0;
+            background-color: #ede7f6; /* Warna ungu muda */
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: white;
+            padding: 30px 40px;
+            border-radius: 25px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+        #loading-state, #quiz-state, #result-state {
+            text-align: center;
+        }
+        #result-state {
+            display: none; /* Sembunyikan hasil di awal */
+        }
+        .question-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .question-header h2 {
+            font-size: 1.8rem;
+            color: #512da8;
+            margin: 0;
+        }
+        .question-text {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            text-align: center;
+            min-height: 60px;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .option-btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 15px;
+            border: 3px solid #d1c4e9;
+            background-color: #f5f3f8;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .option-btn:hover {
+            background-color: #e6e0f1;
+        }
+        .option-btn.selected {
+            background-color: #b39ddb;
+            color: white;
+            border-color: #512da8;
+        }
+        .quiz-footer {
+            margin-top: 30px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .btn-next {
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            border: none;
+            border-radius: 30px;
+            background-color: #ffc107;
+            color: #333;
+            cursor: pointer;
+            border-bottom: 4px solid #ffa000;
+        }
+        /* Result State Styling */
+        .result-title { font-size: 2.8rem; font-weight: 800; color: #673ab7; }
+        .result-score { font-size: 1.5rem; color: #555; margin-bottom: 30px; }
+        .result-score span { font-size: 2rem; font-weight: 800; color: #03a9f4; }
+        
+        .badge-unlocked {
+            background-color: #fff9c4;
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 3px solid #ffecb3;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .badge-unlocked h3 { font-size: 1.6rem; color: #f57f17; margin: 0 0 10px 0; }
+        .badge-info { display: flex; align-items: center; justify-content: center; gap: 20px; }
+        .badge-info img { width: 80px; height: 80px; border-radius: 50%; }
+        .badge-info p { margin: 0; font-size: 1.2rem; font-weight: 700; }
+
+        .result-feedback { font-size: 1.2rem; margin-bottom: 30px; }
+        .result-actions a {
+            padding: 15px 25px;
+            text-decoration: none;
+            font-weight: 700;
+            border-radius: 30px;
+            background-color: #4caf50;
+            color: white;
+            border-bottom: 4px solid #388e3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 1. Loading State -->
+        <div id="loading-state">
+            <h1>Mempersiapkan Tantangan...</h1>
+            <p>Harap tunggu sebentar ya!</p>
+        </div>
+
+        <!-- 2. Quiz State (disembunyikan di awal) -->
+        <div id="quiz-state" style="display: none;">
+            <div class="question-header">
+                <h2 id="question-counter">Pertanyaan 1/10</h2>
+            </div>
+            <p id="question-text">Pertanyaan akan muncul di sini.</p>
+            <div id="options-grid" class="options-grid">
+                <!-- Pilihan jawaban akan dibuat oleh JavaScript -->
+            </div>
+            <div class="quiz-footer">
+                <button id="next-button" class="btn-next">Lanjut</button>
+            </div>
+        </div>
+
+        <!-- 3. Result State (disembunyikan di awal) -->
+        <div id="result-state" style="display: none;">
+            <h1 class="result-title">Kuis Selesai!</h1>
+            <p class="result-score">Skor Kamu: <span id="final-score">0</span>%</p>
+            
+            <!-- Tempat untuk notifikasi lencana -->
+            <div id="badge-notification" style="display: none;"></div>
+
+            <p id="result-feedback" class="result-feedback">Pesan hasil akan muncul di sini.</p>
+            <div class="result-actions">
+                <a href="index.html">Kembali ke Beranda</a>
+            </div>
+        </div>
+    </div>
+
+<script type="module">
+    // Import fungsi Firebase yang dibutuhkan
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, getDocs, query, where, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+        authDomain: "forumwidara.firebaseapp.com",
+        projectId: "forumwidara",
+        storageBucket: "forumwidara.firebasestorage.app",
+        messagingSenderId: "216895655168",
+        appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Elemen UI
+    const loadingState = document.getElementById('loading-state');
+    const quizState = document.getElementById('quiz-state');
+    const resultState = document.getElementById('result-state');
+
+    // Variabel global untuk kuis
+    let currentUser = null;
+    let questions = [];
+    let currentQuestionIndex = 0;
+    let userAnswers = [];
+    let activeChallenge = null;
+
+    // Cek status login pengguna
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUser = user;
+            startQuiz();
+        } else {
+            alert("Kamu harus login untuk mengikuti tantangan mingguan!");
+            window.location.href = 'login.html';
+        }
+    });
+    
+    // Fungsi utama untuk memulai kuis
+    async function startQuiz() {
+        // 1. Ambil data tantangan yang sedang aktif
+        const challengeQuery = query(collection(db, "tantanganMingguan"), where("aktif", "==", true));
+        const challengeSnapshot = await getDocs(challengeQuery);
+
+        if (challengeSnapshot.empty) {
+            loadingState.innerHTML = "<h1>Oops!</h1><p>Belum ada tantangan aktif minggu ini.</p>";
+            return;
+        }
+        activeChallenge = challengeSnapshot.docs[0].data();
+        activeChallenge.id = challengeSnapshot.docs[0].id; // simpan ID tantangannya
+
+        // 2. Ambil soal berdasarkan kategori dari tantangan
+        const questionsQuery = query(collection(db, "soal"), where("kategori", "==", activeChallenge.kategori));
+        const questionsSnapshot = await getDocs(questionsQuery);
+
+        if (questionsSnapshot.empty) {
+            loadingState.innerHTML = `<h1>Oops!</h1><p>Belum ada soal untuk kategori "${activeChallenge.kategori}".</p>`;
+            return;
+        }
+
+        questions = questionsSnapshot.docs.map(doc => doc.data());
+        // Acak urutan soal
+        questions.sort(() => Math.random() - 0.5);
+        
+        // 3. Tampilkan kuis
+        loadingState.style.display = 'none';
+        quizState.style.display = 'block';
+        displayQuestion();
+    }
+
+    // Fungsi untuk menampilkan pertanyaan
+    function displayQuestion() {
+        const question = questions[currentQuestionIndex];
+        document.getElementById('question-counter').textContent = `Pertanyaan ${currentQuestionIndex + 1}/${questions.length}`;
+        document.getElementById('question-text').textContent = question.pertanyaan;
+
+        const optionsGrid = document.getElementById('options-grid');
+        optionsGrid.innerHTML = '';
+        question.pilihan.forEach(optionText => {
+            const button = document.createElement('button');
+            button.className = 'option-btn';
+            button.textContent = optionText;
+            button.onclick = () => selectOption(button, optionText);
+            optionsGrid.appendChild(button);
+        });
+
+        // Ubah teks tombol di pertanyaan terakhir
+        if (currentQuestionIndex === questions.length - 1) {
+            document.getElementById('next-button').textContent = "Selesai!";
+        } else {
+            document.getElementById('next-button').textContent = "Lanjut";
+        }
+    }
+
+    // Fungsi saat user memilih jawaban
+    function selectOption(button, optionText) {
+        // Hapus seleksi dari tombol lain
+        document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+        // Tambahkan seleksi ke tombol yang diklik
+        button.classList.add('selected');
+        userAnswers[currentQuestionIndex] = optionText;
+    }
+
+    // Event listener untuk tombol Lanjut/Selesai
+    document.getElementById('next-button').addEventListener('click', () => {
+        if (userAnswers[currentQuestionIndex] === undefined) {
+            alert("Pilih jawaban dulu ya!");
+            return;
+        }
+
+        if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            displayQuestion();
+        } else {
+            showResults();
+        }
+    });
+
+    // Fungsi untuk menghitung skor dan menampilkan hasil
+    async function showResults() {
+        let correctAnswers = 0;
+        for (let i = 0; i < questions.length; i++) {
+            if (userAnswers[i] === questions[i].jawaban) {
+                correctAnswers++;
+            }
+        }
+        const score = Math.round((correctAnswers / questions.length) * 100);
+
+        quizState.style.display = 'none';
+        resultState.style.display = 'block';
+
+        document.getElementById('final-score').textContent = score;
+
+        // Cek apakah skor memenuhi syarat untuk mendapatkan lencana
+        const badgeRequirement = activeChallenge.syaratLencana[0];
+        if (score >= badgeRequirement.syaratSkor) {
+            document.getElementById('result-feedback').textContent = "Luar biasa! Kamu berhasil menyelesaikan tantangan!";
+            // Panggil fungsi untuk memberikan lencana
+            await awardBadge(badgeRequirement.lencanaId);
+        } else {
+            document.getElementById('result-feedback').textContent = "Kerja bagus! Terus berlatih ya, coba lagi di tantangan berikutnya!";
+        }
+    }
+    
+    // Fungsi untuk memberikan lencana kepada pengguna
+    async function awardBadge(badgeId) {
+        // 1. Ambil data lencana dari koleksi 'lencana'
+        const badgeDocRef = doc(db, "lencana", badgeId);
+        const badgeDoc = await getDoc(badgeDocRef);
+
+        if (!badgeDoc.exists()) {
+            console.error("Lencana dengan ID " + badgeId + " tidak ditemukan!");
+            return;
+        }
+        const badgeData = badgeDoc.data();
+
+        // 2. Simpan lencana ke sub-koleksi 'lencanaKu' milik pengguna
+        // INI ADALAH BAGIAN INTEGRASI BARU
+        const userBadgeRef = doc(db, `users/${currentUser.uid}/lencanaKu`, badgeId);
+        await setDoc(userBadgeRef, {
+            namaLencana: badgeData.nama,
+            ikonLencana: badgeData.ikon,
+            diperolehPada: serverTimestamp()
+        });
+        
+        // 3. Tampilkan notifikasi bahwa lencana berhasil didapat
+        const badgeNotif = document.getElementById('badge-notification');
+        badgeNotif.innerHTML = `
+            <div class="badge-unlocked">
+                <h3>Selamat, Kamu Mendapatkan Lencana Baru!</h3>
+                <div class="badge-info">
+                    <img src="${badgeData.ikon}" alt="${badgeData.nama}">
+                    <p>${badgeData.nama}</p>
+                </div>
+            </div>
+        `;
+        badgeNotif.style.display = 'block';
+    }
+
+</script>
+</body>
+</html>
+
