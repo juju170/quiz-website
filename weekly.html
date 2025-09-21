@@ -4,213 +4,114 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tantangan Mingguan - Komunitas Ceria 2SD</title>
-    <!-- Menambahkan Google Font yang ramah anak -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
-
-    <!-- CSS Internal untuk styling -->
     <style>
-        /* Pengaturan Dasar Body */
-        body {
-            font-family: 'Baloo 2', sans-serif;
-            margin: 0;
-            background-color: #e3f2fd; /* Biru langit sangat muda */
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        /* Container utama untuk membungkus semua elemen */
-        .container {
-            text-align: center;
-            background-color: #ffffff;
-            padding: 30px 40px;
-            border-radius: 25px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            width: 100%;
-        }
-
-        /* 1 & 2. Judul Utama dan Subjudul */
-        .main-title {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #673ab7; /* Ungu */
-            margin-top: 0;
-            margin-bottom: 5px;
-        }
-
-        .subtitle {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #03a9f4; /* Biru cerah */
-            margin-top: 0;
-            margin-bottom: 30px;
-        }
-
-        /* 3. Card Informasi Kuis */
-        .info-card {
-            background-color: #ede7f6; /* Ungu muda */
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 25px;
-            text-align: left;
-        }
-
-        .info-card ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .info-card li {
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-        
-        .info-card li:last-child { margin-bottom: 0; }
-        .info-card li::before {
-            content: '🔹';
-            margin-right: 10px;
-            color: #7e57c2;
-        }
-
-        /* 4. Teaser Soal */
-        .teaser-box {
-            background-color: #e0f7fa; /* Cyan muda */
-            border: 2px dashed #4dd0e1;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 35px;
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #00796b;
-        }
-        
-        /* 5. Tombol Aksi Utama */
-        .btn-start {
-            display: block;
-            width: 100%;
-            padding: 20px;
-            border-radius: 15px;
-            text-decoration: none;
-            font-weight: 800;
-            font-size: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease, background-color 0.2s ease;
-            box-sizing: border-box;
-            background-color: #ff5252; /* Merah cerah */
-            color: white;
-            border-bottom: 4px solid #d32f2f;
-            margin-bottom: 40px;
-        }
-        
-        .btn-start:hover {
-            background-color: #ff6e6e;
-            transform: translateY(-3px);
-        }
-
-        /* 6. Bagian Hadiah Mingguan */
-        .rewards-section {
-            background-color: #fff9c4; /* Kuning pastel */
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 40px;
-        }
-
-        .rewards-section h3 {
-            font-size: 1.4rem;
-            color: #f57f17;
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-        
-        .badges-grid {
-            display: grid;
-            gap: 10px;
-        }
-        
-        .badge-item {
-            background-color: #ffffff;
-            padding: 10px 15px;
-            border-radius: 10px;
-            font-size: 1rem;
-            text-align: left;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        /* 7. Navigasi Bawah */
-        .nav-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        
-        .nav-btn {
-            padding: 10px 20px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 0.9rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-            background-color: #f0f0f0;
-            color: #555;
-            border: 2px solid #ddd;
-        }
-        .nav-btn:hover {
-            transform: scale(1.05);
-            border-color: #ccc;
-        }
+        body { font-family: 'Baloo 2', sans-serif; margin: 0; background-color: #e3f2fd; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+        .container { text-align: center; background-color: #ffffff; padding: 30px 40px; border-radius: 25px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); max-width: 600px; width: 100%; }
+        .main-title { font-size: 2.5rem; font-weight: 800; color: #673ab7; margin-top: 0; margin-bottom: 5px; }
+        .subtitle { font-size: 1.5rem; font-weight: 700; color: #03a9f4; margin-top: 0; margin-bottom: 30px; }
+        .info-card { background-color: #ede7f6; border-radius: 15px; padding: 20px; margin-bottom: 25px; text-align: left; }
+        .info-card ul { list-style: none; padding: 0; margin: 0; }
+        .info-card li { margin-bottom: 10px; font-size: 1.1rem; }
+        .info-card li::before { content: '🔹'; margin-right: 10px; color: #7e57c2; }
+        .btn-start { display: block; width: 100%; padding: 20px; border-radius: 15px; text-decoration: none; font-weight: 800; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.2s ease, background-color 0.2s ease; box-sizing: border-box; background-color: #ff5252; color: white; border-bottom: 4px solid #d32f2f; margin-bottom: 40px; }
+        .btn-start:hover { background-color: #ff6e6e; transform: translateY(-3px); }
+        .rewards-section { background-color: #fff9c4; padding: 20px; border-radius: 15px; margin-bottom: 40px; }
+        .rewards-section h3 { font-size: 1.4rem; color: #f57f17; margin-top: 0; margin-bottom: 15px; }
+        #badges-grid { display: grid; gap: 10px; }
+        .badge-item { display: flex; align-items: center; gap: 15px; background-color: #ffffff; padding: 10px 15px; border-radius: 10px; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .badge-item img { width: 40px; height: 40px; border-radius: 50%; }
+        .badge-item strong { font-size: 1rem; }
+        .nav-buttons { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .nav-btn { padding: 10px 20px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 0.9rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.2s; background-color: #f0f0f0; color: #555; border: 2px solid #ddd; }
+        .nav-btn:hover { transform: scale(1.05); }
     </style>
 </head>
 <body>
-
-    <div class="container">
-        <!-- 1 & 2. Judul dan Subjudul -->
-        <h1 class="main-title">Tantangan Mingguan ⭐</h1>
-        <h2 class="subtitle">Tema Minggu Ini: 🌊 Hewan Laut</h2>
-
-        <!-- 3. Informasi Kuis -->
-        <div class="info-card">
-            <ul>
-                <li><strong>Jumlah Soal:</strong> 7 pertanyaan</li>
-                <li><strong>Waktu:</strong> Sekitar 10 menit</li>
-                <li><strong>Kesulitan:</strong> Lebih menantang dari kuis harian!</li>
-            </ul>
-        </div>
-
-        <!-- 4. Teaser Soal -->
-        <div class="teaser-box">
-            Contoh: Hewan apa yang dikenal sebagai mamalia laut terbesar? 🐋
-        </div>
-
-        <!-- 5. Tombol Mulai -->
-        <a href="quiz-play.html?mode=weekly" class="btn-start">Mulai Tantangan ➡️</a>
-
-        <!-- 6. Hadiah Mingguan -->
-        <div class="rewards-section">
-            <h3>Hadiah Mingguan 🎖️</h3>
-            <div class="badges-grid">
-                <div class="badge-item">🌟 <strong>Bintang Laut</strong> – Skor di atas 80%</div>
-                <div class="badge-item">🐠 <strong>Penjelajah Laut</strong> – Selesaikan semua soal</div>
-                <div class="badge-item">🎖️ <strong>Peserta Mingguan</strong> – Ikut tantangan</div>
-            </div>
-        </div>
-        
-        <!-- 7. Navigasi Bawah -->
-        <div class="nav-buttons">
-            <a href="quiz-menu.html" class="nav-btn">⬅️ Kembali ke Menu Kuis</a>
-            <a href="index.html" class="nav-btn">🏠 Beranda</a>
-        </div>
+    <div class="container" id="challenge-container">
+        <h1 class="main-title">Memuat Tantangan...</h1>
     </div>
 
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+    authDomain: "forumwidara.firebaseapp.com",
+    projectId: "forumwidara",
+    storageBucket: "forumwidara.firebasestorage.app",
+    messagingSenderId: "216895655168",
+    appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadWeeklyChallenge() {
+        const container = document.getElementById('challenge-container');
+        try {
+            const q = query(collection(db, "tantanganMingguan"), where("aktif", "==", true));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                container.innerHTML = `<h1>Oops!</h1><p>Sepertinya belum ada tantangan untuk minggu ini.</p><a href="index.html" class="nav-btn">Kembali ke Beranda</a>`;
+                return;
+            }
+
+            const challenge = querySnapshot.docs[0].data();
+            
+            // Render basic info
+            container.innerHTML = `
+                <h1 class="main-title">Tantangan Mingguan ⭐</h1>
+                <h2 class="subtitle" id="challenge-theme"></h2>
+                <div class="info-card">
+                    <ul>
+                        <li><strong>Kategori:</strong> <span id="challenge-category"></span></li>
+                        <li><strong>Kesulitan:</strong> Lebih menantang dari kuis harian!</li>
+                    </ul>
+                </div>
+                <a href="#" id="start-quiz-btn" class="btn-start">Mulai Tantangan ➡️</a>
+                <div class="rewards-section">
+                    <h3>Hadiah Mingguan 🎖️</h3>
+                    <div id="badges-grid"><p>Memuat hadiah...</p></div>
+                </div>
+                <div class="nav-buttons">
+                    <a href="index.html" class="nav-btn">🏠 Beranda</a>
+                </div>
+            `;
+            
+            document.getElementById('challenge-theme').textContent = challenge.tema;
+            document.getElementById('challenge-category').textContent = challenge.kategori;
+            document.getElementById('start-quiz-btn').href = `quiz-play.html?kategori=${challenge.kategori}&mode=weekly`;
+
+            // Load badges
+            const badgesGrid = document.getElementById('badges-grid');
+            badgesGrid.innerHTML = '';
+            for (const req of challenge.syaratLencana) {
+                const badgeDoc = await getDoc(doc(db, "lencana", req.lencanaId));
+                if (badgeDoc.exists()) {
+                    const badge = badgeDoc.data();
+                    const badgeItem = document.createElement('div');
+                    badgeItem.className = 'badge-item';
+                    badgeItem.innerHTML = `
+                        <img src="${badge.ikon}" alt="${badge.nama}" onerror="this.src='https://placehold.co/40x40/e2e8f0/4a5568?text=🏆'">
+                        <span><strong>${badge.nama}</strong> – Skor di atas ${req.syaratSkor - 1}</span>
+                    `;
+                    badgesGrid.appendChild(badgeItem);
+                }
+            }
+
+        } catch (error) {
+            console.error("Gagal memuat tantangan mingguan:", error);
+            container.innerHTML = `<h1>Error</h1><p>Gagal memuat data tantangan.</p>`;
+        }
+    }
+
+    loadWeeklyChallenge();
+</script>
 </body>
 </html>
 
