@@ -3,91 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buat Pertanyaan Baru - Komunitas Ceria 2SD</title>
+    <title>Buat Kuis & Tantangan - Komunitas Ceria 2SD</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Baloo 2', sans-serif; margin: 0; background-color: #f0f9ff; color: #333; }
         .container { max-width: 800px; margin: 30px auto; padding: 20px; }
-        .page-header h1 { font-size: 2.5rem; margin: 0; color: #0277bd; text-align: center; }
+        .page-header { text-align: center; margin-bottom: 30px; }
+        .page-header h1 { font-size: 2.5rem; margin: 0; color: #0277bd; }
         .form-container { background-color: white; padding: 30px; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
         .input-group { margin-bottom: 20px; }
-        .input-group label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 1.1rem; }
-        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #ccc; box-sizing: border-box; font-family: 'Baloo 2', sans-serif; font-size: 1rem; }
-        .kuota-container { text-align: center; padding: 15px; background-color: #e3f2fd; border: 2px solid #90caf9; border-radius: 10px; margin-bottom: 25px; font-weight: 700; }
-        .kuota-container.no-quota { background-color: #ffebee; border-color: #ef9a9a; color: #c62828; }
-        .checkbox-group { display: flex; align-items: center; background-color: #e8f5e9; padding: 15px; border-radius: 8px; border: 2px solid #a5d6a7; }
-        .checkbox-group input { width: 20px; height: 20px; margin-right: 12px; }
-        .checkbox-group label { margin: 0; font-weight: 700; color: #2e7d32; }
-        .answer-options { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 15px; }
-        .answer-option { display: flex; align-items: center; gap: 10px; }
-        .answer-option input[type="radio"] { flex-shrink: 0; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 700; }
+        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #ccc; box-sizing: border-box; font-size: 1rem; }
+        .kuota-container { text-align: center; padding: 15px; background-color: #e3f2fd; border-radius: 10px; margin-bottom: 25px; font-weight: 700; }
+        .kuota-container.no-quota { background-color: #ffebee; color: #c62828; }
+        .submit-section { text-align: center; margin-top: 30px; }
         .btn-submit { padding: 15px 40px; font-size: 1.2rem; font-weight: 800; background-color: #ff8f00; border-bottom: 4px solid #e65100; cursor: pointer; border: none; border-radius: 8px; color: white; }
-        .message { text-align: center; padding: 15px; border-radius: 8px; font-weight: 700; margin-top: 20px; display: none; }
+        .message { padding: 15px; border-radius: 8px; font-weight: 700; margin-top: 20px; display: none; }
         .message.success { background-color: #e8f5e9; color: #2e7d32; }
         .message.error { background-color: #ffebee; color: #c62828; }
-        .tombol-beranda { position: fixed; bottom: 20px; right: 20px; background-color: #FFC107; color: #333; padding: 12px 20px; border-radius: 50px; display: flex; align-items: center; gap: 8px; font-size: 1.1rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); z-index: 1000; }
-        /* ADMIN SECTION STYLE */
-        #admin-options-container { display: none; background-color: #fffde7; border: 2px dashed #fbc02d; padding: 20px; border-radius: 10px; margin-top: 25px; }
-        #admin-options-container h3 { margin-top: 0; color: #f57f17; }
+        .tombol-beranda { position: fixed; bottom: 20px; right: 20px; background-color: #FFC107; color: #333; padding: 12px 20px; border-radius: 50px; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.15); z-index: 1000; }
+        /* ADMIN SECTION */
+        #admin-panel { display: none; margin-top: 40px; border-top: 5px solid #0277bd; padding-top: 20px; }
+        #admin-panel h2 { text-align: center; color: #0277bd; }
+        .admin-form-container { background-color: #fffde7; border: 2px dashed #fbc02d; padding: 25px; border-radius: 15px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <header class="page-header"><h1>Buat Pertanyaan Baru ✍️</h1></header>
+        <header class="page-header"><h1>Buat Konten Edukasi ✍️</h1></header>
         <main>
-            <div id="kuota-container" class="kuota-container">Memeriksa kuota...</div>
-            <form id="question-form" class="form-container">
-                <fieldset id="form-fieldset" disabled>
+            <!-- Bagian untuk Pengguna Biasa -->
+            <div id="user-panel">
+                <div id="kuota-container" class="kuota-container">Memeriksa kuota...</div>
+                <form id="question-form" class="form-container">
+                    <fieldset id="form-fieldset" disabled>
+                        <h3>Buat Pertanyaan Baru</h3>
+                        <div class="input-group">
+                            <label for="kategori-pilihan">Pilih Kategori Soal</label>
+                            <select id="kategori-pilihan" required>
+                                <option value="">-- Pilih --</option>
+                                <option value="matematika">Matematika</option>
+                                <option value="bahasa_indonesia">Bahasa Indonesia</option>
+                                <option value="ipa">IPA</option>
+                                <option value="ips">IPS</option>
+                                <option value="campuran_seru">Teka Teki Seru</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="pertanyaan-teks">Tulis Pertanyaan</label>
+                            <textarea id="pertanyaan-teks" required rows="3"></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label>Tulis 4 Pilihan Jawaban (Pilihan pertama adalah jawaban benar)</label>
+                            <input type="text" id="jawaban-benar" placeholder="Jawaban Benar" required style="margin-bottom:10px;">
+                            <input type="text" id="pilihan-salah1" placeholder="Pilihan Salah 1" required style="margin-bottom:10px;">
+                            <input type="text" id="pilihan-salah2" placeholder="Pilihan Salah 2" required style="margin-bottom:10px;">
+                            <input type="text" id="pilihan-salah3" placeholder="Pilihan Salah 3" required>
+                        </div>
+                        <div class="submit-section">
+                            <button type="submit" class="btn-submit">Simpan Pertanyaan</button>
+                        </div>
+                    </fieldset>
+                    <div id="user-message-box" class="message"></div>
+                </form>
+            </div>
+
+            <!-- Bagian Khusus Admin -->
+            <div id="admin-panel">
+                <form id="challenge-form" class="admin-form-container">
+                    <h2>Panel Admin: Buat Tantangan Mingguan</h2>
                     <div class="input-group">
-                        <label for="kategori-pilihan">Pilih Kategori Soal</label>
-                        <select id="kategori-pilihan" required>
-                            <option value="">-- Pilih Kategori --</option>
+                        <label for="challenge-tema">Tema Tantangan</label>
+                        <input type="text" id="challenge-tema" placeholder="Contoh: Petualangan Sains" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="challenge-kategori">Kategori Soal</label>
+                        <select id="challenge-kategori" required>
+                            <option value="">-- Pilih Kategori Soal --</option>
                             <option value="matematika">Matematika</option>
                             <option value="bahasa_indonesia">Bahasa Indonesia</option>
-                            <option value="bahasa_inggris">Bahasa Inggris</option>
-                            <option value="ipa">Ilmu Pengetahuan Alam</option>
-                             <option value="ips">Ilmu Sosial</option>
-                            <!-- Tambahkan kategori lain jika perlu -->
+                            <option value="ipa">IPA</option>
+                            <option value="ips">IPS</option>
+                            <option value="campuran_seru">Teka Teki Seru</option>
                         </select>
                     </div>
                     <div class="input-group">
-                        <label for="pertanyaan-teks">Tulis Pertanyaan</label>
-                        <textarea id="pertanyaan-teks" required rows="3"></textarea>
+                        <label for="challenge-lencana">Pilih Lencana Hadiah</label>
+                        <select id="challenge-lencana" required></select>
                     </div>
                     <div class="input-group">
-                        <label>Tulis 4 Pilihan Jawaban</label>
-                        <div id="answer-options-container" class="answer-options"></div>
+                        <label for="challenge-timer">Total Waktu Pengerjaan (Menit)</label>
+                        <input type="number" id="challenge-timer" min="1" placeholder="Contoh: 5" required>
                     </div>
-
-                    <!-- ADMIN ONLY SECTION -->
-                    <div id="admin-options-container">
-                        <h3>Opsi Khusus Admin</h3>
-                        <div class="input-group checkbox-group">
-                            <input type="checkbox" id="is-tantangan">
-                            <label for="is-tantangan">Jadikan Soal Tantangan Mingguan?</label>
-                        </div>
-                        <div class="input-group" id="timer-input-container" style="display: none;">
-                            <label for="timer-detik">Timer per Soal (detik)</label>
-                            <input type="number" id="timer-detik" placeholder="Contoh: 30" min="5">
-                        </div>
+                    <div class="input-group">
+                        <label for="challenge-skor">Syarat Skor Minimum Lulus (%)</label>
+                        <input type="number" id="challenge-skor" min="1" max="100" placeholder="Contoh: 80" required>
                     </div>
-
-                    <div style="text-align: center; margin-top: 30px;">
-                        <button type="submit" class="btn-submit">Simpan Pertanyaan</button>
+                    <div class="submit-section">
+                        <button type="submit" class="btn-submit" style="background-color: #2e7d32; border-bottom-color: #1b5e20;">Aktifkan Tantangan Ini</button>
                     </div>
-                </fieldset>
-                <div id="message-box" class="message"></div>
-            </form>
+                </form>
+                 <div id="admin-message-box" class="message"></div>
+            </div>
         </main>
     </div>
-    <a href="index.html" class="tombol-beranda"><span>🏠</span><span>Beranda</span></a>
+    <a href="index.html" class="tombol-beranda">🏠</a>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-        import { getFirestore, collection, doc, Timestamp, writeBatch, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, Timestamp, writeBatch, query, where, getDocs, addDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
@@ -101,121 +128,126 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        // PENTING: Ganti dengan UID akun admin Anda
-        const ADMIN_UIDS = ["iEko5tJpuMhywhA3dv63WAeqGw82"];
+        const ADMIN_UIDS = ["ganti_dengan_uid_admin_anda"]; // <<< GANTI INI
         let currentUser = null;
-        let isAdmin = false;
         const MAX_QUOTA = 5;
-
-        const formFieldset = document.getElementById('form-fieldset');
-        const adminOptionsContainer = document.getElementById('admin-options-container');
-        const isTantanganCheckbox = document.getElementById('is-tantangan');
-        const timerInputContainer = document.getElementById('timer-input-container');
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                isAdmin = ADMIN_UIDS.includes(user.uid);
-                
-                if (isAdmin) {
-                    adminOptionsContainer.style.display = 'block';
-                    document.getElementById('kuota-container').textContent = "Anda login sebagai Admin. Kuota tidak terbatas.";
-                    formFieldset.disabled = false;
-                } else {
-                    await checkAndDisplayQuota(user);
+                if (ADMIN_UIDS.includes(user.uid)) {
+                    document.getElementById('admin-panel').style.display = 'block';
+                    await loadLencanaDropdown();
                 }
-                renderAnswerOptions();
+                await checkAndDisplayQuota(user);
             } else {
                 window.location.href = 'login.html';
             }
         });
 
-        isTantanganCheckbox.addEventListener('change', () => {
-            timerInputContainer.style.display = isTantanganCheckbox.checked ? 'block' : 'none';
-        });
-
+        // --- LOGIKA UNTUK PENGGUNA BIASA ---
         async function checkAndDisplayQuota(user) {
+            const kuotaContainer = document.getElementById('kuota-container');
+            const formFieldset = document.getElementById('form-fieldset');
             const startOfToday = new Date();
             startOfToday.setHours(0, 0, 0, 0);
-            const historyRef = collection(db, "userData", user.uid, "questionCreationTimestamp");
-            const q = query(historyRef, where("timestamp", ">=", Timestamp.fromDate(startOfToday)));
-            const querySnapshot = await getDocs(q);
-            const sisaKuota = MAX_QUOTA - querySnapshot.size;
+            const q = query(collection(db, "userData", user.uid, "questionCreationTimestamp"), where("timestamp", ">=", Timestamp.fromDate(startOfToday)));
+            const snapshot = await getDocs(q);
+            const sisaKuota = MAX_QUOTA - snapshot.size;
 
             if (sisaKuota > 0) {
-                document.getElementById('kuota-container').textContent = `Sisa kuota membuat pertanyaan hari ini: ${sisaKuota}`;
+                kuotaContainer.textContent = `Sisa kuota membuat pertanyaan hari ini: ${sisaKuota}`;
                 formFieldset.disabled = false;
             } else {
-                document.getElementById('kuota-container').textContent = `Kuota harian Anda sudah habis. Coba lagi besok!`;
+                kuotaContainer.textContent = `Kuota harian Anda sudah habis. Coba lagi besok!`;
                 formFieldset.disabled = true;
             }
         }
 
         document.getElementById('question-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            formFieldset.disabled = true;
-
+            document.getElementById('form-fieldset').disabled = true;
             try {
-                if (!isAdmin) {
-                    const startOfToday = new Date();
-                    startOfToday.setHours(0, 0, 0, 0);
-                    const qCheck = query(collection(db, "userData", currentUser.uid, "questionCreationTimestamp"), where("timestamp", ">=", Timestamp.fromDate(startOfToday)));
-                    const snapshot = await getDocs(qCheck);
-                    if (snapshot.size >= MAX_QUOTA) throw new Error("Kuota harian Anda sudah habis.");
-                }
+                // Double check kuota before submitting
+                const startOfToday = new Date();
+                startOfToday.setHours(0, 0, 0, 0);
+                const qCheck = query(collection(db, "userData", currentUser.uid, "questionCreationTimestamp"), where("timestamp", ">=", Timestamp.fromDate(startOfToday)));
+                const snapshot = await getDocs(qCheck);
+                if (snapshot.size >= MAX_QUOTA) throw new Error("Kuota harian Anda sudah habis.");
 
                 const batch = writeBatch(db);
                 const pertanyaanRef = doc(collection(db, "pertanyaan"));
                 
-                const jawabanTeksInputs = document.querySelectorAll('.jawaban-teks');
-                const pilihanJawaban = Array.from(jawabanTeksInputs).map(input => input.value);
-                const correctIndex = document.querySelector('input[name="correct-answer"]:checked').value;
+                const pilihanJawaban = [
+                    document.getElementById('jawaban-benar').value,
+                    document.getElementById('pilihan-salah1').value,
+                    document.getElementById('pilihan-salah2').value,
+                    document.getElementById('pilihan-salah3').value
+                ];
 
                 const dataPertanyaan = {
                     teksPertanyaan: document.getElementById('pertanyaan-teks').value,
                     kategori: document.getElementById('kategori-pilihan').value,
                     dibuatOleh: currentUser.uid,
                     dibuatPada: Timestamp.now(),
-                    tipeSoal: "pilihan_ganda",
-                    pilihanJawaban: pilihanJawaban,
-                    jawabanBenar: pilihanJawaban[correctIndex],
-                    // Logika baru untuk admin
-                    isTantangan: isAdmin && isTantanganCheckbox.checked,
-                    timerDetik: isAdmin && isTantanganCheckbox.checked ? parseInt(document.getElementById('timer-detik').value) || 30 : null
+                    pilihanJawaban: pilihanJawaban.sort(() => Math.random() - 0.5), // Acak posisi jawaban
+                    jawabanBenar: document.getElementById('jawaban-benar').value
                 };
-
                 batch.set(pertanyaanRef, dataPertanyaan);
 
-                if (!isAdmin) {
-                    const creationRecordRef = doc(collection(db, "userData", currentUser.uid, "questionCreationTimestamp"));
-                    batch.set(creationRecordRef, { timestamp: Timestamp.now() });
-                }
+                const creationRecordRef = doc(collection(db, "userData", currentUser.uid, "questionCreationTimestamp"));
+                batch.set(creationRecordRef, { timestamp: Timestamp.now() });
                 
                 await batch.commit();
-                showMessage('success', 'Pertanyaan berhasil disimpan!');
+                showMessage('user-message-box', 'success', 'Pertanyaan berhasil disimpan!');
                 e.target.reset();
-                timerInputContainer.style.display = 'none';
-
             } catch (error) {
-                showMessage('error', error.message);
+                showMessage('user-message-box', 'error', error.message);
             } finally {
-                if (!isAdmin) await checkAndDisplayQuota(currentUser);
-                else formFieldset.disabled = false;
+                await checkAndDisplayQuota(currentUser);
             }
         });
 
-        function renderAnswerOptions() {
-            const container = document.getElementById('answer-options-container');
-            container.innerHTML = Array.from({ length: 4 }, (_, i) => `
-                <div class="answer-option">
-                    <input type="radio" name="correct-answer" value="${i}" ${i === 0 ? 'checked' : ''} required>
-                    <input type="text" class="jawaban-teks" placeholder="Pilihan Jawaban ${String.fromCharCode(65 + i)}" required>
-                </div>
-            `).join('');
+        // --- LOGIKA KHUSUS ADMIN ---
+        async function loadLencanaDropdown() {
+            const dropdown = document.getElementById('challenge-lencana');
+            const q = query(collection(db, "lencana"));
+            const snapshot = await getDocs(q);
+            dropdown.innerHTML = '<option value="">-- Pilih Lencana --</option>';
+            snapshot.forEach(doc => {
+                dropdown.innerHTML += `<option value="${doc.id}">${doc.data().nama}</option>`;
+            });
         }
-        
-        function showMessage(type, text) {
-            const messageBox = document.getElementById('message-box');
+
+        document.getElementById('challenge-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                // 1. Nonaktifkan tantangan lama
+                const q = query(collection(db, "tantanganMingguan"), where("aktif", "==", true));
+                const activeChallenges = await getDocs(q);
+                for (const docSnap of activeChallenges.docs) {
+                    await updateDoc(doc(db, "tantanganMingguan", docSnap.id), { aktif: false });
+                }
+            
+                // 2. Buat tantangan baru
+                await addDoc(collection(db, "tantanganMingguan"), {
+                    tema: document.getElementById('challenge-tema').value,
+                    kategori: document.getElementById('challenge-kategori').value,
+                    lencanaId: document.getElementById('challenge-lencana').value,
+                    timerMenit: parseInt(document.getElementById('challenge-timer').value),
+                    syaratSkor: parseInt(document.getElementById('challenge-skor').value),
+                    aktif: true,
+                    createdAt: serverTimestamp()
+                });
+                showMessage('admin-message-box', 'success', 'Tantangan baru berhasil diaktifkan!');
+                e.target.reset();
+            } catch (error) {
+                showMessage('admin-message-box', 'error', 'Gagal mengaktifkan tantangan.');
+            }
+        });
+
+        function showMessage(boxId, type, text) {
+            const messageBox = document.getElementById(boxId);
             messageBox.className = `message ${type}`;
             messageBox.textContent = text;
             messageBox.style.display = 'block';
