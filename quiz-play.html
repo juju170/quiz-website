@@ -130,7 +130,6 @@
                     questionData.options = data.pilihanJawaban;
                     questionData.explanations = data.penjelasanPilihan || [];
                 }
-                // FIX: Reading 'pilihanHuruf' field for susun_huruf questions
                 if (type === 'susun_huruf') {
                     questionData.letterPool = data.pilihanHuruf || data.jawabanBenar;
                 }
@@ -176,8 +175,13 @@
             if (isHarian) {
                 q = query(pertanyaanRef, where("isHarian", "==", true), limit(10));
             } else if (category) {
-                q = query(pertanyaanRef, where("kategori", "==", category), where("isHarian", "!=", true), limit(10));
+                // --- PERBAIKAN ---
+                // Kueri disederhanakan untuk hanya mencari berdasarkan kategori.
+                // Ini akan memperbaiki masalah di mana soal tidak muncul karena filter ganda
+                // dan juga akan menyertakan soal harian dalam kuis kategori yang relevan.
+                q = query(pertanyaanRef, where("kategori", "==", category), limit(10));
             } else {
+                 // Jika tidak ada kategori, ambil soal acak yang bukan soal harian
                 q = query(pertanyaanRef, where("isHarian", "!=", true), limit(10));
             }
 
@@ -185,7 +189,7 @@
                 allQuestions = await fetchQuestions(q);
 
                 if (allQuestions.length === 0) {
-                    quizContainer.innerHTML = '<h2>Oops! Tidak ada pertanyaan untuk kategori ini.</h2><a href="index.html">Kembali</a>';
+                    quizContainer.innerHTML = '<h2>Oops! Tidak ada pertanyaan untuk kategori ini. Coba buat soal atau pilih kategori lain!</h2><a href="index.html">Kembali</a>';
                     return;
                 }
                 allQuestions = shuffle(allQuestions);
@@ -217,7 +221,6 @@
                 mediaContainer.innerHTML += `<audio controls src="${getGoogleDriveDirectLink(questionData.audioUrl)}"></audio>`;
             }
 
-            // FIX: Added logic to call rendering functions for 'esai' and 'susun_huruf'
             if (questionData.type === 'pilihan_ganda') {
                 renderPilihanGandaUI(questionData);
             } else if (questionData.type === 'susun_huruf') {
@@ -239,7 +242,6 @@
             });
         }
         
-        // --- START: NEW RENDERING AND CHECKING FUNCTIONS ---
         function renderSusunHurufUI(question) {
             const answerOptions = document.getElementById('answer-options');
             const wrapper = document.createElement('div');
@@ -328,7 +330,6 @@
         
         function checkEsaiAnswer(correctAnswer) {
             const userAnswer = document.getElementById('esai-answer').value;
-            // Simple check: if user's answer includes the keyword. Case-insensitive.
             if (userAnswer.toLowerCase().includes(correctAnswer.toLowerCase())) {
                  correctSound.play().catch(e => console.warn(e.message));
                  showFeedback(true, "Jawabanmu Tepat!");
@@ -338,7 +339,6 @@
             }
              document.getElementById('check-esai-btn').disabled = true;
         }
-        // --- END: NEW FUNCTIONS ---
 
         function checkMultipleChoiceAnswer(button, selectedAnswer, correctAnswer, originalOptions, explanations) {
             document.querySelectorAll('.answer-btn').forEach(btn => btn.disabled = true);
@@ -387,7 +387,7 @@
             } else if (percentage >= 70) {
                 result = { emoji: '🤩', message: 'WAH KAMU HEBAT', sound: resultSounds.hebat };
             } else if (percentage >= 50) {
-                result = { emoji: '🥰', message: 'WAH KAMU KEREN!', sound: resultSounds.keren };
+                result = { emoji: '👍', message: 'WAH KAMU KEREN!', sound: resultSounds.keren };
             } else {
                 result = { emoji: '🤔', message: 'BELAJAR LAGI YA!', sound: resultSounds.belajar };
             }
@@ -431,5 +431,4 @@
     </script>
 </body>
 </html>
-
 
