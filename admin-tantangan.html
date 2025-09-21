@@ -13,6 +13,7 @@
             margin: 0;
             background-color: #f4f6f8;
             color: #333;
+            padding-bottom: 100px; /* Memberi ruang untuk tombol beranda */
         }
         .container {
             max-width: 1000px;
@@ -123,7 +124,37 @@
         }
         .message.success { background-color: #c6f6d5; color: #2f855a; }
         .message.error { background-color: #fed7d7; color: #c53030; }
-        .back-link { display: block; text-align: center; margin-top: 30px; color: #4a5568; font-weight: 700; }
+        
+        /* === STYLE TOMBOL BERANDA BARU === */
+        .tombol-beranda {
+            position: fixed; /* Membuat posisi tombol tetap saat di-scroll */
+            bottom: 20px;
+            right: 20px;
+            
+            background-color: #FFC107; /* Warna kuning amber yang cerah */
+            color: #333; /* Warna teks gelap agar mudah dibaca */
+            
+            padding: 12px 20px; /* Jarak antara teks dan tepi tombol */
+            border-radius: 50px; /* Sudut cembung/bulat sempurna (pill shape) */
+            
+            display: flex; /* Mengaktifkan flexbox untuk alignment */
+            align-items: center; /* Menengahkan teks dan ikon secara vertikal */
+            gap: 8px; /* Jarak antara emoji dan teks "Beranda" */
+            
+            font-family: 'Baloo 2', sans-serif; /* Menggunakan font yang sesuai tema */
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none; /* Menghilangkan garis bawah pada link */
+            
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Efek bayangan halus */
+            transition: transform 0.2s ease, box-shadow 0.2s ease; /* Animasi halus */
+            z-index: 1000; /* Memastikan tombol selalu di lapisan paling atas */
+        }
+
+        .tombol-beranda:hover {
+            transform: translateY(-3px); /* Sedikit terangkat saat disentuh */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Bayangan lebih jelas */
+        }
     </style>
 </head>
 <body>
@@ -166,8 +197,13 @@
                 </div>
             </section>
         </div>
-        <a href="index.html" class="back-link">🏠 Kembali ke Beranda</a>
     </div>
+    
+    <!-- === TOMBOL BERANDA BARU === -->
+    <a href="index.html" class="tombol-beranda" title="Kembali ke Beranda">
+        <span>🏠</span>
+        <span>Beranda</span>
+    </a>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
