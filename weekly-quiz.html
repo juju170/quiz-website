@@ -8,151 +8,32 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Baloo 2', sans-serif;
-            margin: 0;
-            background-color: #ede7f6;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .container {
-            width: 100%;
-            max-width: 800px;
-            background-color: white;
-            padding: 30px 40px;
-            border-radius: 25px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-        }
-        #loading-state, #quiz-state, #result-state {
-            text-align: center;
-        }
-        .question-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .question-header h2 {
-            font-size: 1.8rem;
-            color: #512da8;
-            margin: 0;
-        }
-        .question-text {
-            font-size: 1.5rem;
-            margin-bottom: 30px;
-            text-align: center;
-            min-height: 60px;
-        }
-        .options-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        .option-btn {
-            width: 100%;
-            padding: 20px;
-            font-size: 1.2rem;
-            font-weight: 700;
-            border-radius: 15px;
-            border: 3px solid #d1c4e9;
-            background-color: #f5f3f8;
-            cursor: pointer;
-            transition: background-color 0.2s, border-color 0.2s;
-        }
-        .option-btn:hover {
-            background-color: #e6e0f1;
-        }
-        .option-btn.selected {
-            background-color: #b39ddb;
-            color: white;
-            border-color: #512da8;
-        }
-        .quiz-footer {
-            margin-top: 30px;
-            display: flex;
-            justify-content: flex-end;
-        }
-        .btn-next {
-            padding: 12px 30px;
-            font-size: 1.2rem;
-            font-weight: 800;
-            border: none;
-            border-radius: 30px;
-            background-color: #ffc107;
-            color: #333;
-            cursor: pointer;
-            border-bottom: 4px solid #ffa000;
-        }
+        body { font-family: 'Baloo 2', sans-serif; margin: 0; background-color: #ede7f6; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+        .container { width: 100%; max-width: 800px; background-color: white; padding: 30px 40px; border-radius: 25px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .timer-display { font-size: 1.8rem; font-weight: 800; color: #c62828; background-color: #ffebee; padding: 5px 15px; border-radius: 10px; }
+        .question-counter { font-size: 1.2rem; font-weight: 700; }
+        .question-text { font-size: 1.5rem; margin-bottom: 30px; text-align: center; min-height: 60px; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .option-btn { width: 100%; padding: 20px; font-size: 1.2rem; font-weight: 700; border-radius: 15px; border: 3px solid #d1c4e9; cursor: pointer; }
+        .option-btn.correct { background-color: #a5d6a7; border-color: #388e3c; }
+        .option-btn.wrong { background-color: #ef9a9a; border-color: #c62828; }
+        .btn-next { padding: 12px 30px; font-size: 1.2rem; font-weight: 800; border: none; border-radius: 30px; background-color: #ffc107; cursor: pointer; display: none; }
         .result-title { font-size: 2.8rem; font-weight: 800; color: #673ab7; }
-        .result-score { font-size: 1.5rem; color: #555; margin-bottom: 30px; }
-        .result-score span { font-size: 2rem; font-weight: 800; color: #03a9f4; }
-        .badge-unlocked {
-            background-color: #fff9c4;
-            padding: 25px;
-            border-radius: 20px;
-            margin-bottom: 30px;
-            border: 3px solid #ffecb3;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .badge-unlocked h3 { font-size: 1.6rem; color: #f57f17; margin: 0 0 10px 0; }
+        .badge-unlocked { background-color: #fff9c4; padding: 25px; border-radius: 20px; margin-bottom: 30px; border: 3px solid #ffecb3; }
         .badge-info { display: flex; align-items: center; justify-content: center; gap: 20px; }
-        .badge-info img { width: 80px; height: 80px; border-radius: 50%; }
-        .badge-info p { margin: 0; font-size: 1.2rem; font-weight: 700; }
-
-        .result-feedback { font-size: 1.2rem; margin-bottom: 30px; }
-        .result-actions a {
-            padding: 15px 25px;
-            text-decoration: none;
-            font-weight: 700;
-            border-radius: 30px;
-            background-color: #4caf50;
-            color: white;
-            border-bottom: 4px solid #388e3c;
-        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div id="loading-state">
-            <h1>Mempersiapkan Tantangan...</h1>
-            <p>Harap tunggu sebentar ya!</p>
-        </div>
-
-        <div id="quiz-state" style="display: none;">
-            <div class="question-header">
-                <h2 id="question-counter">Pertanyaan 1/10</h2>
-            </div>
-            <p id="question-text">Pertanyaan akan muncul di sini.</p>
-            <div id="options-grid" class="options-grid"></div>
-            <div class="quiz-footer">
-                <button id="next-button" class="btn-next">Lanjut</button>
-            </div>
-        </div>
-
-        <div id="result-state" style="display: none;">
-            <h1 class="result-title">Kuis Selesai!</h1>
-            <p class="result-score">Skor Kamu: <span id="final-score">0</span>%</p>
-            <div id="badge-notification" style="display: none;"></div>
-            <p id="result-feedback" class="result-feedback">Pesan hasil akan muncul di sini.</p>
-            <div class="result-actions">
-                <a href="index.html">Kembali ke Beranda</a>
-            </div>
-        </div>
+    <div class="container" id="container">
+        <div id="loading-state" style="text-align: center;"><h1>Mempersiapkan Tantangan...</h1></div>
     </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, getDocs, query, where, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getFirestore, collection, getDocs, query, where, doc, getDoc, setDoc, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-    // Ganti dengan konfigurasi Firebase Anda
     const firebaseConfig = {
         apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
         authDomain: "forumwidara.firebaseapp.com",
@@ -161,161 +42,119 @@
         messagingSenderId: "216895655168",
         appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
     };
-
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const loadingState = document.getElementById('loading-state');
-    const quizState = document.getElementById('quiz-state');
-    const resultState = document.getElementById('result-state');
+    const container = document.getElementById('container');
+    let currentUser, questions = [], currentQuestionIndex = 0, userAnswers = [], activeChallenge = null, questionTimerInterval;
 
-    let currentUser = null;
-    let questions = [];
-    let currentQuestionIndex = 0;
-    let userAnswers = [];
-    let activeChallenge = null;
-
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            currentUser = user;
-            startQuiz();
-        } else {
-            alert("Kamu harus login untuk mengikuti tantangan mingguan!");
-            window.location.href = 'login.html';
-        }
-    });
+    onAuthStateChanged(auth, (user) => user ? (currentUser = user, startQuiz()) : (window.location.href = 'login.html'));
     
     async function startQuiz() {
         const challengeQuery = query(collection(db, "tantanganMingguan"), where("aktif", "==", true));
         const challengeSnapshot = await getDocs(challengeQuery);
-
         if (challengeSnapshot.empty) {
-            loadingState.innerHTML = "<h1>Oops!</h1><p>Belum ada tantangan aktif minggu ini.</p>";
+            container.innerHTML = "<h1 style='text-align: center;'>Oops! Belum ada tantangan aktif.</h1>";
             return;
         }
-        activeChallenge = challengeSnapshot.docs[0].data();
-        activeChallenge.id = challengeSnapshot.docs[0].id;
+        activeChallenge = { id: challengeSnapshot.docs[0].id, ...challengeSnapshot.docs[0].data() };
 
-        // PERUBAHAN: Mengambil soal dari koleksi "soal" yang sudah disamakan
-        const questionsQuery = query(collection(db, "soal"), where("kategori", "==", activeChallenge.kategori));
+        const questionsQuery = query(collection(db, "pertanyaan"), where("kategori", "==", activeChallenge.kategori), where("isTantangan", "==", true), limit(10));
         const questionsSnapshot = await getDocs(questionsQuery);
-
         if (questionsSnapshot.empty) {
-            loadingState.innerHTML = `<h1>Oops!</h1><p>Belum ada soal untuk kategori "${activeChallenge.kategori}". Pastikan kategori di tantangan dan soal sama persis.</p>`;
+            container.innerHTML = `<h1 style='text-align: center;'>Oops! Belum ada soal tantangan untuk kategori "${activeChallenge.kategori}".</h1>`;
             return;
         }
-
-        questions = questionsSnapshot.docs.map(doc => doc.data());
-        questions.sort(() => Math.random() - 0.5);
-        
-        loadingState.style.display = 'none';
-        quizState.style.display = 'block';
+        questions = questionsSnapshot.docs.map(doc => doc.data()).sort(() => 0.5 - Math.random());
         displayQuestion();
     }
 
     function displayQuestion() {
-        if (currentQuestionIndex >= questions.length) {
-            showResults();
-            return;
-        }
-
         const question = questions[currentQuestionIndex];
-        document.getElementById('question-counter').textContent = `Pertanyaan ${currentQuestionIndex + 1}/${questions.length}`;
-        document.getElementById('question-text').textContent = question.pertanyaan;
-
+        container.innerHTML = `
+            <div class="quiz-header">
+                <div class="question-counter">Soal ${currentQuestionIndex + 1}/${questions.length}</div>
+                <div id="timer-display" class="timer-display">--</div>
+            </div>
+            <p class="question-text">${question.teksPertanyaan}</p>
+            <div id="options-grid" class="options-grid"></div>
+            <div style="text-align:center; margin-top:20px;"><button id="next-button" class="btn-next">Lanjut</button></div>
+        `;
         const optionsGrid = document.getElementById('options-grid');
-        optionsGrid.innerHTML = '';
-        question.pilihan.forEach(optionText => {
+        question.pilihanJawaban.forEach(option => {
             const button = document.createElement('button');
             button.className = 'option-btn';
-            button.textContent = optionText;
-            button.onclick = () => selectOption(button, optionText);
+            button.textContent = option;
+            button.onclick = () => checkAnswer(button, option);
             optionsGrid.appendChild(button);
         });
-
-        if (currentQuestionIndex === questions.length - 1) {
-            document.getElementById('next-button').textContent = "Selesai!";
-        } else {
-            document.getElementById('next-button').textContent = "Lanjut";
-        }
-    }
-
-    function selectOption(button, optionText) {
-        document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
-        button.classList.add('selected');
-        userAnswers[currentQuestionIndex] = optionText;
-    }
-
-    document.getElementById('next-button').addEventListener('click', () => {
-        if (userAnswers[currentQuestionIndex] === undefined) {
-            alert("Pilih jawaban dulu ya!");
-            return;
-        }
-
-        if (currentQuestionIndex < questions.length - 1) {
+        document.getElementById('next-button').onclick = () => {
             currentQuestionIndex++;
-            displayQuestion();
-        } else {
-            showResults();
+            currentQuestionIndex < questions.length ? displayQuestion() : showResults();
+        };
+        startTimer(question.timerDetik || 30);
+    }
+
+    function startTimer(duration) {
+        let timeLeft = duration;
+        const timerDisplay = document.getElementById('timer-display');
+        timerDisplay.textContent = timeLeft;
+        questionTimerInterval = setInterval(() => {
+            timeLeft--;
+            timerDisplay.textContent = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(questionTimerInterval);
+                checkAnswer(null, "waktu_habis"); // Jawaban salah karena waktu habis
+            }
+        }, 1000);
+    }
+
+    function checkAnswer(selectedButton, selectedAnswer) {
+        clearInterval(questionTimerInterval);
+        const question = questions[currentQuestionIndex];
+        userAnswers[currentQuestionIndex] = selectedAnswer;
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.disabled = true;
+            if (btn.textContent === question.jawabanBenar) btn.classList.add('correct');
+        });
+        if (selectedButton && selectedAnswer !== question.jawabanBenar) {
+            selectedButton.classList.add('wrong');
         }
-    });
+        document.getElementById('next-button').style.display = 'inline-block';
+    }
 
     async function showResults() {
-        let correctAnswers = 0;
-        for (let i = 0; i < questions.length; i++) {
-            // PERUBAHAN: Memeriksa field "jawaban" yang sudah disamakan
-            if (userAnswers[i] === questions[i].jawaban) {
-                correctAnswers++;
-            }
-        }
+        let correctAnswers = questions.filter((q, i) => userAnswers[i] === q.jawabanBenar).length;
         const score = Math.round((correctAnswers / questions.length) * 100);
-
-        quizState.style.display = 'none';
-        resultState.style.display = 'block';
-
-        document.getElementById('final-score').textContent = score;
-
-        const badgeRequirement = activeChallenge.syaratLencana[0];
-        if (score >= badgeRequirement.syaratSkor) {
-            document.getElementById('result-feedback').textContent = "Luar biasa! Kamu berhasil menyelesaikan tantangan!";
-            await awardBadge(badgeRequirement.lencanaId);
-        } else {
-            document.getElementById('result-feedback').textContent = "Kerja bagus! Terus berlatih ya, coba lagi di tantangan berikutnya!";
-        }
-    }
-    
-    async function awardBadge(badgeId) {
-        const badgeDocRef = doc(db, "lencana", badgeId);
-        const badgeDoc = await getDoc(badgeDocRef);
-
-        if (!badgeDoc.exists()) {
-            console.error("Lencana dengan ID " + badgeId + " tidak ditemukan!");
-            return;
-        }
-        const badgeData = badgeDoc.data();
-
-        // Menyimpan lencana ke sub-koleksi pengguna, ini sudah benar.
-        const userBadgeRef = doc(db, `users/${currentUser.uid}/lencanaKu`, badgeId);
-        await setDoc(userBadgeRef, {
-            namaLencana: badgeData.nama,
-            ikonLencana: badgeData.ikon,
-            diperolehPada: serverTimestamp()
-        });
         
-        const badgeNotif = document.getElementById('badge-notification');
-        badgeNotif.innerHTML = `
-            <div class="badge-unlocked">
-                <h3>Selamat, Kamu Mendapatkan Lencana Baru!</h3>
-                <div class="badge-info">
-                    <img src="${badgeData.ikon}" alt="${badgeData.nama}">
-                    <p>${badgeData.nama}</p>
-                </div>
-            </div>
-        `;
-        badgeNotif.style.display = 'block';
+        let resultHTML = `<div style="text-align:center;">
+            <h1 class="result-title">Kuis Selesai!</h1>
+            <p>Skor Kamu: <span style="font-size: 2rem; font-weight: 800;">${score}%</span></p>`;
+
+        if (score >= activeChallenge.syaratSkor) {
+            const badge = await getDoc(doc(db, "lencana", activeChallenge.lencanaId));
+            if (badge.exists()) {
+                const badgeData = badge.data();
+                await setDoc(doc(db, `users/${currentUser.uid}/lencanaKu`, activeChallenge.lencanaId), {
+                    namaLencana: badgeData.nama, ikonLencana: badgeData.ikon, diperolehPada: serverTimestamp()
+                });
+                resultHTML += `<div class="badge-unlocked">
+                    <h3>Selamat, Kamu Lulus & Mendapat Lencana!</h3>
+                    <div class="badge-info">
+                        <img src="${badgeData.ikon}" alt="${badgeData.nama}" width="80" height="80" style="border-radius:50%;">
+                        <p>${badgeData.nama}</p>
+                    </div>
+                </div>`;
+            }
+        } else {
+            resultHTML += `<p>Skor kamu belum mencapai syarat kelulusan (${activeChallenge.syaratSkor}%). Coba lagi di tantangan berikutnya!</p>`;
+        }
+        resultHTML += `<a href="index.html" style="text-decoration:none; padding:15px 25px; background-color: #4caf50; color:white; border-radius:30px;">Kembali ke Beranda</a></div>`;
+        container.innerHTML = resultHTML;
     }
 </script>
 </body>
 </html>
+
 
