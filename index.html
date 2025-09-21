@@ -65,6 +65,9 @@
         .btn.tertiary:hover { background-color: #42a5f5; }
         .btn.admin-badge { background-color: #ba68c8; }
         .btn.admin-badge:hover { background-color: #ab47bc; }
+        /* Style baru untuk tombol admin tantangan */
+        .btn.admin-challenge { background-color: #9575cd; }
+        .btn.admin-challenge:hover { background-color: #7e57c2; }
 
         .menu-grid {
             display: grid;
@@ -147,6 +150,8 @@
             <a href="quiz-menu.html" class="btn">Mulai Kuis 🎲</a>
             <a href="buat-kuis.html" class="btn secondary">Tambah Soal 📚</a>
             <a href="kelola-kuis.html" id="kelola-kuis-btn" class="btn tertiary" style="display: none;">Kelola Kuis ⚙️</a>
+            <!-- Tombol Admin Baru Ditambahkan di sini -->
+            <a href="admin-tantangan.html" id="kelola-tantangan-btn" class="btn admin-challenge" style="display: none;">Kelola Tantangan ⭐</a>
             <a href="admin-lencana.html" id="kelola-lencana-btn" class="btn admin-badge" style="display: none;">Kelola Lencana 🎖️</a>
         </div>
     </header>
@@ -203,7 +208,7 @@
     apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
     authDomain: "forumwidara.firebaseapp.com",
     projectId: "forumwidara",
-    storageBucket: "forumwidara.firebasestorage.app",
+    storageBucket: "forumwidara.appspot.com",
     messagingSenderId: "216895655168",
     appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
   };
@@ -213,13 +218,14 @@
   const db = getFirestore(app);
 
   async function loadWeeklyChallengeTheme() {
+    // ... (Fungsi ini tidak diubah) ...
     const titleElement = document.getElementById('weekly-theme-title');
     try {
         const q = query(collection(db, "tantanganMingguan"), where("aktif", "==", true));
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
             const challengeData = querySnapshot.docs[0].data();
-            titleElement.textContent = `Tantangan Minggu Ini: ${challengeData.tema} 🐠`;
+            titleElement.textContent = `Tantangan Minggu Ini: ${challengeData.tema} ✨`;
         } else {
             titleElement.textContent = 'Belum Ada Tantangan Minggu Ini';
         }
@@ -230,6 +236,7 @@
   }
 
   async function loadUserBadges(userId) {
+      // ... (Fungsi ini tidak diubah) ...
       const grid = document.getElementById('koleksi-lencana-grid');
       grid.innerHTML = '';
       if (!userId) {
@@ -238,7 +245,6 @@
       }
 
       try {
-        // Menggunakan koleksi 'siswa' untuk data lencana
         const userDocRef = doc(db, "siswa", userId);
         const userDocSnap = await getDoc(userDocRef);
 
@@ -269,28 +275,32 @@
   }
 
   onAuthStateChanged(auth, async (user) => {
+    // Definisikan semua tombol admin di sini
     const kelolaKuisBtn = document.getElementById('kelola-kuis-btn');
     const kelolaLencanaBtn = document.getElementById('kelola-lencana-btn');
+    const kelolaTantanganBtn = document.getElementById('kelola-tantangan-btn'); // Tombol baru
     
     if (user) {
-      // Cek peran pengguna dari koleksi 'users'
       const userRoleRef = doc(db, "users", user.uid);
       const userRoleSnap = await getDoc(userRoleRef);
 
       if (userRoleSnap.exists() && userRoleSnap.data().peran === 'admin') {
-        // Tampilkan tombol admin jika peran adalah 'admin'
+        // Tampilkan SEMUA tombol admin jika peran adalah 'admin'
         kelolaKuisBtn.style.display = 'inline-block';
         kelolaLencanaBtn.style.display = 'inline-block';
+        kelolaTantanganBtn.style.display = 'inline-block'; // Tampilkan tombol baru
       } else {
-        // Sembunyikan jika bukan admin
+        // Sembunyikan SEMUA jika bukan admin
         kelolaKuisBtn.style.display = 'none';
         kelolaLencanaBtn.style.display = 'none';
+        kelolaTantanganBtn.style.display = 'none'; // Sembunyikan tombol baru
       }
       loadUserBadges(user.uid);
     } else {
-      // Sembunyikan jika tidak login
+      // Sembunyikan SEMUA jika tidak login
       kelolaKuisBtn.style.display = 'none';
       kelolaLencanaBtn.style.display = 'none';
+      kelolaTantanganBtn.style.display = 'none'; // Sembunyikan tombol baru
       loadUserBadges(null);
     }
   });
