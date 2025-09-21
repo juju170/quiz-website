@@ -60,11 +60,11 @@
     // --- KONFIGURASI FIREBASE ---
     const firebaseConfig = {
         apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
-    authDomain: "forumwidara.firebaseapp.com",
-    projectId: "forumwidara",
-    storageBucket: "forumwidara.firebasestorage.app",
-    messagingSenderId: "216895655168",
-    appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+        authDomain: "forumwidara.firebaseapp.com",
+        projectId: "forumwidara",
+        storageBucket: "forumwidara.appspot.com",
+        messagingSenderId: "216895655168",
+        appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
     };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -77,9 +77,8 @@
     let score = 0;
     let currentUser = null;
     const userCache = {};
-    const correctSound = new Audio('https://raw.githubusercontent.com/juju170/quiz-website/e7fe1bcc58cc86542724a090f068553510594eb4/correct.mp3');
-    const wrongSound = new Audio('https://raw.githubusercontent.com/juju170/quiz-website/e7fe1bcc58cc86542724a090f068553510594eb4/wrong.mp3');
-    const resultSounds = { /* ... suara hasil ... */ };
+    const correctSound = new Audio('https://actions.google.com/sounds/v1/positive_tones/cascading_glitter.ogg');
+    const wrongSound = new Audio('https://actions.google.com/sounds/v1/alarms/medium_bell_ringing_near.ogg');
     
     // --- FUNGSI UTAMA ---
     onAuthStateChanged(auth, (user) => {
@@ -110,7 +109,9 @@
         }
 
         try {
-            allQuestions = await fetchQuestions(q);
+            const querySnapshot = await getDocs(q);
+            allQuestions = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
             if (allQuestions.length === 0) {
                 quizContainer.innerHTML = '<h2>Oops! Tidak ada pertanyaan untuk kategori ini.</h2><a href="index.html">Kembali</a>';
                 return;
@@ -124,69 +125,163 @@
     }
     
     // --- FUNGSI-FUNGSI PEMBANTU (HELPER) ---
-    async function getUserData(userId) { /* ... sama seperti file Anda ... */ }
-    function getGoogleDriveDirectLink(url) { /* ... sama seperti file Anda ... */ }
-    function shuffle(array) { /* ... sama seperti file Anda ... */ }
-    
-    async function fetchQuestions(quizQuery) { /* ... sama seperti file Anda ... */ }
-    function loadQuizUI() { /* ... sama seperti file Anda ... */ }
-    function loadQuestion() { /* ... sama seperti file Anda ... */ }
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function loadQuizUI() {
+        quizContainer.innerHTML = `
+            <div class="creator-info" id="creator-info-box"></div>
+            <a href="index.html" class="btn-quit-quiz" title="Keluar dari Kuis">×</a>
+            <div class="question-box">
+                <div id="media-container"></div>
+                <h2 id="question-text" class="question-text"></h2>
+            </div>
+            <div id="answer-options" class="answer-options"></div>
+            <div id="feedback-box" class="feedback-box"></div>
+            <button id="next-btn" class="next-btn" style="visibility: hidden;">Lanjut ❯</button>
+        `;
+        document.getElementById('next-btn').addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < allQuestions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        });
+    }
+
+    async function loadQuestion() {
+        const question = allQuestions[currentQuestionIndex];
+        document.getElementById('question-text').textContent = question.pertanyaan;
+        document.getElementById('next-btn').style.visibility = 'hidden';
+        document.getElementById('feedback-box').innerHTML = '';
+        
+        const answerOptionsContainer = document.getElementById('answer-options');
+        answerOptionsContainer.innerHTML = '';
+
+        // Render based on question type
+        if (question.tipe === 'pilihanGanda') {
+            renderPilihanGandaUI(question);
+        } else if (question.tipe === 'susunHuruf') {
+            renderSusunHurufUI(question);
+        } else if (question.tipe === 'esai') {
+            renderEsaiUI(question);
+        }
+    }
     
     // --- FUNGSI RENDER & CEK JAWABAN (UNTUK TIAP TIPE SOAL) ---
-    function renderPilihanGandaUI(question) { /* ... sama seperti file Anda ... */ }
-    function checkMultipleChoiceAnswer(button, selectedAnswer, correctAnswer, originalOptions, explanations) { /* ... sama seperti file Anda ... */ }
-    function renderSusunHurufUI(question) { /* ... sama seperti file Anda ... */ }
-    function checkWordAnswer(correctAnswer) { /* ... sama seperti file Anda ... */ }
-    function renderEsaiUI(question) { /* ... sama seperti file Anda ... */ }
-    function checkEsaiAnswer(correctAnswer) { /* ... sama seperti file Anda ... */ }
+    function renderPilihanGandaUI(question) {
+        const answerOptionsContainer = document.getElementById('answer-options');
+        const options = shuffle([...question.pilihan]);
+        options.forEach(option => {
+            const button = document.createElement('button');
+            button.className = 'answer-btn';
+            button.textContent = option;
+            button.style.backgroundColor = '#4fc3f7';
+            button.style.borderColor = '#039be5';
+            button.onclick = () => checkMultipleChoiceAnswer(button, option, question.jawaban, options, question.penjelasan);
+            answerOptionsContainer.appendChild(button);
+        });
+    }
+
+    function checkMultipleChoiceAnswer(button, selectedAnswer, correctAnswer, originalOptions, explanations) {
+        document.querySelectorAll('.answer-btn').forEach(btn => btn.disabled = true);
+        if (selectedAnswer === correctAnswer) {
+            score += 10;
+            button.classList.add('correct');
+            showFeedback(true, "Jawaban Kamu Benar!", explanations);
+            correctSound.play();
+        } else {
+            button.classList.add('wrong');
+            document.querySelectorAll('.answer-btn').forEach(btn => {
+                if (btn.textContent === correctAnswer) {
+                    btn.classList.add('correct');
+                }
+            });
+            showFeedback(false, "Jawaban Kamu Salah!", explanations);
+            wrongSound.play();
+        }
+        document.getElementById('next-btn').style.visibility = 'visible';
+    }
     
-    function showFeedback(isCorrect, message, explanation = "") { /* ... sama seperti file Anda ... */ }
+    // Placeholder for other question types
+    function renderSusunHurufUI(question) { 
+        document.getElementById('answer-options').innerHTML = '<p>Tipe soal susun huruf belum diimplementasikan.</p>';
+        document.getElementById('next-btn').style.visibility = 'visible';
+    }
+    function renderEsaiUI(question) {
+        document.getElementById('answer-options').innerHTML = '<p>Tipe soal esai belum diimplementasikan.</p>';
+        document.getElementById('next-btn').style.visibility = 'visible';
+     }
+
+    function showFeedback(isCorrect, message, explanation = "") {
+        const feedbackBox = document.getElementById('feedback-box');
+        feedbackBox.innerHTML = `<p style="color: ${isCorrect ? 'var(--green-correct)' : 'var(--red-wrong)'}">${message}</p>`;
+        if (explanation) {
+            feedbackBox.innerHTML += `<div class="feedback-explanation"><strong>Penjelasan:</strong> ${explanation}</div>`;
+        }
+    }
     
-    // --- LOGIKA PEMBERIAN LENCANA (INTI TAMBAHAN) ---
+    // --- LOGIKA PEMBERIAN LENCANA (INTI) ---
     async function checkAndAwardBadges(finalScore) {
-        if (!currentUser) return;
+        if (!currentUser) return 0;
         
         const params = new URLSearchParams(window.location.search);
         if (params.get('mode') !== 'weekly') {
-            console.log("Bukan mode mingguan, pemberian lencana dilewati.");
-            return;
+            console.log("Bukan mode mingguan, pemeriksaan lencana dilewati.");
+            return 0;
         }
 
         try {
-            const challengeQuery = query(collection(db, "tantanganMingguan"), where("aktif", "==", true));
+            const challengeQuery = query(collection(db, "tantanganMingguan"), where("aktif", "==", true), limit(1));
             const challengeSnapshot = await getDocs(challengeQuery);
-            if (challengeSnapshot.empty) return;
-
-            const challenge = challengeSnapshot.docs[0].data();
-            const badgeRequirements = challenge.syaratLencana || [];
-            
-            const userDocRef = doc(db, "siswa", currentUser.uid);
-            const userDocSnap = await getDoc(userDocRef);
-            
-            // Jika dokumen siswa belum ada, buat dulu
-            if (!userDocSnap.exists()) {
-                await setDoc(userDocRef, { nama: currentUser.displayName || 'Siswa Baru', lencanaDimiliki: [] });
+            if (challengeSnapshot.empty) {
+                console.log("Tidak ada tantangan mingguan yang aktif.");
+                return 0;
             }
-            
-            const ownedBadges = userDocSnap.exists() ? userDocSnap.data().lencanaDimiliki || [] : [];
-            let newBadgesWon = [];
 
-            for (const req of badgeRequirements) {
-                if (finalScore >= req.syaratSkor && !ownedBadges.includes(req.lencanaId)) {
-                    newBadgesWon.push(req.lencanaId);
+            const challengeDoc = challengeSnapshot.docs[0];
+            const challenge = challengeDoc.data();
+            const challengeId = challengeDoc.id;
+
+            // KUNCI LOGIKA: Cek apakah sudah ada pemenangnya
+            if (challenge.pemenangId) {
+                console.log(`Tantangan sudah dimenangkan oleh: ${challenge.pemenangId}. Tidak ada lencana baru diberikan.`);
+                return 0;
+            }
+
+            const req = challenge.syaratLencana[0];
+            if (finalScore >= req.syaratSkor) {
+                const userDocRef = doc(db, "siswa", currentUser.uid);
+                const userDocSnap = await getDoc(userDocRef);
+                
+                if (!userDocSnap.exists()) {
+                    await setDoc(userDocRef, { nama: currentUser.displayName || 'Siswa Baru', lencanaDimiliki: [] });
                 }
-            }
 
-            if (newBadgesWon.length > 0) {
+                // 1. Berikan lencana ke siswa
                 await updateDoc(userDocRef, {
-                    lencanaDimiliki: arrayUnion(...newBadgesWon)
+                    lencanaDimiliki: arrayUnion(req.lencanaId)
                 });
-                console.log(`Selamat! Kamu mendapatkan ${newBadgesWon.length} lencana baru!`);
-                return newBadgesWon.length; // Kembalikan jumlah lencana baru
+                
+                // 2. KUNCI TANTANGAN dengan ID pemenang
+                const challengeDocRef = doc(db, "tantanganMingguan", challengeId);
+                await updateDoc(challengeDocRef, {
+                    pemenangId: currentUser.uid
+                });
+
+                console.log(`Selamat! Kamu adalah pemenang tantangan ini dan mendapatkan lencana!`);
+                return 1; // Kembalikan 1 karena dapat lencana baru
             }
-            return 0; // Tidak ada lencana baru
+            
+            return 0;
         } catch (error) {
-            console.error("Gagal memberikan lencana:", error);
+            console.error("Gagal memeriksa atau memberikan lencana:", error);
             return 0;
         }
     }
@@ -197,22 +292,20 @@
         const correctAnswers = score / 10;
         const percentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
         
-        // PANGGIL FUNGSI PEMBERIAN LENCANA SEBELUM MENAMPILKAN HASIL
         const newBadgesCount = await checkAndAwardBadges(percentage);
         
         let result = {};
-        if (percentage === 100) result = { emoji: '👑', message: 'WAH KAMU JENIUS', sound: resultSounds.genius };
-        else if (percentage >= 70) result = { emoji: '👍', message: 'WAH KAMU HEBAT', sound: resultSounds.hebat };
-        else if (percentage >= 50) result = { emoji: '😊', message: 'WAH KAMU KEREN!', sound: resultSounds.keren };
-        else result = { emoji: '📚', message: 'BELAJAR LAGI YA!', sound: resultSounds.belajar };
+        if (percentage === 100) result = { emoji: '🏆', message: 'SEMPURNA!' };
+        else if (percentage >= 70) result = { emoji: '🎉', message: 'HEBAT!' };
+        else if (percentage >= 50) result = { emoji: '👍', message: 'KEREN!' };
+        else result = { emoji: '🤔', message: 'COBA LAGI YA!' };
 
         const toastContainer = document.createElement('div');
         toastContainer.id = 'toast-container';
         
-        // Tambahkan pesan jika mendapat lencana baru
         let badgeMessage = '';
         if (newBadgesCount > 0) {
-            badgeMessage = `<p style="font-weight:700; color:var(--green-correct);">Selamat! Kamu mendapatkan ${newBadgesCount} lencana baru! 🎖️</p>`;
+            badgeMessage = `<p style="font-weight:700; color:var(--green-correct);">SELAMAT! KAMU MENJADI PEMENANG TANTANGAN MINGGU INI DAN MENDAPATKAN LENCANA SPESIAL! 🎖️</p>`;
         }
 
         toastContainer.innerHTML = `
@@ -232,12 +325,10 @@
         
         document.body.appendChild(toastContainer);
         toastContainer.style.display = 'flex';
-        // ... (sisa kode suara) ...
         quizContainer.style.display = 'none';
     }
 </script>
 </body>
 </html>
-
 
 
