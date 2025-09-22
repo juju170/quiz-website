@@ -122,14 +122,10 @@
                 <!-- 1. Pilihan Ganda -->
                 <fieldset id="fields-pilihan-ganda" class="question-type-fields space-y-4">
                     <label class="label-text"><i data-lucide="list"></i>Opsi Jawaban & Penjelasan</label>
-                    <div id="pg-options-container">
+                    <div id="pg-options-container" class="space-y-4">
                         <!-- Opsi akan ditambahkan oleh JS -->
                     </div>
                     <button type="button" id="add-pg-option-btn" class="text-sm text-blue-600 font-semibold flex items-center gap-2"><i data-lucide="plus-circle" class="w-4 h-4"></i>Tambah Opsi</button>
-                    <div class="input-group">
-                        <label for="pg-explanation" class="label-text"><i data-lucide="info"></i>Penjelasan Jawaban Benar</label>
-                        <textarea id="pg-explanation" rows="2" class="input-field" placeholder="Jelaskan mengapa jawaban yang benar itu benar..."></textarea>
-                    </div>
                 </fieldset>
 
                 <!-- 2. Esai -->
@@ -141,10 +137,15 @@
                 </fieldset>
 
                 <!-- 3. Susun Huruf -->
-                <fieldset id="fields-susun-huruf" class="question-type-fields">
+                <fieldset id="fields-susun-huruf" class="question-type-fields space-y-4">
                      <div class="input-group">
                         <label for="susun-huruf-answer" class="label-text"><i data-lucide="key-round"></i>Jawaban (Kata yang Benar)</label>
                         <input type="text" id="susun-huruf-answer" class="input-field" placeholder="Contoh: INDONESIA">
+                    </div>
+                    <div class="input-group">
+                        <label for="susun-huruf-decoys" class="label-text"><i data-lucide="shuffle"></i>Huruf Pengecoh</label>
+                        <input type="text" id="susun-huruf-decoys" class="input-field" placeholder="Ketik beberapa huruf tanpa spasi (Contoh: XYZ)">
+                        <p class="text-xs text-gray-500 mt-1">Huruf yang sama akan diabaikan.</p>
                     </div>
                 </fieldset>
 
@@ -173,17 +174,13 @@
                 </fieldset>
                 
                 <!-- 6. Susun Kata Jadi Kalimat -->
-                <fieldset id="fields-susun-kalimat" class="question-type-fields">
-                     <div class="input-group">
-                        <label for="susun-kalimat-answer" class="label-text"><i data-lucide="key-round"></i>Kalimat Jawaban yang Benar</p></label>
-                        <input type="text" id="susun-kalimat-answer" class="input-field" placeholder="Contoh: Ibu pergi ke pasar">
+                <fieldset id="fields-susun-kalimat" class="question-type-fields space-y-4">
+                    <label class="label-text"><i data-lucide="key-round"></i>Kalimat Jawaban yang Benar</label>
+                    <div id="sk-answers-container" class="space-y-3">
+                        <!-- Jawaban benar akan ditambahkan oleh JS -->
                     </div>
-                    <div class="input-group">
-                        <label class="label-text"><i data-lucide="list"></i>Opsi Kalimat Pengecoh</label>
-                        <input type="text" name="kalimat-opsi" class="input-field mb-2" placeholder="Opsi pengecoh 1 (Contoh: Pasar pergi ke ibu)">
-                        <input type="text" name="kalimat-opsi" class="input-field" placeholder="Opsi pengecoh 2 (Contoh: Ke pasar ibu pergi)">
-                         <p class="text-xs text-gray-500 mt-1">Kalimat yang benar di atas akan otomatis diacak bersama opsi ini.</p>
-                    </div>
+                    <button type="button" id="add-sk-answer-btn" class="text-sm text-blue-600 font-semibold flex items-center gap-2"><i data-lucide="plus-circle" class="w-4 h-4"></i>Tambah Alternatif Jawaban Benar</button>
+                    <p class="text-xs text-gray-500 mt-1">Kata-kata dari kalimat pertama yang Anda masukkan akan digunakan untuk diacak di dalam permainan.</p>
                 </fieldset>
 
                 <!-- 7. TTS Mini -->
@@ -244,36 +241,41 @@
         
         function updateFormUI() {
             const selectedType = tipeSoalSelect.value;
-            // Sembunyikan semua fieldset
             document.querySelectorAll('.question-type-fields').forEach(field => {
                 field.style.display = 'none';
             });
-            // Tampilkan fieldset yang sesuai
             const activeFieldset = document.getElementById(`fields-${selectedType}`);
             if (activeFieldset) {
                 activeFieldset.style.display = 'block';
             }
         }
         
-        // --- Fungsi Dinamis untuk Opsi Pilihan Ganda & Pencocokkan ---
+        // --- Fungsi Dinamis untuk Form ---
         const pgContainer = document.getElementById('pg-options-container');
         const addPgBtn = document.getElementById('add-pg-option-btn');
         let pgOptionCount = 0;
 
         function addPgOption(isCorrect = false) {
-            if (pgOptionCount >= 4) return;
+            if (pgOptionCount >= 5) return;
             pgOptionCount++;
             const div = document.createElement('div');
-            div.className = 'flex items-center gap-3 mb-2';
+            div.className = 'p-3 border rounded-lg';
             div.innerHTML = `
-                <input type="radio" name="pg-correct-option" value="${pgOptionCount}" class="h-5 w-5 text-blue-600" ${isCorrect ? 'checked' : ''}>
-                <input type="text" class="input-field" name="pg-option-text" placeholder="Teks Opsi ${pgOptionCount} (bisa juga URL gambar)">
-                <button type="button" class="remove-pg-option text-red-500 hover:text-red-700">&times;</button>
+                <div class="flex items-center gap-3 mb-2">
+                    <input type="radio" name="pg-correct-option" value="${pgOptionCount}" class="h-5 w-5 text-blue-600" ${isCorrect ? 'checked' : ''}>
+                    <input type="text" class="input-field" name="pg-option-text" placeholder="Teks Opsi ${pgOptionCount}">
+                    <button type="button" class="remove-pg-option text-red-500 hover:text-red-700 font-bold text-2xl">&times;</button>
+                </div>
+                <textarea name="pg-option-explanation" class="input-field text-sm mt-2" rows="1" placeholder="Penjelasan untuk opsi ini (misal: mengapa salah/benar)"></textarea>
             `;
             pgContainer.appendChild(div);
             div.querySelector('.remove-pg-option').addEventListener('click', () => {
                 div.remove();
                 pgOptionCount--;
+                 // Pastikan selalu ada satu radio button yang terpilih jika sisa satu
+                if (pgContainer.querySelectorAll('div').length === 1) {
+                    pgContainer.querySelector('input[type="radio"]').checked = true;
+                }
             });
         }
         addPgBtn.addEventListener('click', () => addPgOption());
@@ -291,7 +293,7 @@
                 <input type="text" class="input-field" name="matching-prompt" placeholder="Item Kiri ${matchingPairCount}">
                 <span class="font-bold">=</span>
                 <input type="text" class="input-field" name="matching-match" placeholder="Item Kanan ${matchingPairCount}">
-                <button type="button" class="remove-matching-pair text-red-500 hover:text-red-700">&times;</button>
+                <button type="button" class="remove-matching-pair text-red-500 hover:text-red-700 font-bold text-2xl">&times;</button>
             `;
             matchingContainer.appendChild(div);
              div.querySelector('.remove-matching-pair').addEventListener('click', () => {
@@ -300,6 +302,27 @@
             });
         }
         addMatchingBtn.addEventListener('click', addMatchingPair);
+        
+        const skContainer = document.getElementById('sk-answers-container');
+        const addSkBtn = document.getElementById('add-sk-answer-btn');
+        let skAnswerCount = 0;
+
+        function addSkAnswer() {
+            skAnswerCount++;
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-3';
+            div.innerHTML = `
+                <input type="text" class="input-field" name="sk-answer" placeholder="Alternatif jawaban benar ${skAnswerCount}">
+                <button type="button" class="remove-sk-answer text-red-500 hover:text-red-700 font-bold text-2xl">&times;</button>
+            `;
+            skContainer.appendChild(div);
+            div.querySelector('.remove-sk-answer').addEventListener('click', () => {
+                div.remove();
+                skAnswerCount--;
+            });
+        }
+        addSkBtn.addEventListener('click', addSkAnswer);
+
 
         // --- FUNGSI DATA ---
 
@@ -321,119 +344,127 @@
             };
 
             // Mengumpulkan data berdasarkan tipe soal
-            switch (type) {
-                case 'pilihan-ganda':
-                    const options = [];
-                    const optionElements = pgContainer.querySelectorAll('div');
-                    const correctRadio = pgContainer.querySelector('input[name="pg-correct-option"]:checked');
-                    if (!correctRadio) {
-                        alert('Pilih salah satu jawaban yang benar untuk Pilihan Ganda!');
-                        return;
-                    }
-                    const correctValue = correctRadio.value;
+            try {
+                switch (type) {
+                    case 'pilihan-ganda':
+                        const options = [];
+                        const optionElements = pgContainer.querySelectorAll('div.p-3');
+                        const correctRadio = pgContainer.querySelector('input[name="pg-correct-option"]:checked');
+                        if (!correctRadio) throw new Error('Pilih salah satu jawaban yang benar untuk Pilihan Ganda!');
+                        const correctValue = correctRadio.value;
 
-                    optionElements.forEach((opt, index) => {
-                        const radio = opt.querySelector('input[type="radio"]');
-                        const textInput = opt.querySelector('input[type="text"]');
-                        if (textInput.value) {
-                             options.push({
-                                text: textInput.value.trim(),
-                                isCorrect: radio.value === correctValue
-                            });
-                        }
-                    });
-                    questionData.options = options;
-                    questionData.explanation = document.getElementById('pg-explanation').value.trim();
-                    break;
+                        optionElements.forEach((opt) => {
+                            const radio = opt.querySelector('input[type="radio"]');
+                            const textInput = opt.querySelector('input[name="pg-option-text"]');
+                            const explanationInput = opt.querySelector('textarea[name="pg-option-explanation"]');
+                            if (textInput.value.trim()) {
+                                options.push({
+                                    text: textInput.value.trim(),
+                                    isCorrect: radio.value === correctValue,
+                                    explanation: explanationInput.value.trim() || ''
+                                });
+                            }
+                        });
+                        if (options.length < 2) throw new Error('Pilihan ganda harus memiliki minimal 2 opsi.');
+                        questionData.options = options;
+                        break;
 
-                case 'esai':
-                    questionData.answer = document.getElementById('esai-answer').value.trim();
-                    break;
-                
-                case 'susun-huruf':
-                    questionData.answer = document.getElementById('susun-huruf-answer').value.trim().toUpperCase();
-                    break;
-                
-                case 'pencocokkan':
-                    const pairs = [];
-                    const pairElements = matchingContainer.querySelectorAll('div');
-                    pairElements.forEach(pair => {
-                        const prompt = pair.querySelector('input[name="matching-prompt"]').value.trim();
-                        const match = pair.querySelector('input[name="matching-match"]').value.trim();
-                        if (prompt && match) {
-                            pairs.push({ prompt, match });
-                        }
-                    });
-                    if (pairs.length < 2) {
-                        alert('Tipe Pencocokkan membutuhkan minimal 2 pasang.');
-                        return;
-                    }
-                    questionData.matchingPairs = pairs;
-                    break;
+                    case 'esai':
+                        const esaiAnswer = document.getElementById('esai-answer').value.trim();
+                        if (!esaiAnswer) throw new Error('Kunci jawaban esai tidak boleh kosong.');
+                        questionData.answer = esaiAnswer;
+                        break;
+                    
+                    case 'susun-huruf':
+                        const answer = document.getElementById('susun-huruf-answer').value.trim().toUpperCase();
+                        if (!answer) throw new Error('Jawaban susun huruf tidak boleh kosong.');
+                        const decoysRaw = document.getElementById('susun-huruf-decoys').value.trim().toUpperCase();
+                        // Buat set untuk huruf unik, lalu ubah kembali ke array
+                        const uniqueDecoys = [...new Set(decoysRaw.split(''))];
+                        questionData.answer = answer;
+                        questionData.decoys = uniqueDecoys;
+                        break;
+                    
+                    case 'pencocokkan':
+                        const pairs = [];
+                        const pairElements = matchingContainer.querySelectorAll('div.flex');
+                        pairElements.forEach(pair => {
+                            const prompt = pair.querySelector('input[name="matching-prompt"]').value.trim();
+                            const match = pair.querySelector('input[name="matching-match"]').value.trim();
+                            if (prompt && match) {
+                                pairs.push({ prompt, match });
+                            }
+                        });
+                        if (pairs.length < 2) throw new Error('Tipe Pencocokkan membutuhkan minimal 2 pasang.');
+                        questionData.matchingPairs = pairs;
+                        break;
 
-                case 'benar-salah':
-                    const bsAnswer = document.querySelector('input[name="bs-answer"]:checked');
-                    if (!bsAnswer) {
-                        alert('Pilih jawaban Benar atau Salah!');
-                        return;
-                    }
-                    questionData.answer = bsAnswer.value === 'Benar'; // boolean true/false
-                    break;
+                    case 'benar-salah':
+                        const bsAnswer = document.querySelector('input[name="bs-answer"]:checked');
+                        if (!bsAnswer) throw new Error('Pilih jawaban Benar atau Salah!');
+                        questionData.answer = bsAnswer.value === 'Benar';
+                        break;
 
-                case 'susun-kalimat':
-                    const correctAnswer = document.getElementById('susun-kalimat-answer').value.trim();
-                    if (!correctAnswer) {
-                        alert('Isi kalimat jawaban yang benar!');
-                        return;
-                    }
-                    const sentenceOptions = [correctAnswer];
-                     document.querySelectorAll('input[name="kalimat-opsi"]').forEach(input => {
-                        if (input.value.trim()) {
-                            sentenceOptions.push(input.value.trim());
-                        }
-                    });
-                    questionData.answer = correctAnswer;
-                    questionData.sentenceOptions = sentenceOptions;
-                    break;
-                
-                case 'tts-mini':
-                    const horizontal = document.getElementById('tts-mendatar').value.trim().toUpperCase();
-                    const vertical = document.getElementById('tts-menurun').value.trim().toUpperCase();
-                     if (!horizontal || !vertical) {
-                        alert('Isi jawaban mendatar dan menurun!');
-                        return;
-                    }
-                    questionData.crossword = { horizontal, vertical };
-                    break;
+                    case 'susun-kalimat':
+                        const correctAnswers = [];
+                        const skElements = skContainer.querySelectorAll('input[name="sk-answer"]');
+                        skElements.forEach(input => {
+                            if (input.value.trim()) {
+                                correctAnswers.push(input.value.trim());
+                            }
+                        });
+                        if (correctAnswers.length === 0) throw new Error('Isi setidaknya satu kalimat jawaban yang benar!');
+                        
+                        questionData.correctAnswers = correctAnswers;
+                        questionData.words = correctAnswers[0].split(' '); // Ambil kata dari jawaban pertama
+                        break;
+                    
+                    case 'tts-mini':
+                        const horizontal = document.getElementById('tts-mendatar').value.trim().toUpperCase();
+                        const vertical = document.getElementById('tts-menurun').value.trim().toUpperCase();
+                        if (!horizontal || !vertical) throw new Error('Isi jawaban mendatar dan menurun!');
+                        
+                        // Validasi titik potong
+                        const hasIntersection = [...horizontal].some(char => vertical.includes(char));
+                        if (!hasIntersection) throw new Error('Jawaban mendatar dan menurun harus memiliki minimal satu huruf yang sama (titik potong).');
+
+                        questionData.crossword = { horizontal, vertical };
+                        break;
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                return;
             }
             
             // Simpan ke Firestore
-            // Struktur: 1 kuis (dokumen) bisa punya banyak soal (subcollection)
-            // Ini lebih scalable. Kita buat/update dokumen kuis, lalu tambahkan soal baru.
             try {
-                const quizDocRef = doc(db, 'quizzes', title); // Gunakan judul sebagai ID
+                const quizDocRef = doc(db, 'quizzes', title);
                 const quizDoc = await getDoc(quizDocRef);
 
                 if (!quizDoc.exists()) {
-                    // Kuis baru, buat dokumen utamanya
                     await setDoc(quizDocRef, {
                         title: title,
                         createdAt: serverTimestamp(),
-                        questionCount: 0
                     });
                 }
-                // Tambahkan soal sebagai dokumen baru di subcollection 'questions'
                 const questionsSubcollectionRef = collection(quizDocRef, 'questions');
                 await addDoc(questionsSubcollectionRef, questionData);
                 
-                alert(`Soal "${questionText.substring(0,20)}..." berhasil ditambahkan ke kuis "${title}"!`);
+                alert(`Soal berhasil ditambahkan ke kuis "${title}"!`);
                 form.reset();
+                // Reset form dinamis
                 pgContainer.innerHTML = '';
                 pgOptionCount = 0;
-                addPgOption(true); addPgOption(); // Reset PG
+                addPgOption(true); addPgOption();
+                
                 matchingContainer.innerHTML = '';
                 matchingPairCount = 0;
-                addMatchingPair(); addMatchingPair(); // Reset Matching
+                addMatchingPair(); addMatchingPair();
+
+                skContainer.innerHTML = '';
+                skAnswerCount = 0;
+                addSkAnswer();
+                
                 updateFormUI();
             } catch (error) {
                 console.error("Error saving document: ", error);
@@ -452,12 +483,14 @@
 
             docs.forEach((doc, index) => {
                 const quiz = doc.data();
-                const card = document.createElement('div');
+                const card = document.createElement('a'); // Ubah jadi link
+                card.href = `play.html?quizId=${doc.id}`; // Tambah link ke halaman play
+                card.target = "_blank"; // Buka di tab baru
                 const selectedColor = cardColors[index % cardColors.length];
-                card.className = `quiz-card bg-gradient-to-br ${selectedColor}`;
+                card.className = `quiz-card block bg-gradient-to-br ${selectedColor}`;
                 card.innerHTML = `
                     <h3 class="text-2xl font-bold mb-2">${quiz.title}</h3>
-                    <span class="font-semibold bg-white/50 px-3 py-1 rounded-full text-sm self-start">Kumpulan Soal</span>
+                    <span class="font-semibold bg-white/50 px-3 py-1 rounded-full text-sm self-start">Mainkan Kuis</span>
                 `;
                 daftarKuisContainer.appendChild(card);
             });
@@ -471,11 +504,12 @@
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             // Inisialisasi form
-            addPgOption(true); // Tambah 1 opsi PG awal dan tandai sbg benar
+            addPgOption(true);
             addPgOption();
             addMatchingPair();
             addMatchingPair();
-            updateFormUI(); // Tampilkan form untuk tipe soal pertama
+            addSkAnswer();
+            updateFormUI();
 
              onSnapshot(quizzesCollectionRef, (snapshot) => {
                 document.getElementById('loading-quizzes').style.display = 'none';
