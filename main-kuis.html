@@ -170,6 +170,9 @@
         const db = getFirestore(app);
 
         // State Global
+        let userAnswers = [];
+let timerInterval;
+const currentUserId = "user_demo_123"; // ID pengguna yang disimulasikan
         let currentQuizData = null;
         let currentQuestionIndex = 0;
         let userAnswers = [];
@@ -316,30 +319,73 @@
             showResults(finalScore);
         }
 
-        function showResults(score) {
-            playerContainer.style.display = 'none';
-            resultsContainer.style.display = 'block';
+        async function showResults(score) {
+    playasync function showResults(score) {
+    playerContainer.style.display = 'none';
+    resultsContainer.style.display = 'block';
 
-            const thresholds = currentQuizData.scoreThresholds;
-            let medal = '🤔';
-            let feedback = "Coba lagi, ya! Semangat!";
+    const thresholds = currentQuizData.scoreThresholds;
+    let medal = '👎';
+    let feedback = "Coba lagi, ya! Semangat!";
+    let isEligibleForBadge = false;
 
-            if (score >= thresholds.gold) {
-                medal = '🥇';
-                feedback = "Luar biasa! Kamu mendapatkan medali emas!";
-            } else if (score >= thresholds.silver) {
-                medal = '🥈';
-                feedback = "Hebat! Kamu mendapatkan medali perak!";
-            } else if (score >= thresholds.bronze) {
-                medal = '🥉';
-                feedback = "Bagus! Kamu mendapatkan medali perunggu!";
-            }
+    if (score >= thresholds.gold || score >= thresholds.silver || score >= thresholds.bronze) {
+        isEligibleForBadge = true; // Peserta layak dapat lencana jika meraih medali apapun
+    }
+    
+    if (score >= thresholds.gold) {
+        medal = '🥇';
+        feedback = "Luar biasa! Kamu mendapatkan medali emas!";
+    } else if (score >= thresholds.silver) {
+        medal = '🥈';
+        feedback = "Hebat! Kamu mendapatkan medali perak!";
+    } else if (score >= thresholds.bronze) {
+        medal = '🥉';
+        feedback = "Bagus! Kamu mendapatkan medali perunggu!";
+    }
 
-            document.getElementById('medal-display').textContent = medal;
-            document.getElementById('score-display').textContent = `Skor Kamu: ${Math.round(score)}%`;
-            document.getElementById('feedback-display').textContent = feedback;
+    document.getElementById('medal-display').textContent = medal;
+    document.getElementById('score-display').textContent = `Skor Kamu: ${Math.round(score)}%`;
+    document.getElementById('feedback-display').textContent = feedback;
+
+    // Proses pemberian lencana
+    if (isEligibleForBadge && currentQuizData.badgeToAwardId) {
+        await awardBadge(currentUserId, currentQuizData.badgeToAwardId);
+        document.getElementById('feedback-display').textContent += "\nSelamat! Lencana baru telah ditambahkan ke profilmu!";
+    }
+}
+
+// TAMBAHKAN FUNGSI BARU INI di bawah fungsi showResults
+async function awardBadge(userId, badgeId) {
+    try {
+        // 1. Ambil detail lencana dari koleksi 'badges'
+        const badgeRef = doc(db, "badges", badgeId);
+        const badgeSnap = await getDoc(badgeRef);
+
+        if (!badgeSnap.exists()) {
+            console.error("Lencana dengan ID ini tidak ditemukan:", badgeId);
+            return;
         }
+        
+        const badgeData = badgeSnap.data();
 
+        // 2. Siapkan data untuk disimpan di 'user_badges'
+        const userBadgeData = {
+            userId: userId,
+            badgeId: badgeId,
+            name: badgeData.name,
+            imageUrl: badgeData.imageUrl,
+            awardedAt: serverTimestamp()
+        };
+
+        // 3. Simpan ke koleksi 'user_badges'
+        await addDoc(collection(db, "user_badges"), userBadgeData);
+        console.log("Lencana berhasil diberikan kepada user:", userId);
+
+    } catch (error) {
+        console.error("Gagal memberikan lencana:", error);
+    }
+        }            
         // Event Listeners
         document.addEventListener('DOMContentLoaded', loadQuizzes);
 
