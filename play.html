@@ -133,7 +133,8 @@
                 const quizDoc = await getDoc(doc(db, 'quizzes', quizId));
                 if (quizDoc.exists()) {
                     quizTitleText = quizDoc.data().title;
-                    const questionsSnapshot = await getDocs(collection(quiz.ref, 'questions'));
+                    // SOLUSI: Menggunakan variabel quizDoc yang benar, bukan quiz
+                    const questionsSnapshot = await getDocs(collection(quizDoc.ref, 'questions'));
                     questions = questionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     shuffleArray(questions);
                     startQuiz();
@@ -228,7 +229,6 @@
                     document.getElementById('esai-input').oninput = (e) => actionBtn.disabled = e.target.value.trim() === '';
                     break;
                 case 'susun-huruf':
-                    // SOLUSI: Cek jika q.decoys ada, jika tidak, gunakan array kosong.
                     const decoys = q.decoys || [];
                     const letters = shuffleArray([...q.answer.split(''), ...decoys]);
                     answerOptionsContainer.innerHTML = `
@@ -534,6 +534,4 @@
         document.addEventListener('DOMContentLoaded', loadQuiz);
     </script>
 </body>
-</html>
-
-
+    </html>
