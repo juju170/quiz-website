@@ -133,7 +133,7 @@
                 const quizDoc = await getDoc(doc(db, 'quizzes', quizId));
                 if (quizDoc.exists()) {
                     quizTitleText = quizDoc.data().title;
-                    const questionsSnapshot = await getDocs(collection(quizDoc.ref, 'questions'));
+                    const questionsSnapshot = await getDocs(collection(quiz.ref, 'questions'));
                     questions = questionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     shuffleArray(questions);
                     startQuiz();
@@ -142,7 +142,7 @@
                 }
             } catch (error) {
                 console.error("Gagal memuat kuis:", error);
-                loadingContainer.innerHTML = `<h1 class="text-2xl font-bold text-red-600">Gagal memuat kuis.</h1>`;
+                loadingContainer.innerHTML = `<h1 class="text-2xl font-bold text-red-600">Gagal memuat kuis. Cek konsol untuk detail.</h1>`;
             }
         }
         
@@ -208,7 +208,7 @@
                         answerOptionsContainer.appendChild(btn);
                     });
                     break;
-                case 'benar-salah': // Sama seperti PG
+                case 'benar-salah':
                     ['Benar', 'Salah'].forEach((opt, i) => {
                         const btn = document.createElement('button');
                         btn.textContent = opt;
@@ -228,7 +228,9 @@
                     document.getElementById('esai-input').oninput = (e) => actionBtn.disabled = e.target.value.trim() === '';
                     break;
                 case 'susun-huruf':
-                    const letters = shuffleArray([...q.answer.split(''), ...q.decoys]);
+                    // SOLUSI: Cek jika q.decoys ada, jika tidak, gunakan array kosong.
+                    const decoys = q.decoys || [];
+                    const letters = shuffleArray([...q.answer.split(''), ...decoys]);
                     answerOptionsContainer.innerHTML = `
                         <div id="susun-huruf-answer-display" class="scramble-answer-box text-2xl tracking-widest uppercase"></div>
                         <div id="susun-huruf-letters" class="scramble-bank mt-4"></div>
@@ -398,7 +400,6 @@
                             const activeCell = grid.querySelector('.tts-cell.active');
                             if (activeCell) {
                                 activeCell.textContent = letter;
-                                // Auto-move to next empty cell
                                 let nextCell = findNext(activeCell, '.tts-cell:not(:empty)');
                                 if(!nextCell) nextCell = grid.querySelector('.tts-cell:empty');
                                 if(nextCell) {
@@ -460,7 +461,7 @@
                     break;
                 }
                 case 'esai':
-                    isCorrect = false; // Esai tidak dinilai otomatis
+                    isCorrect = false;
                     actionBtn.textContent = 'Lanjut';
                     const answerKeyBox = document.createElement('div');
                     answerKeyBox.className = 'mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg';
@@ -497,8 +498,8 @@
                     let allCorrect = true;
                     answerOptionsContainer.querySelectorAll('.tts-cell').forEach(cell => {
                         let correctChar = '';
-                        if (cell.dataset.hIndex) correctChar = q.crossword.horizontal[cell.dataset.hIndex];
-                        else if (cell.dataset.vIndex) correctChar = q.crossword.vertical[cell.dataset.vIndex];
+                        if (cell.dataset.hIndex !== undefined) correctChar = q.crossword.horizontal[cell.dataset.hIndex];
+                        else if (cell.dataset.vIndex !== undefined) correctChar = q.crossword.vertical[cell.dataset.vIndex];
                         
                         if (cell.textContent.toUpperCase() === correctChar) {
                             cell.classList.add('correct');
@@ -534,4 +535,5 @@
     </script>
 </body>
 </html>
+
 
