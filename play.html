@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayo Main Kuis!</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Nunito -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #F0F9FF;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2393C5FD' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .quiz-card { background: white; border-radius: 24px; padding: 2.5rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); border: 2px solid white; }
+        .btn-submit { background: linear-gradient(135deg, #34D399, #10B981); color: white; font-weight: 900; padding: 1rem; border-radius: 9999px; width: 100%; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(52, 211, 153, 0.4); font-size: 1.125rem; }
+        .btn-submit:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(52, 211, 153, 0.5); }
+        .btn-submit:disabled { background: #D1D5DB; cursor: not-allowed; box-shadow: none; }
+        .option-btn { border: 2px solid #E5E7EB; padding: 1rem; border-radius: 16px; font-size: 1.1rem; font-weight: 700; text-align: left; transition: all 0.2s ease-in-out; }
+        .option-btn:hover:not(:disabled) { border-color: #60A5FA; background-color: #EFF6FF; }
+        .option-btn.selected { border-color: #3B82F6; background-color: #DBEAFE; color: #2563EB; }
+        .option-btn.correct { border-color: #10B981 !important; background-color: #D1FAE5 !important; color: #047857 !important; }
+        .option-btn.incorrect { border-color: #EF4444 !important; background-color: #FEE2E2 !important; color: #B91C1C !important; }
+        .option-btn:disabled { cursor: not-allowed; }
+        .feedback-correct { background-color: #34D399; }
+        .feedback-incorrect { background-color: #F87171; }
+        .results-card { animation: pop-in 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards; }
+        @keyframes pop-in { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .badge-icon { animation: badge-grow 0.7s 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform: scale(0); }
+        @keyframes badge-grow { from { transform: scale(0); } to { transform: scale(1); } }
+        nav a { padding: 8px 16px; border-radius: 999px; font-weight: 600; transition: all 0.2s ease-in-out; }
+        nav a.active { background-color: #3B82F6; color: white; }
+        nav a:not(.active):hover { background-color: #DBEAFE; color: #3B82F6; }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+        <!-- Kontainer Loading -->
+        <div id="loading-container" class="text-center">
+            <h1 class="text-2xl font-bold text-gray-600">Memuat Kuis... 🎲</h1>
+            <p class="text-gray-500 mt-2">Harap tunggu sebentar ya!</p>
+        </div>
+
+        <!-- Kontainer Kuis -->
+        <div id="quiz-container" class="hidden w-full">
+             <main class="quiz-card">
+                <h1 id="quiz-title" class="text-3xl font-black text-center mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-teal-400">Memuat Judul...</h1>
+                
+                <p id="question-text" class="text-2xl font-bold text-gray-700 mb-8 text-center">Memuat pertanyaan...</p>
+
+                <div id="answer-options" class="space-y-4 mb-6">
+                    <!-- Opsi jawaban akan diisi oleh JavaScript -->
+                </div>
+                
+                <div id="feedback-box" class="hidden p-4 rounded-lg text-center font-bold text-white mb-6 transition-all duration-300">
+                    <span id="feedback-text"></span>
+                </div>
+
+                <button id="submit-btn" class="btn-submit">Kirim Jawaban</button>
+            </main>
+        </div>
+        
+        <!-- Kontainer Hasil -->
+        <div id="results-container" class="hidden w-full">
+             <main class="quiz-card results-card text-center">
+                <h1 id="result-title" class="text-4xl font-black text-gray-800">Kerja Bagus!</h1>
+                <p class="text-xl text-gray-500 mt-2">Kamu telah menyelesaikan kuis.</p>
+                <div class="bg-gray-100 p-6 rounded-2xl my-8">
+                    <p class="text-lg font-bold text-gray-600">SKOR KAMU</p>
+                    <p id="score-text" class="text-7xl font-black text-blue-500 my-2">100</p>
+                </div>
+                <div class="relative flex items-center justify-center gap-4 bg-yellow-50 p-4 rounded-2xl border-2 border-yellow-200">
+                    <div id="badge-icon-container" class="relative"></div>
+                    <p id="badge-message" class="text-lg font-bold text-yellow-700">Kamu mendapatkan lencana Emas!</p>
+                </div>
+                <a href="profile.html" class="btn-submit mt-8 !bg-gradient-to-r from-blue-500 to-indigo-500 block text-center">Lihat Profilku</a>
+            </main>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // KONFIGURASI FIREBASE ANDA DI SINI
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+    authDomain: "forumwidara.firebaseapp.com",
+    projectId: "forumwidara",
+    storageBucket: "forumwidara.firebasestorage.app",
+    messagingSenderId: "216895655168",
+    appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // --- DATA & ELEMEN ---
+        let quizData = null; // Akan diisi dari Firestore
+        let currentQuestion;
+        let score = 0;
+        let isQuestionAnswered = false;
+        const DUMMY_USER_ID = 'user_abc_123'; // Ganti dengan ID user yang login
+        let quizId = null;
+
+        const loadingContainer = document.getElementById('loading-container');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+        const quizTitle = document.getElementById('quiz-title');
+        const questionText = document.getElementById('question-text');
+        const answerOptionsContainer = document.getElementById('answer-options');
+        const feedbackBox = document.getElementById('feedback-box');
+        const feedbackText = document.getElementById('feedback-text');
+        const submitBtn = document.getElementById('submit-btn');
+
+        // --- FUNGSI FIREBASE ---
+
+        async function loadQuiz() {
+            const params = new URLSearchParams(window.location.search);
+            quizId = params.get('quizId');
+
+            if (!quizId) {
+                loadingContainer.innerHTML = '<h1 class="text-2xl font-bold text-red-600">Kuis tidak ditemukan!</h1><p class="text-gray-500 mt-2">Pastikan Anda membuka link dari halaman pengumuman.</p>';
+                return;
+            }
+
+            try {
+                const quizDocRef = doc(db, 'quizzes', quizId);
+                const quizDoc = await getDoc(quizDocRef);
+
+                if (quizDoc.exists()) {
+                    quizData = quizDoc.data();
+                    startQuiz();
+                } else {
+                    loadingContainer.innerHTML = `<h1 class="text-2xl font-bold text-red-600">Error: Kuis dengan ID ${quizId} tidak ada.</h1>`;
+                }
+            } catch (error) {
+                console.error("Gagal memuat kuis:", error);
+                loadingContainer.innerHTML = `<h1 class="text-2xl font-bold text-red-600">Gagal memuat kuis.</h1>`;
+            }
+        }
+
+        async function saveResult(finalScore, badge) {
+            try {
+                // 1. Simpan hasil individu ke koleksi 'results'
+                await addDoc(collection(db, 'results'), {
+                    userId: DUMMY_USER_ID,
+                    quizId: quizId,
+                    quizTitle: quizData.title,
+                    score: finalScore,
+                    badge: badge.name,
+                    completedAt: serverTimestamp()
+                });
+                
+                // 2. Update profil pengguna (agregasi lencana)
+                const profileRef = doc(db, 'profiles', DUMMY_USER_ID);
+                await runTransaction(db, async (transaction) => {
+                    const profileDoc = await transaction.get(profileRef);
+                    if (!profileDoc.exists()) {
+                        // Jika profil belum ada, buat baru
+                        transaction.set(profileRef, {
+                            name: 'Budi Ceria', // Nama default
+                            badges: { gold: 0, silver: 0, bronze: 0 }
+                        });
+                    }
+
+                    // Increment lencana yang sesuai
+                    const newBadgeCount = (profileDoc.data()?.badges?.[badge.name.toLowerCase()] || 0) + 1;
+                    transaction.update(profileRef, {
+                        [`badges.${badge.name.toLowerCase()}`]: newBadgeCount
+                    });
+                });
+
+                console.log("Hasil dan profil berhasil disimpan!");
+
+            } catch (error) {
+                console.error("Gagal menyimpan hasil:", error);
+            }
+        }
+
+        // --- FUNGSI KUIS ---
+
+        function startQuiz() {
+            loadingContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            
+            score = 0;
+            currentQuestion = quizData.questions[0]; // Asumsi hanya 1 soal per kuis
+            quizTitle.innerText = quizData.title;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            isQuestionAnswered = false;
+            feedbackBox.classList.add('hidden');
+            answerOptionsContainer.innerHTML = '';
+            submitBtn.disabled = true;
+
+            questionText.innerText = currentQuestion.question;
+
+            // Render opsi jawaban
+            switch (currentQuestion.type) {
+                case 'pilihan-ganda':
+                case 'benar-salah':
+                    currentQuestion.options.forEach(option => {
+                        const button = document.createElement('button');
+                        button.innerText = option;
+                        button.className = 'option-btn w-full';
+                        button.onclick = () => selectOption(button);
+                        answerOptionsContainer.appendChild(button);
+                    });
+                    break;
+                case 'esai':
+                    const textarea = document.createElement('textarea');
+                    textarea.className = 'w-full p-4 border-2 rounded-xl border-gray-300 focus:border-blue-500 outline-none';
+                    textarea.placeholder = 'Ketik jawabanmu di sini...';
+                    textarea.rows = 4;
+                    textarea.oninput = () => { submitBtn.disabled = textarea.value.trim() === ''; };
+                    answerOptionsContainer.appendChild(textarea);
+                    break;
+                case 'susun-huruf':
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'w-full p-4 text-center text-2xl tracking-[.5em] font-bold border-2 rounded-xl border-gray-300 focus:border-blue-500 outline-none uppercase';
+                    input.oninput = () => { submitBtn.disabled = input.value.trim() === ''; };
+                    answerOptionsContainer.appendChild(input);
+                    break;
+            }
+            submitBtn.innerText = 'Kirim Jawaban';
+        }
+
+        function selectOption(button) {
+            if (isQuestionAnswered) return;
+            document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+            button.classList.add('selected');
+            submitBtn.disabled = false;
+        }
+
+        function handleSubmit() {
+            if (isQuestionAnswered) {
+                showResults();
+                return;
+            }
+
+            isQuestionAnswered = true;
+            let userAnswer, isCorrect = false;
+
+            const answerInputs = answerOptionsContainer.querySelectorAll('button, textarea, input');
+            answerInputs.forEach(input => input.disabled = true);
+
+            switch (currentQuestion.type) {
+                case 'pilihan-ganda':
+                case 'benar-salah':
+                    const selectedBtn = answerOptionsContainer.querySelector('.option-btn.selected');
+                    userAnswer = selectedBtn.innerText;
+                    isCorrect = userAnswer.toLowerCase() === currentQuestion.answer.toLowerCase();
+                    if (!isCorrect) selectedBtn.classList.add('incorrect');
+                    answerOptionsContainer.querySelectorAll('.option-btn').forEach(btn => {
+                        if(btn.innerText.toLowerCase() === currentQuestion.answer.toLowerCase()) btn.classList.add('correct');
+                    });
+                    break;
+                case 'esai':
+                    userAnswer = answerOptionsContainer.querySelector('textarea').value.trim();
+                    isCorrect = userAnswer.toLowerCase() === currentQuestion.answer.toLowerCase();
+                    break;
+                case 'susun-huruf':
+                    userAnswer = answerOptionsContainer.querySelector('input').value.trim().toUpperCase();
+                    isCorrect = userAnswer === currentQuestion.answer.toUpperCase();
+                    break;
+            }
+            
+            if (isCorrect) score = 100; else score = 0;
+
+            feedbackBox.classList.remove('hidden');
+            feedbackBox.classList.toggle('feedback-correct', isCorrect);
+            feedbackBox.classList.toggle('feedback-incorrect', !isCorrect);
+            feedbackText.innerText = isCorrect ? 'Jawaban Benar! Hebat!' : `Kurang Tepat. Jawaban yang benar: ${currentQuestion.answer}`;
+            
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Lihat Hasil';
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+
+            const finalScore = score;
+            document.getElementById('score-text').innerText = finalScore;
+
+            let badge;
+            if (finalScore >= 90) badge = { name: 'Gold', iconColor: 'text-yellow-400' };
+            else if (finalScore >= 75) badge = { name: 'Silver', iconColor: 'text-gray-400' };
+            else badge = { name: 'Bronze', iconColor: 'text-orange-400' };
+
+            document.getElementById('badge-icon-container').innerHTML = `<i data-lucide="award" class="badge-icon w-16 h-16 ${badge.iconColor}"></i>`;
+            document.getElementById('badge-message').innerText = `Hebat! Kamu mendapatkan lencana ${badge.name}!`;
+            lucide.createIcons();
+            
+            // Simpan hasil ke Firestore
+            saveResult(finalScore, badge);
+        }
+        
+        // --- Event Listeners ---
+        submitBtn.addEventListener('click', handleSubmit);
+        document.addEventListener('DOMContentLoaded', loadQuiz);
+
+    </script>
+</body>
+</html>
+

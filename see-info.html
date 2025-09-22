@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papan Info Kuis Ceria</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Fredoka+One&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f7fafc; }
+        .font-heading { font-family: 'Fredoka One', cursive; }
+        .info-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            transition: all 0.3s ease-in-out;
+            border: 1px solid #e2e8f0;
+        }
+        .info-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
+        .timer-box { background-color: #edf2f7; border-radius: 12px; padding: 1rem; }
+        .timer-segment { text-align: center; }
+        .timer-value { font-size: 2rem; font-weight: 700; color: #2d3748; line-height: 1; }
+        .timer-label { font-size: 0.75rem; color: #718096; text-transform: uppercase; }
+        .btn-play { background: linear-gradient(135deg, #48bb78, #38a169); color: white; display: none; }
+        .badge-item { display: flex; align-items: center; gap: 0.75rem; background-color: #f7fafc; padding: 0.5rem 1rem; border-radius: 999px; font-size: 0.875rem; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm py-3">
+        <div class="container mx-auto flex justify-between items-center px-4">
+            <nav id="navbar" class="bg-gray-100 p-2 rounded-full"></nav>
+            <div id="role-switcher" class="flex items-center gap-2">
+                <span id="role-label" class="font-semibold text-sm text-gray-600"></span>
+                <button onclick="toggleRole()" class="bg-indigo-500 text-white px-3 py-1 rounded-full text-sm hover:bg-indigo-600 transition-colors"></button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-10">
+            <h1 class="font-heading text-4xl md:text-5xl font-bold text-teal-500">Papan Info Lomba 🚀</h1>
+            <p class="text-gray-500 mt-2">Lihat semua lomba kuis seru yang akan datang!</p>
+        </header>
+        
+        <div id="announcement-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Kartu Pengumuman akan dimuat di sini oleh JavaScript -->
+            <p id="loading-info" class="col-span-full text-center text-gray-500">Memuat info lomba...</p>
+        </div>
+    </main>
+
+    <script src="role-manager.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+    authDomain: "forumwidara.firebaseapp.com",
+    projectId: "forumwidara",
+    storageBucket: "forumwidara.firebasestorage.app",
+    messagingSenderId: "216895655168",
+    appId: "1:216895655168:web:59255f600fc3b3b44eb7e5" };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const grid = document.getElementById('announcement-grid');
+        let countdownInterval;
+
+        function updateAllCountdowns() {
+            const timers = document.querySelectorAll('.timer-box[data-starttime]');
+            timers.forEach(timerEl => {
+                const startTime = parseInt(timerEl.dataset.starttime, 10);
+                const now = new Date().getTime();
+                const distance = startTime - now;
+
+                const card = timerEl.closest('.info-card');
+                const playButton = card.querySelector('.btn-play');
+                const timerWrapper = card.querySelector('.timer-wrapper');
+
+                if (distance <= 0) {
+                    timerWrapper.innerHTML = `<div class="text-center text-green-600 font-bold p-4">Waktunya Main! 🎉</div>`;
+                    playButton.style.display = 'block';
+                } else {
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    timerEl.querySelector('.days').textContent = String(days).padStart(2, '0');
+                    timerEl.querySelector('.hours').textContent = String(hours).padStart(2, '0');
+                    timerEl.querySelector('.minutes').textContent = String(minutes).padStart(2, '0');
+                    timerEl.querySelector('.seconds').textContent = String(seconds).padStart(2, '0');
+                }
+            });
+        }
+
+        function renderAnnouncements(docs) {
+            grid.innerHTML = '';
+            if (docs.length === 0) {
+                grid.innerHTML = '<p class="col-span-full text-center text-gray-500">Belum ada pengumuman lomba saat ini. Cek lagi nanti ya!</p>';
+                return;
+            }
+
+            docs.forEach(doc => {
+                const a = doc.data();
+                const card = document.createElement('div');
+                card.className = 'info-card flex flex-col p-6';
+
+                const startTimeMs = a.startTime.toMillis();
+                
+                const badgesHTML = Object.entries(a.badges || {})
+                    .filter(([key, value]) => value) // Hanya tampilkan jika ada nama lencananya
+                    .map(([key, value]) => {
+                        const colors = { gold: 'text-yellow-500', silver: 'text-gray-400', bronze: 'text-orange-500' };
+                        return `<div class="badge-item"><i data-lucide="award" class="w-4 h-4 ${colors[key]}"></i><span class="font-semibold">${value}</span></div>`;
+                    }).join('');
+
+                card.innerHTML = `
+                    <div class="flex-grow">
+                        <h2 class="font-heading text-2xl font-bold text-gray-800">${a.title}</h2>
+                        <p class="text-gray-600 mt-2 mb-4">${a.description}</p>
+                        <div class="flex flex-col gap-2 mb-6">${badgesHTML || '<p class="text-sm text-gray-400">Belum ada info lencana.</p>'}</div>
+                    </div>
+                    <div class="timer-wrapper">
+                        <div class="timer-box" data-starttime="${startTimeMs}">
+                            <div class="flex justify-around">
+                                <div class="timer-segment"><span class="timer-value days">00</span><span class="timer-label">Hari</span></div>
+                                <div class="timer-segment"><span class="timer-value hours">00</span><span class="timer-label">Jam</span></div>
+                                <div class="timer-segment"><span class="timer-value minutes">00</span><span class="timer-label">Menit</span></div>
+                                <div class="timer-segment"><span class="timer-value seconds">00</span><span class="timer-label">Detik</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="play.html?quizId=${a.quizId}" class="btn-play w-full text-center font-bold py-3 rounded-lg mt-4 transition-transform hover:scale-105">
+                        Mulai Kuis!
+                    </a>
+                `;
+                grid.appendChild(card);
+            });
+            
+            lucide.createIcons();
+            
+            // Start the global countdown
+            if (countdownInterval) clearInterval(countdownInterval);
+            countdownInterval = setInterval(updateAllCountdowns, 1000);
+            updateAllCountdowns(); // Initial call
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            onSnapshot(collection(db, 'announcements'), (snapshot) => {
+                document.getElementById('loading-info').style.display = 'none';
+                renderAnnouncements(snapshot.docs);
+            });
+        });
+    </script>
+</body>
+</html>
+

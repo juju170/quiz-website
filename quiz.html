@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buat Kuis Ceria - Untuk Guru Hebat!</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #F0F9FF; /* Light blue background */
+        }
+        .form-container {
+            background: white;
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            border: 2px solid #E0E7FF;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #D1D5DB;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #60A5FA;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3);
+        }
+        .label-text {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        .btn-simpan {
+            background: linear-gradient(135deg, #34D399, #10B981);
+            color: white;
+            font-weight: 700;
+            padding: 16px;
+            border-radius: 9999px;
+            width: 100%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(52, 211, 153, 0.4);
+        }
+        .btn-simpan:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 211, 153, 0.5);
+        }
+        .quiz-card {
+            padding: 24px;
+            border-radius: 20px;
+            color: #1F2937;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .quiz-card:hover {
+            transform: scale(1.05);
+        }
+        .opsi-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        nav a {
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+        }
+        nav a.active {
+            background-color: #3B82F6;
+            color: white;
+        }
+        nav a:not(.active):hover {
+            background-color: #DBEAFE;
+            color: #3B82F6;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-blue-600">Buat Kuis Baru yang Seru! 🚀</h1>
+            <p class="text-gray-500 mt-2">Isi formulir di bawah untuk membuat kuis yang asyik bagi para siswa.</p>
+        </header>
+
+        <!-- Form Pembuatan Kuis -->
+        <main id="form-kuis" class="form-container mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-gray-700">Detail Kuis</h2>
+            <form id="quizCreatorForm">
+                 <!-- Judul Kuis -->
+                <div class="input-group">
+                    <label for="judul" class="label-text"><i data-lucide="edit-3"></i>Judul Kuis</label>
+                    <input type="text" id="judul" name="judul" class="input-field" placeholder="Contoh: Kuis Hewan Laut" required>
+                </div>
+
+                <!-- Pertanyaan -->
+                <div class="input-group">
+                    <label for="pertanyaan" class="label-text"><i data-lucide="help-circle"></i>Pertanyaan</label>
+                    <textarea id="pertanyaan" name="pertanyaan" rows="3" class="input-field" placeholder="Tuliskan pertanyaan di sini..."></textarea>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Tipe Soal -->
+                    <div class="input-group">
+                        <label for="tipe-soal" class="label-text"><i data-lucide="list-checks"></i>Tipe Soal</label>
+                        <select id="tipe-soal" name="tipe-soal" class="input-field bg-white">
+                            <option value="pilihan-ganda">Pilihan Ganda</option>
+                            <option value="benar-salah">Benar / Salah</option>
+                            <option value="esai">Esai</option>
+                            <option value="susun-huruf">Susun Huruf</option>
+                        </select>
+                    </div>
+
+                    <!-- Kunci Jawaban -->
+                     <div class="input-group">
+                        <label for="jawaban-benar" class="label-text"><i data-lucide="key-round"></i>Kunci Jawaban</label>
+                        <input type="text" id="jawaban-benar" name="jawaban-benar" class="input-field" placeholder="Contoh: Jupiter" required>
+                    </div>
+                </div>
+
+                <!-- Opsi Jawaban (hanya untuk pilihan ganda) -->
+                <div id="opsi-jawaban-container" class="input-group">
+                    <label class="label-text"><i data-lucide="list"></i>Opsi Jawaban</label>
+                    <input type="text" name="opsi" class="input-field mb-2" placeholder="Opsi 1 (Contoh: Bumi)">
+                    <input type="text" name="opsi" class="input-field mb-2" placeholder="Opsi 2 (Contoh: Mars)">
+                    <input type="text" name="opsi" class="input-field mb-2" placeholder="Opsi 3 (Contoh: Jupiter)">
+                    <input type="text" name="opsi" class="input-field" placeholder="Opsi 4 (Contoh: Saturnus)">
+                    <p class="text-xs text-gray-500 mt-1">Isi opsi jawaban yang relevan. Kunci jawaban di atas harus cocok dengan salah satu opsi ini.</p>
+                </div>
+
+                <!-- Tombol Simpan -->
+                <div class="mt-6">
+                    <button type="submit" class="btn-simpan flex items-center justify-center gap-2">
+                        <i data-lucide="save"></i>
+                        Simpan Kuis
+                    </button>
+                </div>
+            </form>
+        </main>
+
+        <!-- Daftar Kuis -->
+        <section>
+            <h2 class="text-3xl font-bold text-center mb-8 text-blue-600">Daftar Kuis yang Sudah Dibuat 🎨</h2>
+            <div id="daftar-kuis" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Data dari Firestore akan ditampilkan di sini -->
+                <p id="loading-quizzes" class="text-center text-gray-500 col-span-full">Memuat kuis...</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // KONFIGURASI FIREBASE ANDA DI SINI
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+    authDomain: "forumwidara.firebaseapp.com",
+    projectId: "forumwidara",
+    storageBucket: "forumwidara.firebasestorage.app",
+    messagingSenderId: "216895655168",
+    appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+        };
+
+        // Inisialisasi Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Referensi Koleksi
+        const quizzesCollection = collection(db, 'quizzes');
+
+        // Elemen DOM
+        const form = document.getElementById('quizCreatorForm');
+        const daftarKuisContainer = document.getElementById('daftar-kuis');
+        const tipeSoalSelect = document.getElementById('tipe-soal');
+        const opsiJawabanContainer = document.getElementById('opsi-jawaban-container');
+        
+        const cardColors = ['from-yellow-300 to-orange-300', 'from-cyan-300 to-blue-400', 'from-pink-300 to-purple-400', 'from-green-300 to-teal-400'];
+
+        // --- FUNGSI ---
+
+        // Menampilkan atau menyembunyikan input opsi jawaban
+        function toggleOpsiJawaban() {
+            if (tipeSoalSelect.value === 'pilihan-ganda') {
+                opsiJawabanContainer.style.display = 'block';
+            } else {
+                opsiJawabanContainer.style.display = 'none';
+            }
+        }
+        
+        // Render kuis dari data Firestore
+        function renderQuizzes(docs) {
+            daftarKuisContainer.innerHTML = '';
+            if (docs.length === 0) {
+                 daftarKuisContainer.innerHTML = '<p class="text-center text-gray-500 col-span-full">Belum ada kuis yang dibuat.</p>';
+                 return;
+            }
+
+            docs.forEach((doc, index) => {
+                const quiz = doc.data();
+                const card = document.createElement('div');
+                const selectedColor = cardColors[index % cardColors.length];
+                card.className = `quiz-card bg-gradient-to-br ${selectedColor}`;
+                card.innerHTML = `
+                    <h3 class="text-2xl font-bold mb-2">${quiz.title}</h3>
+                    <p class="mb-4">Tipe Soal: ${quiz.type}</p>
+                    <span class="font-semibold bg-white/50 px-3 py-1 rounded-full text-sm self-start">1 Soal</span>
+                `;
+                daftarKuisContainer.appendChild(card);
+            });
+        }
+
+        // Simpan kuis baru ke Firestore
+        async function saveQuiz(e) {
+            e.preventDefault();
+            
+            const title = form.judul.value;
+            const type = form['tipe-soal'].value;
+            const question = form.pertanyaan.value;
+            const answer = form['jawaban-benar'].value;
+
+            if (!title || !question || !answer) {
+                alert('Harap isi semua kolom yang wajib diisi!');
+                return;
+            }
+
+            const newQuiz = {
+                title,
+                type,
+                questions: [{ // Struktur untuk mendukung banyak pertanyaan di masa depan
+                    question,
+                    type,
+                    answer,
+                    options: type === 'pilihan-ganda' 
+                        ? [...document.querySelectorAll('input[name="opsi"]')]
+                            .map(input => input.value).filter(Boolean)
+                        : (type === 'benar-salah' ? ['Benar', 'Salah'] : [])
+                }],
+                createdAt: serverTimestamp()
+            };
+
+            try {
+                await addDoc(quizzesCollection, newQuiz);
+                form.reset();
+                toggleOpsiJawaban();
+                alert('Kuis berhasil disimpan!');
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                alert('Gagal menyimpan kuis. Lihat konsol untuk detail.');
+            }
+        }
+
+
+        // --- EVENT LISTENERS ---
+        
+        // Tampilkan daftar kuis secara real-time
+        onSnapshot(quizzesCollection, (snapshot) => {
+            document.getElementById('loading-quizzes').style.display = 'none';
+            renderQuizzes(snapshot.docs);
+        });
+
+        // Simpan kuis saat form disubmit
+        form.addEventListener('submit', saveQuiz);
+        
+        // Atur UI saat tipe soal berubah
+        tipeSoalSelect.addEventListener('change', toggleOpsiJawaban);
+        
+        // Panggil saat load pertama kali
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            toggleOpsiJawaban();
+        });
+
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil & Prestasiku!</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Fredoka One & Nunito -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link apirel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0f9ff;
+            background-image: radial-gradient(circle at 15% 50%, #e0f2fe 0%, transparent 25%), radial-gradient(circle at 85% 30%, #fef3c7 0%, transparent 25%);
+        }
+        .font-heading { font-family: 'Fredoka One', cursive; }
+        .profile-header { background: linear-gradient(135deg, #60A5FA, #3B82F6); border-radius: 0 0 50% 50% / 0 0 20% 20%; }
+        .badge-card { background-color: white; border-radius: 20px; padding: 1.5rem; text-align: center; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .badge-card:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1); }
+        .badge-icon-container { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+        .gold { background-color: #FFFBEB; border: 3px solid #FBBF24; color: #FBBF24; }
+        .silver { background-color: #F9FAFB; border: 3px solid #D1D5DB; color: #9CA3AF; }
+        .bronze { background-color: #FEF2F2; border: 3px solid #F59E0B; color: #D97706; }
+        .history-item { background: white; border-radius: 16px; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: transform 0.2s ease; }
+        .history-item:hover { transform: scale(1.03); }
+        .progress-bar { background-color: #e5e7eb; border-radius: 999px; height: 10px; width: 100px; overflow: hidden; }
+        .progress-bar-inner { height: 100%; background: linear-gradient(90deg, #34D399, #10B981); border-radius: 999px; }
+        nav a { padding: 8px 16px; border-radius: 999px; font-weight: 600; transition: all 0.2s ease-in-out; }
+        nav a.active { background-color: #3B82F6; color: white; }
+        nav a:not(.active):hover { background-color: #DBEAFE; color: #3B82F6; }
+    </style>
+</head>
+<body class="text-gray-700">
+        <!-- Header Profil -->
+        <header class="profile-header text-white text-center pt-12 pb-24 mb-[-100px] relative">
+            <div class="relative inline-block">
+                <div class="w-32 h-32 rounded-full bg-white/30 p-2 mx-auto">
+                     <svg class="w-full h-full text-white" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+                <span class="absolute -bottom-2 -right-2 bg-yellow-400 text-yellow-900 p-2 rounded-full text-2xl">🤠</span>
+            </div>
+            <h1 id="profile-name" class="font-heading text-4xl md:text-5xl mt-4">Memuat Nama...</h1>
+            <p class="opacity-80">Siswa Kelas 4B</p>
+        </header>
+
+        <main class="relative z-10">
+            <!-- Bagian Lencana -->
+            <section class="bg-white/70 backdrop-blur-sm p-6 md:p-8 rounded-3xl shadow-lg">
+                <h2 class="font-heading text-3xl text-center text-amber-600 mb-6">🥇 Lencana Prestasiku</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <!-- Lencana Emas -->
+                    <div class="badge-card">
+                        <div class="badge-icon-container gold"><i data-lucide="award" class="w-10 h-10"></i></div>
+                        <h3 class="text-xl font-extrabold text-gray-800">Lencana Emas</h3>
+                        <p id="gold-badge-count" class="text-4xl font-black text-amber-500">0</p>
+                    </div>
+                    <!-- Lencana Perak -->
+                    <div class="badge-card">
+                        <div class="badge-icon-container silver"><i data-lucide="shield" class="w-10 h-10"></i></div>
+                        <h3 class="text-xl font-extrabold text-gray-800">Lencana Perak</h3>
+                        <p id="silver-badge-count" class="text-4xl font-black text-gray-500">0</p>
+                    </div>
+                    <!-- Lencana Perunggu -->
+                    <div class="badge-card">
+                        <div class="badge-icon-container bronze"><i data-lucide="medal" class="w-10 h-10"></i></div>
+                        <h3 class="text-xl font-extrabold text-gray-800">Lencana Perunggu</h3>
+                        <p id="bronze-badge-count" class="text-4xl font-black text-orange-500">0</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bagian Riwayat Kuis -->
+            <section class="mt-10">
+                <h2 class="font-heading text-3xl text-center text-blue-600 mb-6">📜 Riwayat Kuis</h2>
+                <div id="quiz-history-list" class="space-y-4">
+                     <!-- Data dari Firestore akan ditampilkan di sini -->
+                    <p id="loading-history" class="text-center text-gray-500 col-span-full">Memuat riwayat kuis...</p>
+                </div>
+            </section>
+        </main>
+        
+    </div>
+
+     <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // KONFIGURASI FIREBASE ANDA DI SINI
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+    authDomain: "forumwidara.firebaseapp.com",
+    projectId: "forumwidara",
+    storageBucket: "forumwidara.firebasestorage.app",
+    messagingSenderId: "216895655168",
+    appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // ID Pengguna (Contoh)
+        const DUMMY_USER_ID = 'user_abc_123'; // Harus sama dengan di play.html
+
+        // Elemen DOM
+        const profileNameEl = document.getElementById('profile-name');
+        const goldBadgeEl = document.getElementById('gold-badge-count');
+        const silverBadgeEl = document.getElementById('silver-badge-count');
+        const bronzeBadgeEl = document.getElementById('bronze-badge-count');
+        const historyListEl = document.getElementById('quiz-history-list');
+
+        // --- FUNGSI ---
+
+        function renderProfile(data) {
+            profileNameEl.textContent = data.name || 'Nama Siswa';
+            goldBadgeEl.textContent = data.badges?.gold || 0;
+            silverBadgeEl.textContent = data.badges?.silver || 0;
+            bronzeBadgeEl.textContent = data.badges?.bronze || 0;
+        }
+
+        function renderHistory(docs) {
+            historyListEl.innerHTML = ''; // Kosongkan daftar
+            if (docs.length === 0) {
+                 historyListEl.innerHTML = '<p class="text-center text-gray-500">Belum ada riwayat kuis.</p>';
+                 return;
+            }
+
+            docs.forEach(doc => {
+                const result = doc.data();
+                const item = document.createElement('div');
+                item.className = 'history-item';
+
+                const date = result.completedAt?.toDate().toLocaleDateString('id-ID', {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                }) || 'Tanggal tidak diketahui';
+
+                let scoreColor = 'text-green-500';
+                let progressColor = '!bg-gradient-to-r from-green-400 to-teal-500';
+                if(result.score < 80) {
+                    scoreColor = 'text-yellow-500';
+                    progressColor = '!bg-gradient-to-r from-yellow-400 to-amber-500';
+                }
+                if(result.score < 60) {
+                    scoreColor = 'text-orange-500';
+                    progressColor = '!bg-gradient-to-r from-orange-400 to-red-500';
+                }
+
+
+                item.innerHTML = `
+                    <div>
+                        <p class="font-bold text-lg text-gray-800">${result.quizTitle}</p>
+                        <p class="text-sm text-gray-500">${date}</p>
+                    </div>
+                    <div class="text-right">
+                         <p class="font-extrabold text-lg ${scoreColor}">Skor: ${result.score}</p>
+                         <div class="progress-bar mt-1">
+                            <div class="progress-bar-inner ${progressColor}" style="width: ${result.score}%;"></div>
+                         </div>
+                    </div>
+                `;
+                historyListEl.appendChild(item);
+            });
+        }
+
+        // --- LISTENER FIREBASE ---
+        function listenToProfile() {
+            const profileRef = doc(db, 'profiles', DUMMY_USER_ID);
+            onSnapshot(profileRef, (doc) => {
+                if (doc.exists()) {
+                    renderProfile(doc.data());
+                } else {
+                    console.log("Profil belum ada, akan dibuat saat kuis pertama diselesaikan.");
+                    renderProfile({ name: 'Siswa Baru', badges: { gold: 0, silver: 0, bronze: 0 } });
+                }
+            });
+        }
+
+        function listenToHistory() {
+            const resultsRef = collection(db, 'results');
+            const q = query(resultsRef, where("userId", "==", DUMMY_USER_ID));
+            
+            onSnapshot(q, (snapshot) => {
+                document.getElementById('loading-history').style.display = 'none';
+                renderHistory(snapshot.docs);
+            });
+        }
+
+        // Mulai listener saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            listenToProfile();
+            listenToHistory();
+        });
+
+    </script>
+</body>
+</html>
+
