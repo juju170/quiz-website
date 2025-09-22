@@ -71,8 +71,8 @@
         .btn.admin-badge:hover { background-color: #ab47bc; }
         .btn.admin-quest { background-color: #ba68c8; }
         .btn.admin-quest:hover { background-color: #ab47bc; }
-        .btn.admin-challenge { background-color: #ef5350; }
-        .btn.admin-challenge:hover { background-color: #e53935; }
+        .btn.admin-challenges { background-color: #ef5350; }
+        .btn.admin-challenges:hover { background-color: #e53935; }
 
         .menu-grid {
             display: grid;
@@ -162,7 +162,7 @@
             <!-- PERUBAHAN: Tombol admin disederhanakan. Hanya ada satu tombol untuk tantangan. -->
             <a href="buat-lencana.html" id="kelola-lencana-btn" class="btn admin-badge" style="display: none;">Kelola Lencana 🎖️</a>
             <a href="create-tantangan.html" id="kelola-challenges" class="btn admin-quest" style="display: none;">Buat Soal Tantangan ✏️</a>
-            <a href="buat-tantangan.html" id="kelola-tantangan-btn" class="btn admin-challenge" style="display: none;">Kelola Tantangan 🏆</a>
+            <a href="buat-tantangan.html" id="kelola-tantangan-btn" class="btn admin-challenges" style="display: none;">Kelola Tantangan 🏆</a>
         </div>
     </header>
 
@@ -280,11 +280,11 @@
 
   onAuthStateChanged(auth, async (user) => {
     // PERUBAHAN: Daftar tombol admin disesuaikan, hanya 2 tombol.
-    const kelolaChallengesBtn = document.getElementById('kelola-challenges');
+    const kelolaChallengeBtn = document.getElementById('kelola-challenge');
     const kelolaLencanaBtn = document.getElementById('kelola-lencana-btn');
     const kelolaTantanganBtn = document.getElementById('kelola-tantangan-btn');
     
-    const adminButtons = [kelolaChallengesBtn, kelolaLencanaBtn, kelolaTantanganBtn];
+    const adminButtons = [kelolaChallengeBtn, kelolaLencanaBtn, kelolaTantanganBtn];
 
     if (user) {
       const userRoleRef = doc(db, "users", user.uid);
