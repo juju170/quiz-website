@@ -404,4 +404,87 @@
                         return;
                     }
                     questionData.crossword = { horizontal, vertical };
-                    br
+                    break;
+            }
+            
+            // Simpan ke Firestore
+            // Struktur: 1 kuis (dokumen) bisa punya banyak soal (subcollection)
+            // Ini lebih scalable. Kita buat/update dokumen kuis, lalu tambahkan soal baru.
+            try {
+                const quizDocRef = doc(db, 'quizzes', title); // Gunakan judul sebagai ID
+                const quizDoc = await getDoc(quizDocRef);
+
+                if (!quizDoc.exists()) {
+                    // Kuis baru, buat dokumen utamanya
+                    await setDoc(quizDocRef, {
+                        title: title,
+                        createdAt: serverTimestamp(),
+                        questionCount: 0
+                    });
+                }
+                // Tambahkan soal sebagai dokumen baru di subcollection 'questions'
+                const questionsSubcollectionRef = collection(quizDocRef, 'questions');
+                await addDoc(questionsSubcollectionRef, questionData);
+                
+                alert(`Soal "${questionText.substring(0,20)}..." berhasil ditambahkan ke kuis "${title}"!`);
+                form.reset();
+                pgContainer.innerHTML = '';
+                pgOptionCount = 0;
+                addPgOption(true); addPgOption(); // Reset PG
+                matchingContainer.innerHTML = '';
+                matchingPairCount = 0;
+                addMatchingPair(); addMatchingPair(); // Reset Matching
+                updateFormUI();
+            } catch (error) {
+                console.error("Error saving document: ", error);
+                alert('Gagal menyimpan. Lihat konsol untuk detail.');
+            }
+        }
+        
+        // Render daftar kuis
+        function renderQuizzes(docs) {
+            daftarKuisContainer.innerHTML = '';
+             if (docs.length === 0) {
+                 daftarKuisContainer.innerHTML = '<p class="text-center text-gray-500 col-span-full">Belum ada kuis yang dibuat.</p>';
+                 return;
+            }
+            const cardColors = ['from-yellow-300 to-orange-300', 'from-cyan-300 to-blue-400', 'from-pink-300 to-purple-400', 'from-green-300 to-teal-400'];
+
+            docs.forEach((doc, index) => {
+                const quiz = doc.data();
+                const card = document.createElement('div');
+                const selectedColor = cardColors[index % cardColors.length];
+                card.className = `quiz-card bg-gradient-to-br ${selectedColor}`;
+                card.innerHTML = `
+                    <h3 class="text-2xl font-bold mb-2">${quiz.title}</h3>
+                    <span class="font-semibold bg-white/50 px-3 py-1 rounded-full text-sm self-start">Kumpulan Soal</span>
+                `;
+                daftarKuisContainer.appendChild(card);
+            });
+        }
+
+
+        // --- EVENT LISTENERS ---
+        form.addEventListener('submit', saveQuiz);
+        tipeSoalSelect.addEventListener('change', updateFormUI);
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            // Inisialisasi form
+            addPgOption(true); // Tambah 1 opsi PG awal dan tandai sbg benar
+            addPgOption();
+            addMatchingPair();
+            addMatchingPair();
+            updateFormUI(); // Tampilkan form untuk tipe soal pertama
+
+             onSnapshot(quizzesCollectionRef, (snapshot) => {
+                document.getElementById('loading-quizzes').style.display = 'none';
+                renderQuizzes(snapshot.docs);
+            });
+        });
+
+    </script>
+</body>
+</html>
+
+
