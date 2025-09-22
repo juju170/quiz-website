@@ -22,7 +22,6 @@
         .btn-action:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
         .btn-action:disabled { background: #D1D5DB !important; cursor: not-allowed; box-shadow: none; }
         
-        /* === Gaya Tombol Jawaban === */
         .option-btn { border: 3px solid transparent; padding: 1rem; border-radius: 16px; font-size: 1.1rem; font-weight: 700; text-align: center; transition: all 0.2s ease-in-out; background-size: 200% auto; }
         .option-btn:hover:not(:disabled) { transform: scale(1.03); }
         .option-btn.selected { border-color: #1d4ed8; transform: scale(1.05); }
@@ -30,28 +29,27 @@
         .option-btn.incorrect { background-image: linear-gradient(to right, #F87171, #EF4444, #F87171) !important; color: white !important; border-color: #B91C1C !important; animation: shake 0.5s; }
         .option-btn:disabled { cursor: not-allowed; opacity: 0.7; }
 
-        /* === Animasi === */
         @keyframes tada { 0%{transform:scale(1)}10%,20%{transform:scale(.9) rotate(-3deg)}30%,50%,70%,90%{transform:scale(1.1) rotate(3deg)}40%,60%,80%{transform:scale(1.1) rotate(-3deg)}100%{transform:scale(1) rotate(0)} }
         @keyframes shake { 0%,100%{transform:translateX(0)}10%,30%,50%,70%,90%{transform:translateX(-10px)}20%,40%,60%,80%{transform:translateX(10px)} }
         @keyframes pop-in { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         
         /* === Gaya Spesifik Tipe Soal === */
-        /* Susun Huruf */
-        .letter-scramble { user-select: none; }
-        .letter-scramble span { display: inline-block; padding: 0.5rem 1rem; margin: 0.25rem; background: linear-gradient(135deg, #fde68a, #f59e0b); color: #92400e; border-radius: 12px; font-weight: 900; font-size: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .scramble-answer-box, .word-scramble-answer-box { min-height: 50px; background: #f3f4f6; border-radius: 12px; padding: 0.5rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem; border: 2px dashed #d1d5db; }
+        .scramble-letter, .scramble-word { padding: 0.5rem 1rem; background: linear-gradient(135deg, #fde68a, #f59e0b); color: #92400e; border-radius: 8px; font-weight: 900; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .scramble-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-top: 1rem; }
         
-        /* Pencocokkan */
         .matching-item { border: 2px dashed #9ca3af; padding: 0.75rem; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
-        .matching-item.selected { border-style: solid; border-color: #3b82f6; background-color: #dbeafe; }
+        .matching-item.selected-blue { border-style: solid; border-color: #3b82f6; background-color: #dbeafe; transform: scale(1.05); }
+        .matching-item.selected-pink { border-style: solid; border-color: #ec4899; background-color: #fce7f3; transform: scale(1.05); }
+        .matching-item.paired { border-style: solid; border-color: #10b981; background-color: #d1fae5; cursor: not-allowed; opacity: 0.8; }
         
-        /* TTS Mini */
         .tts-grid { display: grid; gap: 4px; }
         .tts-cell { width: 40px; height: 40px; text-align: center; font-size: 1.5rem; font-weight: 900; border-radius: 8px; border: 2px solid #cbd5e1; text-transform: uppercase; }
+        .tts-cell.active { border-color: #3b82f6; background-color: #dbeafe; }
         .tts-cell:disabled { background-color: #f1f5f9; }
         .tts-cell.correct { background-color: #a7f3d0; border-color: #059669; }
         .tts-cell.incorrect { background-color: #fecaca; border-color: #dc2626; }
         
-        /* Progress Bar */
         #progress-bar { transition: width 0.5s ease-in-out; }
     </style>
 </head>
@@ -75,7 +73,7 @@
                 <div id="answer-options" class="space-y-3 mb-4"></div>
             </div>
             
-            <div id="feedback-box" class="hidden p-4 rounded-lg text-center font-bold text-white my-4 transition-all duration-300"></div>
+            <div id="feedback-box" class="hidden p-4 rounded-lg text-center font-semibold my-4 transition-all duration-300"></div>
 
             <button id="action-btn" class="btn-action bg-gradient-to-r from-cyan-400 to-blue-500 text-white">Periksa Jawaban</button>
         </main>
@@ -98,7 +96,7 @@
         import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
-             apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+            apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
             authDomain: "forumwidara.firebaseapp.com",
             projectId: "forumwidara",
             storageBucket: "forumwidara.appspot.com",
@@ -109,12 +107,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // --- State & Elemen Global ---
-        let quizTitleText = '';
-        let questions = [];
-        let currentQuestionIndex = 0;
-        let correctAnswersCount = 0;
-        let isAnswerChecked = false;
+        let quizTitleText = '', questions = [], currentQuestionIndex = 0, correctAnswersCount = 0, isAnswerChecked = false;
 
         const loadingContainer = document.getElementById('loading-container');
         const quizContainer = document.getElementById('quiz-container');
@@ -127,28 +120,22 @@
         const progressBar = document.getElementById('progress-bar');
         const questionCounter = document.getElementById('question-counter');
 
-        // --- Fungsi Helper ---
-        const shuffleArray = (array) => array.sort(() => Math.random() - 0.5);
+        const shuffleArray = (array) => [...array].sort(() => Math.random() - 0.5);
 
-        // --- Fungsi Logika Kuis ---
         async function loadQuiz() {
-            const params = new URLSearchParams(window.location.search);
-            const quizId = params.get('quizId');
-
+            const quizId = new URLSearchParams(window.location.search).get('quizId');
             if (!quizId) {
                 loadingContainer.innerHTML = '<h1 class="text-2xl font-bold text-red-600">Kuis tidak ditemukan!</h1>';
                 return;
             }
 
             try {
-                const quizDocRef = doc(db, 'quizzes', quizId);
-                const quizDoc = await getDoc(quizDocRef);
-
+                const quizDoc = await getDoc(doc(db, 'quizzes', quizId));
                 if (quizDoc.exists()) {
                     quizTitleText = quizDoc.data().title;
-                    const questionsSnapshot = await getDocs(collection(quizDocRef, 'questions'));
+                    const questionsSnapshot = await getDocs(collection(quizDoc.ref, 'questions'));
                     questions = questionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    shuffleArray(questions); // Acak urutan soal
+                    shuffleArray(questions);
                     startQuiz();
                 } else {
                      loadingContainer.innerHTML = `<h1 class="text-2xl font-bold text-red-600">Error: Kuis tidak ada.</h1>`;
@@ -160,8 +147,6 @@
         }
         
         function startQuiz() {
-            currentQuestionIndex = 0;
-            correctAnswersCount = 0;
             loadingContainer.classList.add('hidden');
             quizContainer.classList.remove('hidden');
             resultsContainer.classList.add('hidden');
@@ -189,16 +174,9 @@
             if (!isAnswerChecked) {
                 checkAnswer();
             } else {
-                nextQuestion();
-            }
-        }
-
-        function nextQuestion() {
-            currentQuestionIndex++;
-            if (currentQuestionIndex < questions.length) {
-                showQuestion();
-            } else {
-                showResults();
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) showQuestion();
+                else showResults();
             }
         }
 
@@ -210,22 +188,18 @@
             document.getElementById('score-summary').textContent = `Kamu berhasil menjawab ${correctAnswersCount} dari ${questions.length} soal dengan benar!`;
         }
 
-        // --- Fungsi Render & Pengecekan Jawaban ---
+        // --- RENDER & LOGIKA JAWABAN ---
 
         function renderAnswerOptions(q) {
-            const optionColors = [
-                'bg-gradient-to-r from-blue-400 to-cyan-400 text-white',
-                'bg-gradient-to-r from-purple-400 to-pink-400 text-white',
-                'bg-gradient-to-r from-yellow-400 to-orange-400 text-white',
-                'bg-gradient-to-r from-lime-400 to-green-400 text-white'
-            ];
+            const optionColors = ['from-blue-400 to-cyan-400', 'from-purple-400 to-pink-400', 'from-yellow-400 to-orange-400', 'from-lime-400 to-green-400', 'from-red-400 to-rose-400'];
             
             switch (q.type) {
                 case 'pilihan-ganda':
                     shuffleArray(q.options).forEach((opt, i) => {
                         const btn = document.createElement('button');
                         btn.innerHTML = opt.text;
-                        btn.className = `option-btn w-full ${optionColors[i % 4]}`;
+                        btn.className = `option-btn w-full bg-gradient-to-r ${optionColors[i % 5]} text-white`;
+                        btn.dataset.explanation = opt.explanation;
                         btn.onclick = () => {
                             document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
                             btn.classList.add('selected');
@@ -234,11 +208,11 @@
                         answerOptionsContainer.appendChild(btn);
                     });
                     break;
-                case 'benar-salah':
+                case 'benar-salah': // Sama seperti PG
                     ['Benar', 'Salah'].forEach((opt, i) => {
                         const btn = document.createElement('button');
                         btn.textContent = opt;
-                        btn.className = `option-btn w-full ${i === 0 ? optionColors[0] : optionColors[1]}`;
+                        btn.className = `option-btn w-full bg-gradient-to-r ${i === 0 ? optionColors[0] : optionColors[4]} text-white`;
                         btn.onclick = () => {
                             document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
                             btn.classList.add('selected');
@@ -247,15 +221,65 @@
                         answerOptionsContainer.appendChild(btn);
                     });
                     break;
-                case 'susun-huruf':
-                    const scrambled = shuffleArray(q.answer.split('')).join('');
+                case 'esai':
                     answerOptionsContainer.innerHTML = `
-                        <div class="text-center mb-4 letter-scramble">
-                            ${scrambled.split('').map(letter => `<span>${letter}</span>`).join('')}
-                        </div>
-                        <input type="text" id="susun-huruf-input" class="w-full p-3 text-center text-xl tracking-widest font-bold border-2 rounded-xl border-gray-300 focus:border-blue-500 outline-none uppercase" placeholder="Ketik jawabanmu...">
+                        <textarea id="esai-input" class="w-full p-3 text-lg border-2 rounded-xl border-gray-300 focus:border-blue-500 outline-none" rows="4" placeholder="Ketik jawabanmu di sini..."></textarea>
                     `;
-                    document.getElementById('susun-huruf-input').oninput = (e) => actionBtn.disabled = e.target.value.trim() === '';
+                    document.getElementById('esai-input').oninput = (e) => actionBtn.disabled = e.target.value.trim() === '';
+                    break;
+                case 'susun-huruf':
+                    const letters = shuffleArray([...q.answer.split(''), ...q.decoys]);
+                    answerOptionsContainer.innerHTML = `
+                        <div id="susun-huruf-answer-display" class="scramble-answer-box text-2xl tracking-widest uppercase"></div>
+                        <div id="susun-huruf-letters" class="scramble-bank mt-4"></div>
+                    `;
+                    const answerBox = document.getElementById('susun-huruf-answer-display');
+                    const letterBank = document.getElementById('susun-huruf-letters');
+                    
+                    letters.forEach(letter => {
+                        const btn = document.createElement('button');
+                        btn.textContent = letter;
+                        btn.className = 'scramble-letter text-2xl';
+                        btn.onclick = () => {
+                            answerBox.appendChild(btn);
+                            actionBtn.disabled = answerBox.children.length === 0;
+                        };
+                        letterBank.appendChild(btn);
+                    });
+                    
+                    answerBox.onclick = (e) => {
+                        if (e.target.classList.contains('scramble-letter')) {
+                            letterBank.appendChild(e.target);
+                            actionBtn.disabled = answerBox.children.length === 0;
+                        }
+                    };
+                    break;
+                case 'susun-kalimat':
+                    const words = shuffleArray(q.words);
+                    answerOptionsContainer.innerHTML = `
+                        <div id="susun-kalimat-answer-display" class="word-scramble-answer-box text-xl"></div>
+                        <div id="susun-kalimat-words" class="scramble-bank mt-4"></div>
+                    `;
+                    const sentenceAnswerBox = document.getElementById('susun-kalimat-answer-display');
+                    const wordBank = document.getElementById('susun-kalimat-words');
+                    
+                    words.forEach(word => {
+                        const btn = document.createElement('button');
+                        btn.textContent = word;
+                        btn.className = 'scramble-word text-lg';
+                        btn.onclick = () => {
+                            sentenceAnswerBox.appendChild(btn);
+                            actionBtn.disabled = sentenceAnswerBox.children.length === 0;
+                        };
+                        wordBank.appendChild(btn);
+                    });
+                    
+                    sentenceAnswerBox.onclick = (e) => {
+                        if (e.target.classList.contains('scramble-word')) {
+                            wordBank.appendChild(e.target);
+                             actionBtn.disabled = sentenceAnswerBox.children.length === 0;
+                        }
+                    };
                     break;
                 case 'pencocokkan':
                     const prompts = shuffleArray(q.matchingPairs.map(p => p.prompt));
@@ -263,118 +287,137 @@
                     let selected = { prompt: null, match: null };
                     
                     answerOptionsContainer.innerHTML = `
-                        <div class="grid grid-cols-2 gap-4" id="matching-grid">
-                            <div class="space-y-2" id="matching-prompts"></div>
-                            <div class="space-y-2" id="matching-matches"></div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div id="matching-prompts" class="space-y-2"></div>
+                            <div id="matching-matches" class="space-y-2"></div>
                         </div>
                     `;
                     const promptsContainer = document.getElementById('matching-prompts');
                     const matchesContainer = document.getElementById('matching-matches');
 
-                    prompts.forEach(p => {
+                    prompts.forEach((p, i) => {
                         const item = document.createElement('div');
                         item.textContent = p;
                         item.className = 'matching-item prompt-item';
-                        item.onclick = () => {
-                            document.querySelectorAll('.prompt-item').forEach(i => i.classList.remove('selected'));
-                            item.classList.add('selected');
-                            selected.prompt = item;
-                            if (selected.match) pairItems();
-                        };
+                        item.dataset.id = i;
+                        item.onclick = () => handleSelect(item, 'prompt');
                         promptsContainer.appendChild(item);
                     });
 
-                    matches.forEach(m => {
+                    matches.forEach((m, i) => {
                         const item = document.createElement('div');
                         item.textContent = m;
                         item.className = 'matching-item match-item';
-                        item.onclick = () => {
-                             document.querySelectorAll('.match-item').forEach(i => i.classList.remove('selected'));
-                            item.classList.add('selected');
-                            selected.match = item;
-                            if (selected.prompt) pairItems();
-                        };
+                        item.dataset.id = i;
+                        item.onclick = () => handleSelect(item, 'match');
                         matchesContainer.appendChild(item);
                     });
 
-                    const pairItems = () => {
-                        selected.prompt.style.visibility = 'hidden';
-                        selected.match.style.visibility = 'hidden';
-                        selected.prompt.dataset.pairedWith = selected.match.textContent;
-                        selected = { prompt: null, match: null };
-                        if (document.querySelectorAll('.prompt-item[style*="visibility: hidden"]').length === prompts.length) {
-                             actionBtn.disabled = false;
+                    function handleSelect(item, type) {
+                        if (item.classList.contains('paired')) return;
+
+                        if (item.classList.contains('selected-blue') || item.classList.contains('selected-pink')) {
+                            item.classList.remove('selected-blue', 'selected-pink');
+                            selected[type] = null;
+                            return;
+                        }
+
+                        document.querySelectorAll(`.${type}-item`).forEach(i => i.classList.remove(type === 'prompt' ? 'selected-blue' : 'selected-pink'));
+                        item.classList.add(type === 'prompt' ? 'selected-blue' : 'selected-pink');
+                        selected[type] = item;
+                        
+                        if (selected.prompt && selected.match) {
+                            selected.prompt.classList.add('paired');
+                            selected.match.classList.add('paired');
+                            selected.prompt.classList.remove('selected-blue');
+                            selected.match.classList.remove('selected-pink');
+                            selected.prompt.dataset.pairedWith = selected.match.textContent;
+                            selected = { prompt: null, match: null };
+                            
+                            if (document.querySelectorAll('.prompt-item.paired').length === prompts.length) {
+                                actionBtn.disabled = false;
+                            }
                         }
                     };
                     break;
-
-                case 'susun-kalimat':
-                    shuffleArray(q.sentenceOptions).forEach((opt, i) => {
-                         const btn = document.createElement('button');
-                        btn.textContent = opt;
-                        btn.className = `option-btn w-full ${optionColors[i % 4]}`;
-                        btn.onclick = () => {
-                             document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
-                            btn.classList.add('selected');
-                            actionBtn.disabled = false;
-                        };
-                        answerOptionsContainer.appendChild(btn);
-                    });
-                    break;
-                
                 case 'tts-mini':
                     const { horizontal, vertical } = q.crossword;
                     let intersection = null;
-                    // Cari titik potong
                     for (let i = 0; i < horizontal.length; i++) {
                         for (let j = 0; j < vertical.length; j++) {
                             if (horizontal[i] === vertical[j]) {
-                                intersection = { char: horizontal[i], hIndex: i, vIndex: j };
-                                break;
+                                intersection = { hIndex: i, vIndex: j }; break;
                             }
                         }
                         if (intersection) break;
                     }
                     if (!intersection) { 
-                        answerOptionsContainer.innerHTML = '<p class="text-red-500">Soal TTS ini rusak.</p>'; 
-                        return; 
+                        answerOptionsContainer.innerHTML = '<p class="text-red-500">Soal TTS ini rusak.</p>'; return; 
                     }
 
-                    const gridCols = horizontal.length;
-                    const gridRows = vertical.length;
+                    const gridCols = Math.max(horizontal.length, intersection.hIndex + 1);
+                    const gridRows = Math.max(vertical.length, intersection.vIndex + 1);
+                    const ttsLetters = shuffleArray([...new Set((horizontal + vertical).split(''))]);
                     
-                    const grid = document.createElement('div');
-                    grid.className = 'tts-grid justify-center';
-                    grid.style.gridTemplateColumns = `repeat(${gridCols}, 40px)`;
-
-                    for (let row = 0; row < gridRows; row++) {
-                        for (let col = 0; col < gridCols; col++) {
-                            const cell = document.createElement('input');
-                            cell.maxLength = 1;
-                            cell.className = 'tts-cell';
-                            cell.disabled = true;
-                            
-                            if (row === intersection.vIndex && col < horizontal.length) {
-                                cell.disabled = false;
-                                cell.dataset.word = 'h';
-                                cell.dataset.index = col;
+                    answerOptionsContainer.innerHTML = `
+                        <div class="flex justify-center">
+                            <div id="tts-grid-container" class="tts-grid" style="grid-template-columns: repeat(${gridCols}, 40px);"></div>
+                        </div>
+                        <div id="tts-letter-bank" class="scramble-bank mt-4"></div>
+                    `;
+                    const grid = document.getElementById('tts-grid-container');
+                    
+                    for (let r = 0; r < gridRows; r++) {
+                        for (let c = 0; c < gridCols; c++) {
+                            const isHorizontal = r === intersection.vIndex && c < horizontal.length;
+                            const isVertical = c === intersection.hIndex && r < vertical.length;
+                            if (isHorizontal || isVertical) {
+                                const cell = document.createElement('div');
+                                cell.className = 'tts-cell cursor-pointer';
+                                cell.dataset.row = r;
+                                cell.dataset.col = c;
+                                if (isHorizontal) { cell.dataset.hIndex = c; }
+                                if (isVertical) { cell.dataset.vIndex = r; }
+                                cell.onclick = () => {
+                                    document.querySelectorAll('.tts-cell').forEach(c => c.classList.remove('active'));
+                                    cell.classList.add('active');
+                                };
+                                grid.appendChild(cell);
+                            } else {
+                                grid.appendChild(document.createElement('div'));
                             }
-                            if (col === intersection.hIndex && row < vertical.length) {
-                                cell.disabled = false;
-                                cell.dataset.word = (cell.dataset.word || '') + 'v';
-                                cell.dataset.indexV = row;
-                            }
-                            grid.appendChild(cell);
                         }
                     }
-                    answerOptionsContainer.appendChild(grid);
-                    grid.oninput = () => {
-                        const inputs = grid.querySelectorAll('input:not(:disabled)');
-                        const allFilled = [...inputs].every(i => i.value !== '');
-                        actionBtn.disabled = !allFilled;
-                    }
+                    
+                    const ttsLetterBank = document.getElementById('tts-letter-bank');
+                    ttsLetters.forEach(letter => {
+                        const btn = document.createElement('button');
+                        btn.textContent = letter;
+                        btn.className = 'scramble-letter text-2xl';
+                        btn.onclick = () => {
+                            const activeCell = grid.querySelector('.tts-cell.active');
+                            if (activeCell) {
+                                activeCell.textContent = letter;
+                                // Auto-move to next empty cell
+                                let nextCell = findNext(activeCell, '.tts-cell:not(:empty)');
+                                if(!nextCell) nextCell = grid.querySelector('.tts-cell:empty');
+                                if(nextCell) {
+                                    activeCell.classList.remove('active');
+                                    nextCell.classList.add('active');
+                                }
+                            }
+                             actionBtn.disabled = [...grid.querySelectorAll('.tts-cell')].some(c => !c.textContent);
+                        };
+                        ttsLetterBank.appendChild(btn);
+                    });
+                    const findNext = (el, selector) => {
+                        let next = el.nextElementSibling;
+                        while(next) {
+                            if(!next.matches(selector)) return next;
+                            next = next.nextElementSibling;
+                        }
+                    };
                     break;
-                
                 default:
                     answerOptionsContainer.innerHTML = `<p>Tipe soal tidak dikenali: ${q.type}</p>`;
             }
@@ -387,39 +430,61 @@
             progressBar.style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
 
             let isCorrect = false;
+            let feedbackText = '';
             const q = questions[currentQuestionIndex];
             
-            // Disable all inputs
-            answerOptionsContainer.querySelectorAll('button, input, .matching-item').forEach(el => el.disabled = true);
+            answerOptionsContainer.querySelectorAll('button, input, textarea, .matching-item, .tts-cell').forEach(el => el.style.pointerEvents = 'none');
 
             switch (q.type) {
-                case 'pilihan-ganda':
-                    const selectedPgBtn = answerOptionsContainer.querySelector('.option-btn.selected');
+                case 'pilihan-ganda': {
+                    const selectedBtn = answerOptionsContainer.querySelector('.option-btn.selected');
                     const correctOption = q.options.find(opt => opt.isCorrect);
-                    isCorrect = selectedPgBtn.textContent === correctOption.text;
+                    isCorrect = selectedBtn.textContent === correctOption.text;
+                    if (selectedBtn.dataset.explanation) {
+                        feedbackText = `Penjelasan: ${selectedBtn.dataset.explanation}`;
+                    }
                     answerOptionsContainer.querySelectorAll('.option-btn').forEach(btn => {
                         if (btn.textContent === correctOption.text) btn.classList.add('correct');
                         else if (btn.classList.contains('selected')) btn.classList.add('incorrect');
                     });
                     break;
-                case 'benar-salah':
-                    const selectedBsBtn = answerOptionsContainer.querySelector('.option-btn.selected');
+                }
+                case 'benar-salah': {
+                    const selectedBtn = answerOptionsContainer.querySelector('.option-btn.selected');
                     const answerText = q.answer ? 'Benar' : 'Salah';
-                    isCorrect = selectedBsBtn.textContent === answerText;
+                    isCorrect = selectedBtn.textContent === answerText;
                     answerOptionsContainer.querySelectorAll('.option-btn').forEach(btn => {
                         if (btn.textContent === answerText) btn.classList.add('correct');
                         else if (btn.classList.contains('selected')) btn.classList.add('incorrect');
                     });
                     break;
-                 case 'susun-huruf':
-                    const input = document.getElementById('susun-huruf-input');
-                    isCorrect = input.value.toUpperCase() === q.answer;
-                    input.classList.add(isCorrect ? 'bg-green-100' : 'bg-red-100');
+                }
+                case 'esai':
+                    isCorrect = false; // Esai tidak dinilai otomatis
+                    actionBtn.textContent = 'Lanjut';
+                    const answerKeyBox = document.createElement('div');
+                    answerKeyBox.className = 'mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg';
+                    answerKeyBox.innerHTML = `<strong class="text-blue-700">Kunci Jawaban:</strong><p>${q.answer}</p>`;
+                    answerOptionsContainer.appendChild(answerKeyBox);
+                    feedbackText = 'Silakan periksa jawabanmu dengan kunci jawaban di atas.';
                     break;
-                 case 'pencocokkan':
+                 case 'susun-huruf': {
+                    const userAnswer = [...document.getElementById('susun-huruf-answer-display').children].map(c => c.textContent).join('');
+                    isCorrect = userAnswer === q.answer;
+                    feedbackText = isCorrect ? '' : `Jawaban yang benar: <strong>${q.answer}</strong>`;
+                    document.getElementById('susun-huruf-answer-display').parentElement.classList.add(isCorrect ? 'border-green-500' : 'border-red-500');
+                    break;
+                 }
+                case 'susun-kalimat': {
+                    const userAnswer = [...document.getElementById('susun-kalimat-answer-display').children].map(c => c.textContent).join(' ');
+                    isCorrect = q.correctAnswers.includes(userAnswer);
+                    feedbackText = isCorrect ? '' : `Salah satu jawaban yang benar: <strong>${q.correctAnswers[0]}</strong>`;
+                    document.getElementById('susun-kalimat-answer-display').parentElement.classList.add(isCorrect ? 'border-green-500' : 'border-red-500');
+                    break;
+                }
+                 case 'pencocokkan': {
                     let correctPairs = 0;
-                    const pairedItems = document.querySelectorAll('.prompt-item[data-paired-with]');
-                    pairedItems.forEach(promptItem => {
+                    document.querySelectorAll('.prompt-item.paired').forEach(promptItem => {
                         const correctMatch = q.matchingPairs.find(p => p.prompt === promptItem.textContent).match;
                         if (promptItem.dataset.pairedWith === correctMatch) {
                             correctPairs++;
@@ -427,48 +492,40 @@
                     });
                     isCorrect = correctPairs === q.matchingPairs.length;
                     break;
-                case 'susun-kalimat':
-                    const selectedSentenceBtn = answerOptionsContainer.querySelector('.option-btn.selected');
-                    isCorrect = selectedSentenceBtn.textContent === q.answer;
-                    answerOptionsContainer.querySelectorAll('.option-btn').forEach(btn => {
-                        if (btn.textContent === q.answer) btn.classList.add('correct');
-                        else if (btn.classList.contains('selected')) btn.classList.add('incorrect');
-                    });
-                    break;
-                case 'tts-mini':
+                }
+                case 'tts-mini': {
                     let allCorrect = true;
-                    const inputs = answerOptionsContainer.querySelectorAll('input:not(:disabled)');
-                    inputs.forEach(cell => {
+                    answerOptionsContainer.querySelectorAll('.tts-cell').forEach(cell => {
                         let correctChar = '';
-                        let cellIsCorrect = false;
-                        if (cell.dataset.word.includes('h')) {
-                            correctChar = q.crossword.horizontal[cell.dataset.index];
-                        }
-                        if (cell.dataset.word.includes('v')) {
-                           correctChar = q.crossword.vertical[cell.dataset.indexV];
-                        }
-
-                        if (cell.value.toUpperCase() === correctChar) {
+                        if (cell.dataset.hIndex) correctChar = q.crossword.horizontal[cell.dataset.hIndex];
+                        else if (cell.dataset.vIndex) correctChar = q.crossword.vertical[cell.dataset.vIndex];
+                        
+                        if (cell.textContent.toUpperCase() === correctChar) {
                             cell.classList.add('correct');
-                            cellIsCorrect = true;
                         } else {
                             cell.classList.add('incorrect');
-                            cellIsCorrect = false;
+                            allCorrect = false;
                         }
-                        if (!cellIsCorrect) allCorrect = false;
                     });
                     isCorrect = allCorrect;
                     break;
+                }
             }
-
-            if (isCorrect) {
-                correctAnswersCount++;
-                feedbackBox.className = 'p-4 rounded-lg text-center font-bold text-white bg-gradient-to-r from-green-400 to-emerald-500';
-                feedbackBox.textContent = 'Benar! Kamu Hebat! ✨';
+            
+            if (q.type !== 'esai') {
+                if (isCorrect) {
+                    correctAnswersCount++;
+                    feedbackBox.className = 'p-4 rounded-lg text-center font-semibold text-white bg-gradient-to-r from-green-400 to-emerald-500';
+                    feedbackBox.innerHTML = 'Benar! Kamu Hebat! ✨<br>' + feedbackText;
+                } else {
+                    feedbackBox.className = 'p-4 rounded-lg text-center font-semibold text-white bg-gradient-to-r from-red-400 to-rose-500';
+                    feedbackBox.innerHTML = 'Oops, belum tepat. <br>' + feedbackText;
+                }
             } else {
-                feedbackBox.className = 'p-4 rounded-lg text-center font-bold text-white bg-gradient-to-r from-red-400 to-rose-500';
-                feedbackBox.textContent = 'Oops, coba lagi nanti ya!';
+                 feedbackBox.className = 'p-4 rounded-lg text-center font-semibold text-blue-800 bg-blue-100';
+                 feedbackBox.innerHTML = feedbackText;
             }
+            feedbackBox.classList.remove('hidden');
             feedbackBox.style.animation = 'pop-in 0.3s';
         }
 
