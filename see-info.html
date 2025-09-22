@@ -27,20 +27,11 @@
         .timer-value { font-size: 2rem; font-weight: 700; color: #2d3748; line-height: 1; }
         .timer-label { font-size: 0.75rem; color: #718096; text-transform: uppercase; }
         .btn-play { background: linear-gradient(135deg, #48bb78, #38a169); color: white; display: none; }
+        .btn-disabled { background-color: #cbd5e0; color: #718096; cursor: not-allowed; }
         .badge-item { display: flex; align-items: center; gap: 0.75rem; background-color: #f7fafc; padding: 0.5rem 1rem; border-radius: 999px; font-size: 0.875rem; }
     </style>
 </head>
 <body class="text-gray-800">
-
-    <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm py-3">
-        <div class="container mx-auto flex justify-between items-center px-4">
-            <nav id="navbar" class="bg-gray-100 p-2 rounded-full"></nav>
-            <div id="role-switcher" class="flex items-center gap-2">
-                <span id="role-label" class="font-semibold text-sm text-gray-600"></span>
-                <button onclick="toggleRole()" class="bg-indigo-500 text-white px-3 py-1 rounded-full text-sm hover:bg-indigo-600 transition-colors"></button>
-            </div>
-        </div>
-    </header>
 
     <main class="container mx-auto p-4 md:p-8">
         <header class="text-center mb-10">
@@ -54,27 +45,47 @@
         </div>
     </main>
 
-    <script src="role-manager.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        // Diperbarui: Menambahkan fungsi query dari Firestore
+        import { getFirestore, collection, onSnapshot, Timestamp, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
-    authDomain: "forumwidara.firebaseapp.com",
-    projectId: "forumwidara",
-    storageBucket: "forumwidara.firebasestorage.app",
-    messagingSenderId: "216895655168",
-    appId: "1:216895655168:web:59255f600fc3b3b44eb7e5" };
+        const firebaseConfig = { 
+            apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+            authDomain: "forumwidara.firebaseapp.com",
+            projectId: "forumwidara",
+            storageBucket: "forumwidara.appspot.com",
+            messagingSenderId: "216895655168",
+            appId: "1:216895655168:web:59255f600fc3b3b44eb7e5" 
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // ID Pengguna statis untuk simulasi, harus sama dengan di file lain
+        const DUMMY_USER_ID = 'user_abc_123';
+
         const grid = document.getElementById('announcement-grid');
         let countdownInterval;
 
+        // FUNGSI BARU: Mengambil daftar ID kuis yang sudah diselesaikan oleh pengguna
+        async function getCompletedQuizIds() {
+            const completedIds = new Set(); // Menggunakan Set agar tidak ada ID duplikat dan pengecekan lebih cepat
+            try {
+                const resultsRef = collection(db, 'results');
+                const q = query(resultsRef, where("userId", "==", DUMMY_USER_ID));
+                const querySnapshot = await getDocs(q);
+                querySnapshot.forEach(doc => {
+                    completedIds.add(doc.data().quizId);
+                });
+            } catch (error) {
+                console.error("Gagal mengambil riwayat kuis:", error);
+            }
+            return completedIds;
+        }
+
         function updateAllCountdowns() {
-            const timers = document.querySelectorAll('.timer-box[data-starttime]');
-            timers.forEach(timerEl => {
+            document.querySelectorAll('.timer-box[data-starttime]').forEach(timerEl => {
                 const startTime = parseInt(timerEl.dataset.starttime, 10);
                 const now = new Date().getTime();
                 const distance = startTime - now;
@@ -84,8 +95,8 @@
                 const timerWrapper = card.querySelector('.timer-wrapper');
 
                 if (distance <= 0) {
-                    timerWrapper.innerHTML = `<div class="text-center text-green-600 font-bold p-4">Waktunya Main! 🎉</div>`;
-                    playButton.style.display = 'block';
+                    timerWrapper.style.display = 'none'; // Sembunyikan timer jika waktu habis
+                    if (playButton) playButton.style.display = 'block'; // Tampilkan tombol main
                 } else {
                     const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                     const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -100,12 +111,16 @@
             });
         }
 
-        function renderAnnouncements(docs) {
+        // FUNGSI UTAMA DIMODIFIKASI: Menjadi async dan memeriksa riwayat
+        async function renderAnnouncements(docs) {
             grid.innerHTML = '';
             if (docs.length === 0) {
                 grid.innerHTML = '<p class="col-span-full text-center text-gray-500">Belum ada pengumuman lomba saat ini. Cek lagi nanti ya!</p>';
                 return;
             }
+
+            // Panggil fungsi baru kita untuk mendapatkan daftar kuis yang sudah selesai
+            const completedQuizIds = await getCompletedQuizIds();
 
             docs.forEach(doc => {
                 const a = doc.data();
@@ -114,12 +129,24 @@
 
                 const startTimeMs = a.startTime.toMillis();
                 
+                // Cek apakah kuis di pengumuman ini ID-nya ada di daftar yang sudah selesai
+                const isCompleted = completedQuizIds.has(a.quizId);
+
                 const badgesHTML = Object.entries(a.badges || {})
-                    .filter(([key, value]) => value) // Hanya tampilkan jika ada nama lencananya
+                    .filter(([key, value]) => value)
                     .map(([key, value]) => {
                         const colors = { gold: 'text-yellow-500', silver: 'text-gray-400', bronze: 'text-orange-500' };
                         return `<div class="badge-item"><i data-lucide="award" class="w-4 h-4 ${colors[key]}"></i><span class="font-semibold">${value}</span></div>`;
                     }).join('');
+                
+                // Logika baru untuk menentukan tampilan tombol
+                const buttonHTML = isCompleted
+                    ? `<button class="btn-disabled w-full text-center font-bold py-3 rounded-lg mt-4 flex items-center justify-center gap-2" disabled>
+                           <i data-lucide="check-circle" class="w-5 h-5"></i> Selesai Dikerjakan
+                       </button>`
+                    : `<a href="play.html?quizId=${a.quizId}" class="btn-play w-full text-center font-bold py-3 rounded-lg mt-4 transition-transform hover:scale-105">
+                           Mulai Kuis!
+                       </a>`;
 
                 card.innerHTML = `
                     <div class="flex-grow">
@@ -137,19 +164,16 @@
                             </div>
                         </div>
                     </div>
-                    <a href="play.html?quizId=${a.quizId}" class="btn-play w-full text-center font-bold py-3 rounded-lg mt-4 transition-transform hover:scale-105">
-                        Mulai Kuis!
-                    </a>
+                    ${buttonHTML}
                 `;
                 grid.appendChild(card);
             });
             
             lucide.createIcons();
             
-            // Start the global countdown
             if (countdownInterval) clearInterval(countdownInterval);
             countdownInterval = setInterval(updateAllCountdowns, 1000);
-            updateAllCountdowns(); // Initial call
+            updateAllCountdowns();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
