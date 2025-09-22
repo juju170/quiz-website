@@ -291,18 +291,34 @@ async function loadQuizzes() {
 
         // --- Event Listener untuk Form Submission ---
         challengeForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    e.preventDefault();
 
-            const title = challengeForm.title.value;
-            const description = challengeForm.description.value;
-            const question = challengeForm.question.value;
-            const duration = challengeForm.duration.value;
-            
-            const originalButtonText = saveButton.textContent;
-            saveButton.textContent = 'Menyimpan...';
-            saveButton.disabled = true;
+    const title = challengeForm.title.value;
+    const description = challengeForm.description.value;
+    const question = challengeForm.question.value;
+    const duration = challengeForm.duration.value;
+    const relatedQuizId = relatedQuizSelect.value; // Ambil ID kuis
 
-            try {
+    // ... nonaktifkan tombol ...
+
+    try {
+        await addDoc(collection(db, 'challenges'), {
+            title: title,
+            description: description,
+            question: question,
+            duration: parseInt(duration),
+            relatedQuizId: relatedQuizId, // <<< BARIS PENTING
+            createdAt: serverTimestamp()
+        });
+        
+        challengeForm.reset();
+
+    } catch (error) {
+        // ... error handling ...
+    } finally {
+        // ... aktifkan tombol ...
+    }
+});        
                 // Menambahkan dokumen baru ke koleksi 'challenges'
                 await addDoc(collection(db, 'challenges'), {
                     title: title,
