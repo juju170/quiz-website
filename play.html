@@ -15,7 +15,7 @@
         body {
             font-family: 'Nunito', sans-serif;
             background-color: #F0F9FF;
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2393C5FD' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2393C5FD' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
         .quiz-card { background: white; border-radius: 24px; padding: 1.5rem 1rem; md:padding: 2.5rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); border: 2px solid white; transition: all 0.3s ease; }
         .btn-action { font-weight: 900; padding: 1rem; border-radius: 9999px; width: 100%; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-size: 1.125rem; }
@@ -133,10 +133,11 @@
                 const quizDoc = await getDoc(doc(db, 'quizzes', quizId));
                 if (quizDoc.exists()) {
                     quizTitleText = quizDoc.data().title;
-                    // SOLUSI: Menggunakan variabel quizDoc yang benar, bukan quiz
+                    // [FIX 1] Menggunakan referensi dokumen yang benar (quizDoc.ref) untuk mengambil sub-koleksi
                     const questionsSnapshot = await getDocs(collection(quizDoc.ref, 'questions'));
                     questions = questionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    shuffleArray(questions);
+                    // [FIX 2] Memastikan hasil pengacakan array disimpan kembali ke variabel 'questions'
+                    questions = shuffleArray(questions);
                     startQuiz();
                 } else {
                      loadingContainer.innerHTML = `<h1 class="text-2xl font-bold text-red-600">Error: Kuis tidak ada.</h1>`;
@@ -357,8 +358,8 @@
                         answerOptionsContainer.innerHTML = '<p class="text-red-500">Soal TTS ini rusak.</p>'; return; 
                     }
 
-                    const gridCols = Math.max(horizontal.length, intersection.hIndex + 1);
-                    const gridRows = Math.max(vertical.length, intersection.vIndex + 1);
+                    const gridCols = Math.max(horizontal.length, intersection.vIndex + 1);
+                    const gridRows = Math.max(vertical.length, intersection.hIndex + 1);
                     const ttsLetters = shuffleArray([...new Set((horizontal + vertical).split(''))]);
                     
                     answerOptionsContainer.innerHTML = `
@@ -400,8 +401,7 @@
                             const activeCell = grid.querySelector('.tts-cell.active');
                             if (activeCell) {
                                 activeCell.textContent = letter;
-                                let nextCell = findNext(activeCell, '.tts-cell:not(:empty)');
-                                if(!nextCell) nextCell = grid.querySelector('.tts-cell:empty');
+                                let nextCell = findNextEmpty(activeCell);
                                 if(nextCell) {
                                     activeCell.classList.remove('active');
                                     nextCell.classList.add('active');
@@ -411,12 +411,19 @@
                         };
                         ttsLetterBank.appendChild(btn);
                     });
-                    const findNext = (el, selector) => {
-                        let next = el.nextElementSibling;
-                        while(next) {
-                            if(!next.matches(selector)) return next;
-                            next = next.nextElementSibling;
+                    const findNextEmpty = (el) => {
+                        let current = el;
+                        while(current.nextElementSibling) {
+                            current = current.nextElementSibling;
+                            if(current.matches('.tts-cell') && !current.textContent) return current;
                         }
+                        // If not found, loop from the beginning
+                        current = grid.querySelector('.tts-cell');
+                        while(current && current !== el) {
+                             if(!current.textContent) return current;
+                             current = current.nextElementSibling;
+                        }
+                        return null; // All are filled
                     };
                     break;
                 default:
@@ -495,13 +502,26 @@
                     break;
                 }
                 case 'tts-mini': {
+                    // [FIX 3] Logika pengecekan TTS disempurnakan untuk menangani huruf persimpangan dengan benar
                     let allCorrect = true;
                     answerOptionsContainer.querySelectorAll('.tts-cell').forEach(cell => {
-                        let correctChar = '';
-                        if (cell.dataset.hIndex !== undefined) correctChar = q.crossword.horizontal[cell.dataset.hIndex];
-                        else if (cell.dataset.vIndex !== undefined) correctChar = q.crossword.vertical[cell.dataset.vIndex];
+                        const userChar = cell.textContent.toUpperCase();
+                        let isCellCorrect = true; 
+
+                        // Periksa kecocokan dengan kata mendatar jika sel ini adalah bagian darinya
+                        if (cell.dataset.hIndex !== undefined) {
+                            if (userChar !== q.crossword.horizontal[cell.dataset.hIndex]) {
+                                isCellCorrect = false;
+                            }
+                        }
+                        // Periksa kecocokan dengan kata menurun jika sel ini adalah bagian darinya
+                        if (cell.dataset.vIndex !== undefined) {
+                            if (userChar !== q.crossword.vertical[cell.dataset.vIndex]) {
+                                isCellCorrect = false;
+                            }
+                        }
                         
-                        if (cell.textContent.toUpperCase() === correctChar) {
+                        if (isCellCorrect) {
                             cell.classList.add('correct');
                         } else {
                             cell.classList.add('incorrect');
@@ -534,4 +554,6 @@
         document.addEventListener('DOMContentLoaded', loadQuiz);
     </script>
 </body>
-    </html>
+</html>
+
+
