@@ -245,7 +245,7 @@
     <!-- Script Firebase & Logika Halaman -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Ganti dengan konfigurasi Firebase Anda
         const firebaseConfig = {
@@ -264,11 +264,24 @@
         let quizQuestions = []; // Array untuk menampung soal sebelum disimpan
 
         // --- ELEMEN DOM ---
+        const badgeSelect = document.getElementById('badge-to-award');
         const questionTypeSelect = document.getElementById('question-type');
         const questionForms = document.querySelectorAll('.question-type-form');
         const addQuestionBtn = document.getElementById('add-question-btn');
         const saveQuizBtn = document.getElementById('save-quiz-btn');
         const questionsPreview = document.getElementById('questions-preview');
+
+        // Buat fungsi baru untuk memuat lencana
+async function loadBadges() {
+    const querySnapshot = await getDocs(collection(db, "badges"));
+    querySnapshot.forEach((doc) => {
+        const badge = doc.data();
+        const option = document.createElement('option');
+        option.value = doc.id; // Simpan ID unik lencana
+        option.textContent = badge.name; // Tampilkan nama lencana
+        badgeSelect.appendChild(option);
+    });
+        }
         
         // Elemen Pilihan Ganda
         const pgOptionsContainer = document.getElementById('pg-options-container');
@@ -477,6 +490,7 @@
         createPcPair(1);
         switchQuestionForm();
         renderPreview();
+        loadBadges();
 
     </script>
 </body>
