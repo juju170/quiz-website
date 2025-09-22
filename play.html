@@ -256,7 +256,6 @@
                     };
                     break;
                 case 'susun-kalimat':
-                    // FIX: Fallback for q.words. If it's missing, derive it from the first correct answer to prevent crash.
                     const wordsToShuffle = Array.isArray(q.words) && q.words.length > 0
                         ? q.words
                         : (q.correctAnswers && q.correctAnswers[0] ? q.correctAnswers[0].split(' ') : []);
@@ -470,15 +469,14 @@
                     });
                     break;
                 }
-                case 'esai':
-                    isCorrect = false;
-                    actionBtn.textContent = 'Lanjut';
-                    const answerKeyBox = document.createElement('div');
-                    answerKeyBox.className = 'mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg';
-                    answerKeyBox.innerHTML = `<strong class="text-blue-700">Kunci Jawaban:</strong><p>${q.answer}</p>`;
-                    answerOptionsContainer.appendChild(answerKeyBox);
-                    feedbackText = 'Silakan periksa jawabanmu dengan kunci jawaban di atas.';
+                // FIX: Logic to automatically grade essay questions
+                case 'esai': {
+                    const userAnswer = document.getElementById('esai-input').value.trim();
+                    // Simple case-insensitive comparison
+                    isCorrect = userAnswer.toLowerCase() === q.answer.toLowerCase(); 
+                    feedbackText = isCorrect ? '' : `Jawaban yang benar: <strong>${q.answer}</strong>`;
                     break;
+                }
                  case 'susun-huruf': {
                     const userAnswer = [...document.getElementById('susun-huruf-answer-display').children].map(c => c.textContent).join('');
                     isCorrect = userAnswer === q.answer;
@@ -508,17 +506,14 @@
                     let allCorrect = true;
                     answerOptionsContainer.querySelectorAll('.tts-cell').forEach(cell => {
                         const userChar = cell.textContent.toUpperCase();
-                        let isCellCorrect = true; 
+                        let isCellCorrect = false;
 
-                        if (cell.dataset.hIndex !== undefined) {
-                            if (userChar !== q.crossword.horizontal[cell.dataset.hIndex]) {
-                                isCellCorrect = false;
-                            }
+                        // A cell is correct if it matches EITHER the horizontal or vertical answer
+                        if (cell.dataset.hIndex !== undefined && userChar === q.crossword.horizontal[cell.dataset.hIndex]) {
+                            isCellCorrect = true;
                         }
-                        if (cell.dataset.vIndex !== undefined) {
-                            if (userChar !== q.crossword.vertical[cell.dataset.vIndex]) {
-                                isCellCorrect = false;
-                            }
+                         if (cell.dataset.vIndex !== undefined && userChar === q.crossword.vertical[cell.dataset.vIndex]) {
+                            isCellCorrect = true;
                         }
                         
                         if (isCellCorrect) {
@@ -533,18 +528,15 @@
                 }
             }
             
-            if (q.type !== 'esai') {
-                if (isCorrect) {
-                    correctAnswersCount++;
-                    feedbackBox.className = 'p-4 rounded-lg text-center font-semibold text-white bg-gradient-to-r from-green-400 to-emerald-500';
-                    feedbackBox.innerHTML = 'Benar! Kamu Hebat! ✨<br>' + feedbackText;
-                } else {
-                    feedbackBox.className = 'p-4 rounded-lg text-center font-semibold text-white bg-gradient-to-r from-red-400 to-rose-500';
-                    feedbackBox.innerHTML = 'Oops, belum tepat. <br>' + feedbackText;
-                }
+            // FIX: Removed conditional that excluded essays from scoring.
+            // All question types will now go through this scoring logic.
+            if (isCorrect) {
+                correctAnswersCount++;
+                feedbackBox.className = 'p-4 rounded-lg text-center font-semibold text-white bg-gradient-to-r from-green-400 to-emerald-500';
+                feedbackBox.innerHTML = 'Benar! Kamu Hebat! ✨<br>' + feedbackText;
             } else {
-                 feedbackBox.className = 'p-4 rounded-lg text-center font-semibold text-blue-800 bg-blue-100';
-                 feedbackBox.innerHTML = feedbackText;
+                feedbackBox.className = 'p-4 rounded-lg text-center font-semibold text-white bg-gradient-to-r from-red-400 to-rose-500';
+                feedbackBox.innerHTML = 'Oops, belum tepat. <br>' + feedbackText;
             }
             feedbackBox.classList.remove('hidden');
             feedbackBox.style.animation = 'pop-in 0.3s';
@@ -555,5 +547,6 @@
     </script>
 </body>
 </html>
+
 
 
