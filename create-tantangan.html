@@ -405,29 +405,30 @@ async function loadBadges() {
 
         // Fungsi untuk menyimpan seluruh kuis ke Firestore
         async function saveQuiz() {
-            const title = document.getElementById('quiz-title').value;
-            const timer = parseInt(document.getElementById('quiz-timer').value, 10);
-            const scoreGold = parseInt(document.getElementById('score-gold').value, 10);
-            const scoreSilver = parseInt(document.getElementById('score-silver').value, 10);
-            const scoreBronze = parseInt(document.getElementById('score-bronze').value, 10);
-
+    const title = document.getElementById('quiz-title').value;
+    const timer = parseInt(document.getElementById('quiz-timer').value, 10);
+    const scoreGold = parseInt(document.getElementById('score-gold').value, 10);
+    const scoreSilver = parseInt(document.getElementById('score-silver').value, 10);
+    const scoreBronze = parseInt(document.getElementById('score-bronze').value, 10);
+    const selectedBadgeId = badgeSelect.value; // Ambil ID lencana dari dropdown
+        
             if (!title || !timer || !scoreGold || !scoreSilver || !scoreBronze || quizQuestions.length === 0) {
                 alert("Harap isi semua pengaturan kuis (judul, timer, skor) dan tambahkan minimal satu soal.");
                 return;
             }
             
             const quizData = {
-                title,
-                timerInMinutes: timer,
-                scoreThresholds: {
-                    gold: scoreGold,
-                    silver: scoreSilver,
-                    bronze: scoreBronze
-                },
-                questions: quizQuestions,
-                createdAt: serverTimestamp()
-            };
-
+        title,
+        timerInMinutes: timer,
+        badgeToAwardId: selectedBadgeId || null, // <<< BARIS PENTING
+        scoreThresholds: {
+            gold: scoreGold,
+            silver: scoreSilver,
+            bronze: scoreBronze
+        },
+        questions: quizQuestions,
+        createdAt: serverTimestamp()
+    };
             try {
                 await addDoc(collection(db, "kuis"), quizData);
                 alert("Kuis berhasil disimpan!");
