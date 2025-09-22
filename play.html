@@ -133,10 +133,8 @@
                 const quizDoc = await getDoc(doc(db, 'quizzes', quizId));
                 if (quizDoc.exists()) {
                     quizTitleText = quizDoc.data().title;
-                    // [FIX 1] Menggunakan referensi dokumen yang benar (quizDoc.ref) untuk mengambil sub-koleksi
                     const questionsSnapshot = await getDocs(collection(quizDoc.ref, 'questions'));
                     questions = questionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    // [FIX 2] Memastikan hasil pengacakan array disimpan kembali ke variabel 'questions'
                     questions = shuffleArray(questions);
                     startQuiz();
                 } else {
@@ -258,7 +256,12 @@
                     };
                     break;
                 case 'susun-kalimat':
-                    const words = shuffleArray(q.words);
+                    // FIX: Fallback for q.words. If it's missing, derive it from the first correct answer to prevent crash.
+                    const wordsToShuffle = Array.isArray(q.words) && q.words.length > 0
+                        ? q.words
+                        : (q.correctAnswers && q.correctAnswers[0] ? q.correctAnswers[0].split(' ') : []);
+
+                    const words = shuffleArray(wordsToShuffle);
                     answerOptionsContainer.innerHTML = `
                         <div id="susun-kalimat-answer-display" class="word-scramble-answer-box text-xl"></div>
                         <div id="susun-kalimat-words" class="scramble-bank mt-4"></div>
@@ -502,19 +505,16 @@
                     break;
                 }
                 case 'tts-mini': {
-                    // [FIX 3] Logika pengecekan TTS disempurnakan untuk menangani huruf persimpangan dengan benar
                     let allCorrect = true;
                     answerOptionsContainer.querySelectorAll('.tts-cell').forEach(cell => {
                         const userChar = cell.textContent.toUpperCase();
                         let isCellCorrect = true; 
 
-                        // Periksa kecocokan dengan kata mendatar jika sel ini adalah bagian darinya
                         if (cell.dataset.hIndex !== undefined) {
                             if (userChar !== q.crossword.horizontal[cell.dataset.hIndex]) {
                                 isCellCorrect = false;
                             }
                         }
-                        // Periksa kecocokan dengan kata menurun jika sel ini adalah bagian darinya
                         if (cell.dataset.vIndex !== undefined) {
                             if (userChar !== q.crossword.vertical[cell.dataset.vIndex]) {
                                 isCellCorrect = false;
