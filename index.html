@@ -152,17 +152,9 @@
     <header>
         <h1>Komunitas Ceria 2SD</h1>
         <div class="header-buttons">
-            <a href="profil.html" class="btn tertiary">Profil Saya 👤</a>
-            <a href="daftar-tantangan.html" class="btn">Lihat Tantangan 🔥</a>
-            
             <a href="quiz-menu.html" class="btn">Mulai Kuis 🎲</a>
             <a href="buat-kuis.html" class="btn secondary">Tambah Soal 📚</a>
             <a href="kelola-kuis.html" id="kelola-kuis-btn" class="btn tertiary">Kelola Kuis ⚙️</a>
-            
-            <!-- PERUBAHAN: Tombol admin disederhanakan. Hanya ada satu tombol untuk tantangan. -->
-            <a href="buat-lencana.html" id="kelola-lencana-btn" class="btn admin-badge" style="display: none;">Kelola Lencana 🎖️</a>
-            <a href="create-tantangan.html" id="kelola-challenge" class="btn admin-quest" style="display: none;">Buat Soal Tantangan ✏️</a>
-            <a href="buat-tantangan.html" id="kelola-tantangan-btn" class="btn admin-challenges" style="display: none;">Kelola Tantangan 🏆</a>
         </div>
     </header>
 
@@ -195,7 +187,7 @@
             </section>
 
             <section class="highlight">
-                <a href="daftar-tantangan.html">
+                <a href="#">
                     <h2 id="weekly-theme-title">Memuat Tantangan Minggu Ini...</h2>
                 </a>
             </section>
@@ -267,7 +259,7 @@
             const badgeElement = document.createElement('div');
             badgeElement.className = 'badge-item';
             badgeElement.innerHTML = `
-                <img src="${badge.badgeImageUrl}" alt="${badge.badgeName}" title="${badge.badgeName}" onerror="this.src='https://placehold.co/80x80/e2e8f0/4a5568?text=🖼️'">
+                <img src="${badge.badgeImageUrl}" alt="${badge.badgeName}" title="${badge.badgeName}" onerror="this.src='https.placehold.co/80x80/e2e8f0/4a5568?text=🖼️'">
                 <p>${badge.badgeName}</p>
             `;
             grid.appendChild(badgeElement);
@@ -279,25 +271,10 @@
   }
 
   onAuthStateChanged(auth, async (user) => {
-    // PERUBAHAN: Daftar tombol admin disesuaikan, hanya 2 tombol.
-    const kelolaChallengeBtn = document.getElementById('kelola-challenge');
-    const kelolaLencanaBtn = document.getElementById('kelola-lencana-btn');
-    const kelolaTantanganBtn = document.getElementById('kelola-tantangan-btn');
-    
-    const adminButtons = [kelolaChallengeBtn, kelolaLencanaBtn, kelolaTantanganBtn];
-
     if (user) {
-      const userRoleRef = doc(db, "users", user.uid);
-      const userRoleSnap = await getDoc(userRoleRef);
-
-      if (userRoleSnap.exists() && userRoleSnap.data().peran === 'admin') {
-        adminButtons.forEach(btn => btn.style.display = 'inline-block');
-      } else {
-        adminButtons.forEach(btn => btn.style.display = 'none');
-      }
+      // Admin button logic removed as buttons no longer exist.
       loadUserBadges(user.uid);
     } else {
-      adminButtons.forEach(btn => btn.style.display = 'none');
       loadUserBadges(null);
     }
   });
@@ -307,5 +284,3 @@
 
 </body>
 </html>
-
-
