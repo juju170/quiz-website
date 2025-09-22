@@ -68,6 +68,8 @@
         .btn.admin-badge:hover { background-color: #ab47bc; }
         .btn.quiz-btn { background-color: #ba68c8; } /* Warna baru untuk tombol profil */
         .btn.quiz-btn:hover { background-color: #ab47bc; }
+        .btn.akses-info { background-color: #ba68c8; } /* Warna baru untuk tombol profil */
+        .btn.akses-info:hover { background-color: #ab47bc; }
         
 
         .menu-grid {
@@ -154,8 +156,11 @@
         <div class="header-buttons">
             <!-- Tambahan tombol admin -->
 <a href="quiz.html" id="quiz-btn" class="btn quiz-btn" style="display:none;">
-  Buat Tantangan
+  Dasbor Star
 </a>
+            <a href="announcement.html" id="akses-info" class="btn akses-info" style="display:none;">
+  Dasbor Info
+            </a>
             <a href="see-info.html" class="btn">Mulai Kuis 🎲</a>
             <a href="quiz.html" class="btn secondary">Tambah Soal 📚</a>
             <a href="announcement.html" id="kelola-kuis-btn" class="btn tertiary">Kelola Kuis ⚙️</a>
@@ -290,8 +295,10 @@
       if (peran === "admin") {
         // tampilkan tombol admin
         document.getElementById("quiz-btn").style.display = "inline-block";
+          document.getElementById("akses-info").style.display = "inline-block";
       } else {
         document.getElementById("quiz-btn").style.display = "none";
+          document.getElementById("akses-info").style.display = "none";
       }
     }
 
