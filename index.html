@@ -286,8 +286,8 @@
     const snap = await getDoc(ref);
 
     if (snap.exists()) {
-      const role = snap.data().role;
-      if (role === "admin") {
+      const peran = snap.data().peran;
+      if (peran === "admin") {
         // tampilkan tombol admin
         document.getElementById("quiz-btn").style.display = "inline-block";
       } else {
