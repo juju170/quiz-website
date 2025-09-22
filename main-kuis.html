@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pilih Kuis</title>
+    <title>Pengerjaan Kuis</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;700&display=swap" rel="stylesheet">
@@ -41,38 +41,8 @@
             color: var(--primary-blue);
         }
 
-        /* Tampilan Pemilihan Kuis */
-        #quiz-selection-container .quiz-card {
-            background-color: #fafcff;
-            border: 1px solid var(--primary-blue);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        #quiz-selection-container .quiz-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 15px var(--shadow-color);
-        }
-        .quiz-card h3 { margin: 0; }
-        .quiz-card span { font-weight: 500; color: #777; }
-        .btn {
-            background-color: var(--green);
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 700;
-            transition: background-color 0.3s;
-        }
-
         /* Tampilan Pengerjaan Kuis */
-        #quiz-player-container { display: none; }
+        #quiz-player-container { display: none; } /* Initially hidden */
         .quiz-header {
             display: flex;
             justify-content: space-between;
@@ -114,22 +84,20 @@
         .medal { font-size: 5em; }
         .score { font-size: 2em; margin: 10px 0; }
 
+        /* Fallback message */
+        #error-container {
+            text-align: center;
+            padding: 40px;
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Tampilan 1: Daftar Kuis -->
-        <div id="quiz-selection-container">
-            <h1>Pilih Kuis untuk Dikerjakan</h1>
-            <div id="quiz-list">
-                <p>Memuat daftar kuis...</p>
-            </div>
-        </div>
-
-        <!-- Tampilan 2: Pengerjaan Kuis -->
+        <!-- Tampilan 1: Pengerjaan Kuis (akan ditampilkan oleh JS) -->
         <div id="quiz-player-container">
             <div class="quiz-header">
-                <h2 id="quiz-title-player">Judul Kuis</h2>
+                <h2 id="quiz-title-player">Memuat Kuis...</h2>
                 <div id="timer">00:00</div>
             </div>
             <div id="question-container">
@@ -142,13 +110,19 @@
             </div>
         </div>
 
-        <!-- Tampilan 3: Hasil Kuis -->
+        <!-- Tampilan 2: Hasil Kuis -->
         <div id="results-container">
             <h1>Hasil Kuis</h1>
             <div id="medal-display" class="medal"></div>
             <p id="score-display" class="score"></p>
             <p id="feedback-display"></p>
-            <button onclick="window.location.reload()" class="btn">Kembali ke Daftar Kuis</button>
+            <button onclick="window.location.href='daftar-tantangan.html'" class="btn">Kembali ke Daftar Tantangan</button>
+        </div>
+
+        <!-- Tampilan 3: Error atau Loading -->
+        <div id="error-container">
+            <h1>Memuat...</h1>
+            <p>Harap tunggu sebentar.</p>
         </div>
     </div>
 
@@ -156,107 +130,82 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, getDoc, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        // Ganti dengan konfigurasi Firebase Anda
         const firebaseConfig = {
             apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
-    authDomain: "forumwidara.firebaseapp.com",
-    projectId: "forumwidara",
-    storageBucket: "forumwidara.firebasestorage.app",
-    messagingSenderId: "216895655168",
-    appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+            authDomain: "forumwidara.firebaseapp.com",
+            projectId: "forumwidara",
+            storageBucket: "forumwidara.appspot.com",
+            messagingSenderId: "216895655168",
+            appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
         // State Global
-        let userAnswers = [];
-let timerInterval;
-const currentUserId = "user_demo_123"; // ID pengguna yang disimulasikan
         let currentQuizData = null;
         let currentQuestionIndex = 0;
         let userAnswers = [];
         let timerInterval;
+        const currentUserId = "user_demo_123"; // Simulasi ID pengguna
 
         // Elemen DOM
-        const selectionContainer = document.getElementById('quiz-selection-container');
         const playerContainer = document.getElementById('quiz-player-container');
         const resultsContainer = document.getElementById('results-container');
-        const quizListDiv = document.getElementById('quiz-list');
+        const errorContainer = document.getElementById('error-container');
         const questionContainer = document.getElementById('question-container');
-
-        // Fungsi untuk memuat daftar kuis dari Firestore
-        async function loadQuizzes() {
-            try {
-                const querySnapshot = await getDocs(collection(db, "kuis"));
-                quizListDiv.innerHTML = '';
-                if (querySnapshot.empty) {
-                    quizListDiv.innerHTML = '<p>Belum ada kuis yang dibuat oleh admin.</p>';
-                    return;
-                }
-                querySnapshot.forEach(doc => {
-                    const quiz = doc.data();
-                    const card = document.createElement('div');
-                    card.className = 'quiz-card';
-                    card.innerHTML = `
-                        <div>
-                            <h3>${quiz.title}</h3>
-                            <span>${quiz.questions.length} Soal, ${quiz.timerInMinutes} menit</span>
-                        </div>
-                        <button class="btn start-quiz-btn" data-id="${doc.id}">Mulai</button>
-                    `;
-                    quizListDiv.appendChild(card);
-                });
-            } catch (error) {
-                console.error("Error loading quizzes: ", error);
-                quizListDiv.innerHTML = '<p>Gagal memuat kuis.</p>';
-            }
-        }
 
         // Fungsi untuk memulai sebuah kuis
         async function startQuiz(quizId) {
             try {
                 const docRef = doc(db, "kuis", quizId);
                 const docSnap = await getDoc(docRef);
+
                 if (docSnap.exists()) {
                     currentQuizData = docSnap.data();
                     userAnswers = new Array(currentQuizData.questions.length).fill(null);
                     currentQuestionIndex = 0;
                     
-                    selectionContainer.style.display = 'none';
+                    errorContainer.style.display = 'none';
                     playerContainer.style.display = 'block';
                     
                     document.getElementById('quiz-title-player').textContent = currentQuizData.title;
                     renderQuestion();
                     startTimer(currentQuizData.timerInMinutes);
+                } else {
+                    showError("Oops! Kuis tidak ditemukan. Mungkin sudah dihapus.");
                 }
             } catch (error) {
                 console.error("Error starting quiz:", error);
+                showError("Terjadi kesalahan saat memuat kuis.");
             }
         }
         
-        // Fungsi untuk menampilkan soal
+        function showError(message) {
+            playerContainer.style.display = 'none';
+            resultsContainer.style.display = 'none';
+            errorContainer.innerHTML = `<h1>Error</h1><p>${message}</p><a href="daftar-tantangan.html">Kembali</a>`;
+            errorContainer.style.display = 'block';
+        }
+
+        // --- (Salin semua fungsi lain dari main-kuis.html yang lama ke sini) ---
+        // renderQuestion, updateNavButtons, saveAnswer, startTimer, finishQuiz, showResults, awardBadge
+
         function renderQuestion() {
             const question = currentQuizData.questions[currentQuestionIndex];
             let html = `<div class="question-text">${currentQuestionIndex + 1}. ${question.questionText}</div>`;
             html += `<div class="options-container">`;
 
-            switch (question.type) {
-                case 'pilihan-ganda':
-                    question.options.forEach((opt, index) => {
-                        const isChecked = userAnswers[currentQuestionIndex] === index ? 'checked' : '';
-                        html += `
-                            <label>
-                                <input type="radio" name="option" value="${index}" ${isChecked}> ${opt.text}
-                            </label>`;
-                    });
-                    break;
-                case 'esai':
-                    const answer = userAnswers[currentQuestionIndex] || '';
-                    html += `<textarea rows="5" style="width: 100%;" placeholder="Ketik jawabanmu...">${answer}</textarea>`;
-                    break;
-                // Tambahkan case untuk tipe soal lain (susun-huruf, pencocokan) di sini
+            if (question.type === 'pilihan-ganda') {
+                question.options.forEach((opt, index) => {
+                    const isChecked = userAnswers[currentQuestionIndex] === index ? 'checked' : '';
+                    html += `<label><input type="radio" name="option" value="${index}" ${isChecked}> ${opt.text}</label>`;
+                });
+            } else if (question.type === 'esai') {
+                const answer = userAnswers[currentQuestionIndex] || '';
+                html += `<textarea rows="5" style="width: 100%;" placeholder="Ketik jawabanmu...">${answer}</textarea>`;
             }
+            // Tambahkan render untuk tipe soal lain jika ada
 
             html += `</div>`;
             questionContainer.innerHTML = html;
@@ -270,16 +219,13 @@ const currentUserId = "user_demo_123"; // ID pengguna yang disimulasikan
 
         function saveAnswer() {
             const question = currentQuizData.questions[currentQuestionIndex];
-             switch (question.type) {
-                case 'pilihan-ganda':
-                    const selected = document.querySelector('input[name="option"]:checked');
-                    if (selected) userAnswers[currentQuestionIndex] = parseInt(selected.value, 10);
-                    break;
-                case 'esai':
-                    const textarea = questionContainer.querySelector('textarea');
-                    if (textarea) userAnswers[currentQuestionIndex] = textarea.value;
-                    break;
-             }
+            if (question.type === 'pilihan-ganda') {
+                const selected = document.querySelector('input[name="option"]:checked');
+                if (selected) userAnswers[currentQuestionIndex] = parseInt(selected.value, 10);
+            } else if (question.type === 'esai') {
+                const textarea = questionContainer.querySelector('textarea');
+                if (textarea) userAnswers[currentQuestionIndex] = textarea.value;
+            }
         }
         
         function startTimer(minutes) {
@@ -298,104 +244,91 @@ const currentUserId = "user_demo_123"; // ID pengguna yang disimulasikan
             }, 1000);
         }
 
-        function finishQuiz() {
+        async function finishQuiz() {
             clearInterval(timerInterval);
-            saveAnswer(); // Simpan jawaban terakhir
+            saveAnswer(); 
             
             let score = 0;
-            currentQuizData.questions.forEach((q, index) => {
-                if (q.type === 'pilihan-ganda') {
+            const scorableQuestions = currentQuizData.questions.filter(q => q.type === 'pilihan-ganda');
+            scorableQuestions.forEach((q, index) => {
+                const originalIndex = currentQuizData.questions.indexOf(q);
+                if (q.options) {
                     const correctOptionIndex = q.options.findIndex(opt => opt.isCorrect);
-                    if (userAnswers[index] === correctOptionIndex) {
+                    if (userAnswers[originalIndex] === correctOptionIndex) {
                         score++;
                     }
                 }
-                // Penilaian esai diabaikan untuk skor otomatis
             });
 
-            const totalScorableQuestions = currentQuizData.questions.filter(q => q.type === 'pilihan-ganda').length;
-            const finalScore = totalScorableQuestions > 0 ? (score / totalScorableQuestions) * 100 : 0;
+            const finalScore = scorableQuestions.length > 0 ? (score / scorableQuestions.length) * 100 : 0;
             
-            showResults(finalScore);
+            await showResults(finalScore);
         }
 
         async function showResults(score) {
-    playasync function showResults(score) {
-    playerContainer.style.display = 'none';
-    resultsContainer.style.display = 'block';
+            playerContainer.style.display = 'none';
+            resultsContainer.style.display = 'block';
 
-    const thresholds = currentQuizData.scoreThresholds;
-    let medal = '👎';
-    let feedback = "Coba lagi, ya! Semangat!";
-    let isEligibleForBadge = false;
+            const thresholds = currentQuizData.scoreThresholds;
+            let medal = '👎';
+            let feedback = "Coba lagi, ya! Semangat!";
+            let isEligibleForBadge = (score >= thresholds.bronze);
 
-    if (score >= thresholds.gold || score >= thresholds.silver || score >= thresholds.bronze) {
-        isEligibleForBadge = true; // Peserta layak dapat lencana jika meraih medali apapun
-    }
-    
-    if (score >= thresholds.gold) {
-        medal = '🥇';
-        feedback = "Luar biasa! Kamu mendapatkan medali emas!";
-    } else if (score >= thresholds.silver) {
-        medal = '🥈';
-        feedback = "Hebat! Kamu mendapatkan medali perak!";
-    } else if (score >= thresholds.bronze) {
-        medal = '🥉';
-        feedback = "Bagus! Kamu mendapatkan medali perunggu!";
-    }
+            if (score >= thresholds.gold) {
+                medal = '🥇';
+                feedback = "Luar biasa! Kamu mendapatkan medali emas!";
+            } else if (score >= thresholds.silver) {
+                medal = '🥈';
+                feedback = "Hebat! Kamu mendapatkan medali perak!";
+            } else if (score >= thresholds.bronze) {
+                medal = '🥉';
+                feedback = "Bagus! Kamu mendapatkan medali perunggu!";
+            }
 
-    document.getElementById('medal-display').textContent = medal;
-    document.getElementById('score-display').textContent = `Skor Kamu: ${Math.round(score)}%`;
-    document.getElementById('feedback-display').textContent = feedback;
+            document.getElementById('medal-display').textContent = medal;
+            document.getElementById('score-display').textContent = `Skor Kamu: ${Math.round(score)}%`;
+            document.getElementById('feedback-display').textContent = feedback;
 
-    // Proses pemberian lencana
-    if (isEligibleForBadge && currentQuizData.badgeToAwardId) {
-        await awardBadge(currentUserId, currentQuizData.badgeToAwardId);
-        document.getElementById('feedback-display').textContent += "\nSelamat! Lencana baru telah ditambahkan ke profilmu!";
-    }
-}
+            if (isEligibleForBadge && currentQuizData.badgeToAwardId) {
+                await awardBadge(currentUserId, currentQuizData.badgeToAwardId);
+                document.getElementById('feedback-display').textContent += "\nSelamat! Lencana baru telah ditambahkan ke profilmu!";
+            }
+        }
 
-// TAMBAHKAN FUNGSI BARU INI di bawah fungsi showResults
-async function awardBadge(userId, badgeId) {
-    try {
-        // 1. Ambil detail lencana dari koleksi 'badges'
-        const badgeRef = doc(db, "badges", badgeId);
-        const badgeSnap = await getDoc(badgeRef);
+        async function awardBadge(userId, badgeId) {
+           try {
+                const badgeRef = doc(db, "badges", badgeId);
+                const badgeSnap = await getDoc(badgeRef);
 
-        if (!badgeSnap.exists()) {
-            console.error("Lencana dengan ID ini tidak ditemukan:", badgeId);
-            return;
+                if (!badgeSnap.exists()) { console.error("Lencana tidak ditemukan:", badgeId); return; }
+                
+                const badgeData = badgeSnap.data();
+                await addDoc(collection(db, "user_badges"), {
+                    userId: userId,
+                    badgeId: badgeId,
+                    name: badgeData.name,
+                    imageUrl: badgeData.imageUrl,
+                    awardedAt: serverTimestamp()
+                });
+                console.log("Lencana berhasil diberikan:", userId);
+            } catch (error) {
+                console.error("Gagal memberikan lencana:", error);
+            }
         }
         
-        const badgeData = badgeSnap.data();
+        // --- LOGIKA UTAMA SAAT HALAMAN DIMUAT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const quizIdFromUrl = urlParams.get('quizId');
 
-        // 2. Siapkan data untuk disimpan di 'user_badges'
-        const userBadgeData = {
-            userId: userId,
-            badgeId: badgeId,
-            name: badgeData.name,
-            imageUrl: badgeData.imageUrl,
-            awardedAt: serverTimestamp()
-        };
-
-        // 3. Simpan ke koleksi 'user_badges'
-        await addDoc(collection(db, "user_badges"), userBadgeData);
-        console.log("Lencana berhasil diberikan kepada user:", userId);
-
-    } catch (error) {
-        console.error("Gagal memberikan lencana:", error);
-    }
-        }            
-        // Event Listeners
-        document.addEventListener('DOMContentLoaded', loadQuizzes);
-
-        quizListDiv.addEventListener('click', (e) => {
-            if (e.target.classList.contains('start-quiz-btn')) {
-                const quizId = e.target.dataset.id;
-                startQuiz(quizId);
+            if (quizIdFromUrl) {
+                startQuiz(quizIdFromUrl);
+            } else {
+                showError("Tidak ada tantangan yang dipilih. Silakan kembali ke halaman daftar tantangan.");
             }
         });
         
+        // Event Listeners Navigasi Kuis
         document.getElementById('next-btn').addEventListener('click', () => {
             saveAnswer();
             if (currentQuestionIndex < currentQuizData.questions.length - 1) {
