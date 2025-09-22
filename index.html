@@ -71,8 +71,6 @@
         .btn.admin-badge:hover { background-color: #ab47bc; }
         .btn.admin-challenge { background-color: #ef5350; }
         .btn.admin-challenge:hover { background-color: #e53935; }
-        .btn.admin-create-question { background-color: #673ab7; }
-        .btn.admin-create-question:hover { background-color: #512da8; }
 
         .menu-grid {
             display: grid;
@@ -152,13 +150,16 @@
     <header>
         <h1>Komunitas Ceria 2SD</h1>
         <div class="header-buttons">
+            <a href="profil.html" class="btn tertiary">Profil Saya 👤</a>
+            <a href="tantangan.html" class="btn">Lihat Tantangan 🔥</a>
+            
             <a href="quiz-menu.html" class="btn">Mulai Kuis 🎲</a>
             <a href="buat-kuis.html" class="btn secondary">Tambah Soal 📚</a>
-             <a href="kelola-kuis.html" id="kelola-kuis-btn" class="btn tertiary">Kelola Kuis ⚙️</a>
-            <!-- Tombol-tombol Admin -->
-            <a href="admin-lencana.html" id="kelola-lencana-btn" class="btn admin-badge" style="display: none;">Kelola Lencana 🎖️</a>
-            <a href="admin-tantangan.html" id="kelola-tantangan-btn" class="btn admin-challenge" style="display: none;">Kelola Tantangan 🏆</a>
-            <a href="admin-buat-soal.html" id="buat-soal-btn" class="btn admin-create-question" style="display: none;">Buat Soal Tantangan 📝</a>
+            <a href="kelola-kuis.html" id="kelola-kuis-btn" class="btn tertiary">Kelola Kuis ⚙️</a>
+            
+            <!-- PERUBAHAN: Tombol admin disederhanakan. Hanya ada satu tombol untuk tantangan. -->
+            <a href="buat-lencana.html" id="kelola-lencana-btn" class="btn admin-badge" style="display: none;">Kelola Lencana 🎖️</a>
+            <a href="buat_tantangan.html" id="kelola-tantangan-btn" class="btn admin-challenge" style="display: none;">Kelola Tantangan 🏆</a>
         </div>
     </header>
 
@@ -191,7 +192,7 @@
             </section>
 
             <section class="highlight">
-                <a href="weekly.html">
+                <a href="tantangan.html">
                     <h2 id="weekly-theme-title">Memuat Tantangan Minggu Ini...</h2>
                 </a>
             </section>
@@ -208,7 +209,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, collection, getDocs, doc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, collection, getDocs, doc, getDoc, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   
   const firebaseConfig = {
     apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
@@ -226,11 +227,11 @@
   async function loadWeeklyChallengeTheme() {
     const titleElement = document.getElementById('weekly-theme-title');
     try {
-        const q = query(collection(db, "tantanganMingguan"), where("aktif", "==", true));
+        const q = query(collection(db, "challenges"), orderBy("createdAt", "desc"), limit(1));
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
             const challengeData = querySnapshot.docs[0].data();
-            titleElement.textContent = `Tantangan Minggu Ini: ${challengeData.tema} 🐠`;
+            titleElement.textContent = `Tantangan Minggu Ini: ${challengeData.title} 🔥`;
         } else {
             titleElement.textContent = 'Belum Ada Tantangan Minggu Ini';
         }
@@ -240,8 +241,6 @@
     }
   }
 
-  // === FUNGSI DIPERBARUI ===
-  // Fungsi ini sekarang membaca dari sub-koleksi 'lencanaKu' sesuai instruksi kita sebelumnya.
   async function loadUserBadges(userId) {
       const grid = document.getElementById('koleksi-lencana-grid');
       if (!userId) {
@@ -250,13 +249,13 @@
       }
 
       try {
-        const badgesQuery = collection(db, "users", userId, "lencanaKu");
+        const badgesQuery = query(collection(db, "user_badges"), where("userId", "==", userId));
         const querySnapshot = await getDocs(badgesQuery);
         
-        grid.innerHTML = ''; // Kosongkan grid sebelum diisi
+        grid.innerHTML = ''; 
 
         if (querySnapshot.empty) {
-            grid.innerHTML = '<p>Kamu belum punya lencana. Ayo selesaikan tantangan mingguan!</p>';
+            grid.innerHTML = '<p>Kamu belum punya lencana. Ayo selesaikan tantangan!</p>';
             return;
         }
 
@@ -265,8 +264,8 @@
             const badgeElement = document.createElement('div');
             badgeElement.className = 'badge-item';
             badgeElement.innerHTML = `
-                <img src="${badge.ikonLencana}" alt="${badge.namaLencana}" title="${badge.namaLencana}" onerror="this.src='https://placehold.co/80x80/e2e8f0/4a5568?text=🖼️'">
-                <p>${badge.namaLencana}</p>
+                <img src="${badge.badgeImageUrl}" alt="${badge.badgeName}" title="${badge.badgeName}" onerror="this.src='https://placehold.co/80x80/e2e8f0/4a5568?text=🖼️'">
+                <p>${badge.badgeName}</p>
             `;
             grid.appendChild(badgeElement);
         });
@@ -277,29 +276,23 @@
   }
 
   onAuthStateChanged(auth, async (user) => {
-    // Ambil semua tombol admin
+    // PERUBAHAN: Daftar tombol admin disesuaikan, hanya 2 tombol.
     const kelolaLencanaBtn = document.getElementById('kelola-lencana-btn');
     const kelolaTantanganBtn = document.getElementById('kelola-tantangan-btn');
-    const buatSoalBtn = document.getElementById('buat-soal-btn');
     
-    // Kelompokkan dalam satu array agar mudah dikelola
-    const adminButtons = [kelolaLencanaBtn, kelolaTantanganBtn, buatSoalBtn];
+    const adminButtons = [kelolaLencanaBtn, kelolaTantanganBtn];
 
     if (user) {
-      // Cek peran pengguna dari koleksi 'users'
       const userRoleRef = doc(db, "users", user.uid);
       const userRoleSnap = await getDoc(userRoleRef);
 
       if (userRoleSnap.exists() && userRoleSnap.data().peran === 'admin') {
-        // Tampilkan semua tombol admin jika peran adalah 'admin'
         adminButtons.forEach(btn => btn.style.display = 'inline-block');
       } else {
-        // Sembunyikan jika bukan admin
         adminButtons.forEach(btn => btn.style.display = 'none');
       }
       loadUserBadges(user.uid);
     } else {
-      // Sembunyikan jika tidak login
       adminButtons.forEach(btn => btn.style.display = 'none');
       loadUserBadges(null);
     }
@@ -310,4 +303,5 @@
 
 </body>
 </html>
+
 
