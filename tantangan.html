@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tantangan Mingguan</title>
+    
+    <!-- Impor Font dari Google Fonts (gaya playful) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS Internal untuk Styling -->
+    <style>
+        /* Variabel Warna Pastel */
+        :root {
+            --bg-color: #f0f8ff; /* AliceBlue */
+            --container-bg: #ffffff;
+            --primary-blue: #5c9ced;
+            --primary-blue-hover: #4a8cdb;
+            --text-color: #4c4c4c;
+            --text-secondary: #7f8c8d;
+            --input-border: #dcdcdc;
+            --shadow-color: rgba(92, 156, 237, 0.2);
+            --notification-bg: #77dd77; /* Pastel Green */
+        }
+
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* Kontainer Utama */
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: var(--container-bg);
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px var(--shadow-color);
+        }
+
+        /* Judul */
+        h1 {
+            text-align: center;
+            color: var(--primary-blue);
+            margin-bottom: 25px;
+        }
+
+        /* Area Tampilan Tantangan */
+        #challenge-display {
+            margin-bottom: 30px;
+        }
+        
+        #challenge-display h2 {
+            margin-top: 0;
+            color: var(--text-color);
+        }
+
+        #challenge-display p.description {
+            font-size: 1.1em;
+            color: var(--text-secondary);
+        }
+
+        #challenge-display .question-box {
+            background-color: #f9f9f9;
+            border-left: 5px solid var(--primary-blue);
+            padding: 15px 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+        
+        #challenge-display .question-box p {
+            margin: 0;
+        }
+
+        /* Styling Form Jawaban */
+        #answer-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        #answer-form.hidden {
+            display: none;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            display: block;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--input-border);
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: 'Baloo 2', cursive;
+            box-sizing: border-box;
+            min-height: 120px;
+            resize: vertical;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 8px var(--shadow-color);
+        }
+
+        /* Tombol Kirim */
+        #submit-button {
+            background-color: var(--primary-blue);
+            color: white;
+            font-size: 1.25em;
+            font-weight: 700;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #submit-button:hover {
+            background-color: var(--primary-blue-hover);
+            transform: translateY(-3px);
+        }
+        
+        #submit-button:disabled {
+             background-color: #a9c7e8;
+             cursor: not-allowed;
+        }
+        
+        /* Notifikasi */
+        #notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--notification-bg);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            font-size: 1.1em;
+            opacity: 1;
+            transition: opacity 0.5s, transform 0.5s;
+            z-index: 1000;
+        }
+        
+        #notification.hidden {
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Tantangan Mingguan</h1>
+
+        <!-- Kontainer untuk menampilkan detail tantangan -->
+        <div id="challenge-display">
+            <p id="loading-message">Memuat tantangan terbaru...</p>
+            <!-- Detail tantangan akan dimuat di sini oleh JavaScript -->
+        </div>
+
+        <!-- Form untuk mengirim jawaban (awalnya disembunyikan) -->
+        <form id="answer-form" class="hidden">
+            <div class="form-group">
+                <label for="answer-text">Kirim Jawabanmu</label>
+                <textarea id="answer-text" placeholder="Tulis jawaban atau link solusimu di sini..." required></textarea>
+            </div>
+            <button type="submit" id="submit-button">Kirim</button>
+        </form>
+    </div>
+    
+    <!-- Elemen untuk notifikasi -->
+    <div id="notification" class="hidden"></div>
+
+    <!-- Script Firebase SDK (versi modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Ganti dengan konfigurasi Firebase Anda
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+    authDomain: "forumwidara.firebaseapp.com",
+    projectId: "forumwidara",
+    storageBucket: "forumwidara.firebasestorage.app",
+    messagingSenderId: "216895655168",
+    appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+        };
+
+        // Inisialisasi Firebase dan Firestore
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Referensi ke elemen DOM
+        const challengeDisplay = document.getElementById('challenge-display');
+        const loadingMessage = document.getElementById('loading-message');
+        const answerForm = document.getElementById('answer-form');
+        const submitButton = document.getElementById('submit-button');
+        const notification = document.getElementById('notification');
+        
+        // Variabel untuk menyimpan ID tantangan yang aktif
+        let activeChallengeId = null;
+
+        // --- Fungsi untuk memuat dan menampilkan tantangan aktif ---
+        const loadActiveChallenge = async () => {
+            try {
+                // Buat query untuk mendapatkan 1 dokumen terbaru dari koleksi 'challenges'
+                const challengesRef = collection(db, 'challenges');
+                const q = query(challengesRef, orderBy('createdAt', 'desc'), limit(1));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    loadingMessage.textContent = "Yah, belum ada tantangan yang tersedia saat ini.";
+                    return;
+                }
+
+                // Ambil data dari dokumen pertama
+                const doc = querySnapshot.docs[0];
+                const challenge = doc.data();
+                activeChallengeId = doc.id; // Simpan ID tantangan untuk form jawaban
+
+                // Tampilkan data ke HTML
+                challengeDisplay.innerHTML = `
+                    <h2>${challenge.title}</h2>
+                    <p class="description">${challenge.description}</p>
+                    <div class="question-box">
+                        <strong>Soal:</strong>
+                        <p>${challenge.question}</p>
+                    </div>
+                `;
+                
+                // Tampilkan form jawaban setelah tantangan dimuat
+                answerForm.classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Gagal memuat tantangan: ", error);
+                loadingMessage.textContent = "Oops! Terjadi kesalahan saat memuat tantangan.";
+            }
+        };
+        
+        // --- Fungsi untuk menampilkan notifikasi ---
+        const showNotification = (message) => {
+            notification.textContent = message;
+            notification.classList.remove('hidden');
+            
+            // Sembunyikan notifikasi setelah 3 detik
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 3000);
+        };
+
+        // --- Event Listener untuk Form Jawaban ---
+        answerForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Mencegah reload halaman
+
+            if (!activeChallengeId) {
+                alert("ID tantangan tidak ditemukan. Gagal mengirim jawaban.");
+                return;
+            }
+            
+            const answerText = document.getElementById('answer-text').value.trim();
+            if (!answerText) {
+                alert("Jawaban tidak boleh kosong!");
+                return;
+            }
+
+            // Nonaktifkan tombol saat proses pengiriman
+            submitButton.disabled = true;
+            submitButton.textContent = 'Mengirim...';
+
+            try {
+                // Simpan jawaban ke koleksi 'answers'
+                await addDoc(collection(db, "answers"), {
+                    challengeId: activeChallengeId, // Tautkan jawaban dengan tantangan
+                    answer: answerText,
+                    submittedAt: serverTimestamp()
+                    // Di aplikasi nyata, Anda juga akan menambahkan 'userId' di sini
+                });
+
+                // Reset form dan tampilkan notifikasi sukses
+                answerForm.reset();
+                showNotification("Jawaban berhasil terkirim! 🎉");
+
+            } catch (error) {
+                console.error("Error mengirim jawaban: ", error);
+                alert("Gagal mengirim jawaban. Silakan coba lagi.");
+            } finally {
+                // Aktifkan kembali tombol
+                submitButton.disabled = false;
+                submitButton.textContent = 'Kirim';
+            }
+        });
+
+        // Panggil fungsi untuk memuat tantangan saat halaman dibuka
+        loadActiveChallenge();
+    </script>
+</body>
+</html>
+

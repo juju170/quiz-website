@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buat Lencana</title>
+    
+    <!-- Impor Font dari Google Fonts (gaya playful) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS Internal untuk Styling -->
+    <style>
+        /* Variabel Warna Pastel */
+        :root {
+            --bg-color: #f0f8ff; /* AliceBlue */
+            --container-bg: #ffffff;
+            --primary-blue: #5c9ced;
+            --primary-blue-hover: #4a8cdb;
+            --text-color: #4c4c4c;
+            --input-border: #dcdcdc;
+            --shadow-color: rgba(92, 156, 237, 0.2);
+            --pastel-pink: #ffcdd2;
+            --pastel-yellow: #fff9c4;
+            --pastel-green: #c8e6c9;
+            --pastel-purple: #e1bee7;
+        }
+
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* Kontainer Utama */
+        .container {
+            max-width: 700px;
+            width: 100%;
+            background-color: var(--container-bg);
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px var(--shadow-color);
+        }
+
+        /* Judul */
+        h1, h2 {
+            text-align: center;
+            color: var(--primary-blue);
+            margin-bottom: 25px;
+        }
+
+        /* Styling Form */
+        #badge-form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--input-border);
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: 'Baloo 2', cursive;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 8px var(--shadow-color);
+        }
+
+        /* Tombol Simpan */
+        #save-button {
+            background-color: var(--primary-blue);
+            color: white;
+            font-size: 1.25em;
+            font-weight: 700;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #save-button:hover {
+            background-color: var(--primary-blue-hover);
+            transform: translateY(-3px);
+        }
+        
+        #save-button:disabled {
+            background-color: #a9c7e8;
+            cursor: not-allowed;
+        }
+
+        /* Daftar Lencana dalam Grid */
+        #badges-grid {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 25px;
+            text-align: center;
+        }
+
+        .badge-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .badge-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%; /* Membuat gambar menjadi bulat */
+            object-fit: cover; /* Memastikan gambar mengisi area tanpa distorsi */
+            border: 4px solid white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            background-color: #eee; /* Warna placeholder jika gambar gagal dimuat */
+        }
+        
+        /* Memberi warna border ikon secara acak */
+        .badge-icon.pink { border-color: var(--pastel-pink); }
+        .badge-icon.yellow { border-color: var(--pastel-yellow); }
+        .badge-icon.green { border-color: var(--pastel-green); }
+        .badge-icon.purple { border-color: var(--pastel-purple); }
+
+        .badge-item p {
+            margin: 0;
+            font-weight: 500;
+            word-break: break-word;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Buat Lencana</h1>
+
+        <!-- Form untuk membuat lencana baru -->
+        <form id="badge-form">
+            <div class="form-group">
+                <label for="name">Nama Lencana</label>
+                <input type="text" id="name" placeholder="Contoh: Master Koding" required>
+            </div>
+
+            <div class="form-group">
+                <label for="imageUrl">URL Gambar</label>
+                <input type="url" id="imageUrl" placeholder="https://example.com/icon.png" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="requirement">Syarat Mendapatkan</label>
+                <input type="text" id="requirement" placeholder="Selesaikan 5 tantangan mingguan" required>
+            </div>
+
+            <button type="submit" id="save-button">Simpan</button>
+        </form>
+
+        <hr style="margin-top: 40px; border: 1px solid #eee;">
+
+        <h2>Koleksi Lencana</h2>
+        <!-- Kontainer untuk menampilkan lencana dari Firestore -->
+        <div id="badges-grid">
+            <!-- Item lencana akan dimuat di sini oleh JavaScript -->
+        </div>
+    </div>
+
+    <!-- Script Firebase SDK (versi modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Ganti dengan konfigurasi Firebase Anda
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+    authDomain: "forumwidara.firebaseapp.com",
+    projectId: "forumwidara",
+    storageBucket: "forumwidara.firebasestorage.app",
+    messagingSenderId: "216895655168",
+    appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+        };
+
+        // Inisialisasi Firebase dan Firestore
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Referensi ke elemen DOM
+        const badgeForm = document.getElementById('badge-form');
+        const badgesGrid = document.getElementById('badges-grid');
+        const saveButton = document.getElementById('save-button');
+        
+        // Warna border ikon untuk variasi
+        const borderColors = ['pink', 'yellow', 'green', 'purple'];
+
+        // --- Fungsi untuk Menampilkan Lencana ---
+        const renderBadges = (snapshot) => {
+            badgesGrid.innerHTML = '';
+            let colorIndex = 0;
+
+            snapshot.docs.forEach(doc => {
+                const badge = doc.data();
+                
+                const item = document.createElement('div');
+                item.className = 'badge-item';
+                
+                const borderColor = borderColors[colorIndex % borderColors.length];
+
+                item.innerHTML = `
+                    <img src="${badge.imageUrl}" alt="${badge.name}" class="badge-icon ${borderColor}" onerror="this.src='https://placehold.co/80x80/eee/333?text=Icon'; this.classList.remove('${borderColor}');">
+                    <p>${badge.name}</p>
+                `;
+                
+                badgesGrid.appendChild(item);
+                colorIndex++;
+            });
+        };
+        
+        // --- Mendengarkan Perubahan di Koleksi 'badges' secara Real-time ---
+        const badgesCollection = collection(db, 'badges');
+        const q = query(badgesCollection, orderBy('createdAt', 'desc'));
+
+        onSnapshot(q, renderBadges, (error) => {
+            console.error("Gagal mengambil data lencana: ", error);
+            badgesGrid.innerHTML = '<p>Gagal memuat lencana.</p>';
+        });
+
+        // --- Event Listener untuk Form Submission ---
+        badgeForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Mencegah refresh halaman
+
+            // Ambil data dari form
+            const name = badgeForm.name.value;
+            const imageUrl = badgeForm.imageUrl.value;
+            const requirement = badgeForm.requirement.value;
+            
+            // Nonaktifkan tombol saat proses penyimpanan
+            saveButton.disabled = true;
+            saveButton.textContent = 'Menyimpan...';
+
+            try {
+                // Tambahkan dokumen baru ke koleksi 'badges'
+                await addDoc(collection(db, 'badges'), {
+                    name,
+                    imageUrl,
+                    requirement,
+                    createdAt: serverTimestamp()
+                });
+                
+                // Kosongkan form setelah berhasil
+                badgeForm.reset();
+
+            } catch (error) {
+                console.error("Error menambahkan lencana: ", error);
+                alert("Gagal menyimpan lencana. Silakan coba lagi.");
+            } finally {
+                // Aktifkan kembali tombol
+                saveButton.disabled = false;
+                saveButton.textContent = 'Simpan';
+            }
+        });
+    </script>
+</body>
+</html>
+

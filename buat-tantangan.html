@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buat Tantangan</title>
+    
+    <!-- Impor Font dari Google Fonts (gaya playful) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS Internal untuk Styling -->
+    <style>
+        /* Variabel Warna Pastel yang disesuaikan */
+        :root {
+            --bg-color: #f0f8ff; /* AliceBlue */
+            --container-bg: #ffffff;
+            --primary-blue: #5c9ced;
+            --green-button: #77dd77; /* Pastel Green */
+            --green-button-hover: #6ace6a;
+            --text-color: #4c4c4c;
+            --input-border: #dcdcdc;
+            --shadow-color: rgba(92, 156, 237, 0.2);
+            --card-pink: #fff0f1;
+            --card-yellow: #fff9e6;
+            --card-green: #e6f7e6;
+            --card-purple: #f3e8f7;
+        }
+
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* Kontainer Utama */
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: var(--container-bg);
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px var(--shadow-color);
+        }
+
+        /* Judul */
+        h1, h2 {
+            text-align: center;
+            color: var(--primary-blue);
+            margin-bottom: 25px;
+        }
+
+        /* Styling Form */
+        #challenge-form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--input-border);
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: 'Baloo 2', cursive;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 8px var(--shadow-color);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Tombol Simpan */
+        #save-button {
+            background-color: var(--green-button);
+            color: var(--container-bg);
+            font-size: 1.25em;
+            font-weight: 700;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #save-button:hover {
+            background-color: var(--green-button-hover);
+            transform: translateY(-3px);
+        }
+        
+        #save-button:disabled {
+             background-color: #b9e8b9;
+             cursor: not-allowed;
+        }
+
+        /* Daftar Tantangan */
+        #challenges-list {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .challenge-card {
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: none;
+        }
+
+        .challenge-card h3 {
+            margin-top: 0;
+            color: var(--text-color);
+        }
+        
+        .challenge-card p {
+            margin-bottom: 5px;
+            word-wrap: break-word;
+        }
+        
+        .challenge-card small {
+            color: #7f8c8d;
+        }
+
+        /* Variasi Warna Kartu Pastel */
+        .card-pink { background-color: var(--card-pink); }
+        .card-yellow { background-color: var(--card-yellow); }
+        .card-green { background-color: var(--card-green); }
+        .card-purple { background-color: var(--card-purple); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Buat Tantangan Mingguan</h1>
+
+        <!-- Form untuk membuat tantangan baru -->
+        <form id="challenge-form">
+            <div class="form-group">
+                <label for="title">Judul Tantangan</label>
+                <input type="text" id="title" placeholder="Contoh: Tantangan Algoritma Dasar" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Deskripsi</label>
+                <textarea id="description" placeholder="Jelaskan secara singkat tentang tantangan ini" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="question">Soal</label>
+                <textarea id="question" placeholder="Tuliskan detail soal atau studi kasus di sini" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="duration">Durasi</label>
+                <select id="duration" required>
+                    <option value="7">7 Hari</option>
+                    <option value="14">14 Hari</option>
+                    <option value="30">30 Hari</option>
+                </select>
+            </div>
+
+            <button type="submit" id="save-button">Simpan Tantangan</button>
+        </form>
+
+        <hr style="margin-top: 40px; border: 1px solid #eee;">
+
+        <h2>Daftar Tantangan</h2>
+        <!-- Kontainer untuk menampilkan daftar tantangan dari Firestore -->
+        <div id="challenges-list">
+            <!-- Kartu tantangan akan dimuat di sini oleh JavaScript -->
+        </div>
+    </div>
+
+    <!-- Script Firebase SDK (versi modular) -->
+    <script type="module">
+        // Impor fungsi yang diperlukan dari Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Konfigurasi Firebase Anda (ganti dengan kredensial Anda)
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+    authDomain: "forumwidara.firebaseapp.com",
+    projectId: "forumwidara",
+    storageBucket: "forumwidara.firebasestorage.app",
+    messagingSenderId: "216895655168",
+    appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+        };
+
+        // Inisialisasi Firebase dan Firestore
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Referensi ke elemen DOM
+        const challengeForm = document.getElementById('challenge-form');
+        const challengesList = document.getElementById('challenges-list');
+        const saveButton = document.getElementById('save-button');
+        
+        // Array warna kartu untuk variasi
+        const cardColors = ['card-pink', 'card-yellow', 'card-green', 'card-purple'];
+
+        // --- Fungsi untuk Menampilkan Tantangan ---
+        const renderChallenges = (snapshot) => {
+            challengesList.innerHTML = '';
+            let colorIndex = 0;
+
+            snapshot.docs.forEach(doc => {
+                const challenge = doc.data();
+                const card = document.createElement('div');
+                
+                // Beri kelas CSS pada kartu dan pilih warna secara bergiliran
+                card.className = `challenge-card ${cardColors[colorIndex % cardColors.length]}`;
+                
+                // Isi konten kartu dengan data dari Firestore
+                card.innerHTML = `
+                    <h3>${challenge.title}</h3>
+                    <p><strong>Deskripsi:</strong> ${challenge.description}</p>
+                    <p><strong>Durasi:</strong> ${challenge.duration} hari</p>
+                    <small>Dibuat pada: ${challenge.createdAt?.toDate().toLocaleDateString('id-ID') || 'Baru saja'}</small>
+                `;
+                
+                challengesList.appendChild(card);
+                colorIndex++;
+            });
+        };
+        
+        // --- Mendengarkan Perubahan Data di Firestore secara Real-time ---
+        const challengesCollection = collection(db, 'challenges');
+        const q = query(challengesCollection, orderBy('createdAt', 'desc'));
+
+        onSnapshot(q, (snapshot) => {
+            console.log("Data tantangan diterima dari Firestore!");
+            renderChallenges(snapshot);
+        }, (error) => {
+            console.error("Gagal mengambil data: ", error);
+            challengesList.innerHTML = '<p style="color: red;">Gagal memuat data tantangan.</p>';
+        });
+
+
+        // --- Event Listener untuk Form Submission ---
+        challengeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const title = challengeForm.title.value;
+            const description = challengeForm.description.value;
+            const question = challengeForm.question.value;
+            const duration = challengeForm.duration.value;
+            
+            const originalButtonText = saveButton.textContent;
+            saveButton.textContent = 'Menyimpan...';
+            saveButton.disabled = true;
+
+            try {
+                // Menambahkan dokumen baru ke koleksi 'challenges'
+                await addDoc(collection(db, 'challenges'), {
+                    title: title,
+                    description: description,
+                    question: question,
+                    duration: parseInt(duration),
+                    createdAt: serverTimestamp()
+                });
+                
+                challengeForm.reset();
+
+            } catch (error) {
+                console.error("Error menambahkan dokumen: ", error);
+                alert("Gagal menyimpan tantangan. Silakan coba lagi.");
+            } finally {
+                saveButton.textContent = originalButtonText;
+                saveButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
+
+

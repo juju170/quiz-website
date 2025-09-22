@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Saya</title>
+    
+    <!-- Impor Font dari Google Fonts (gaya playful) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS Internal untuk Styling -->
+    <style>
+        /* Variabel Warna Pastel */
+        :root {
+            --bg-color: #f0f8ff; /* AliceBlue */
+            --container-bg: #ffffff;
+            --primary-blue: #5c9ced;
+            --text-color: #4c4c4c;
+            --text-secondary: #7f8c8d;
+            --shadow-color: rgba(92, 156, 237, 0.2);
+            --pastel-pink: #ffcdd2;
+            --pastel-yellow: #fff9c4;
+            --pastel-green: #c8e6c9;
+            --pastel-purple: #e1bee7;
+        }
+
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* Kontainer Utama */
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background-color: var(--container-bg);
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px var(--shadow-color);
+        }
+
+        /* Judul */
+        h1, h2 {
+            text-align: center;
+            color: var(--primary-blue);
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            margin-top: 40px;
+            margin-bottom: 25px;
+        }
+
+        /* Grid untuk Lencana */
+        #my-badges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 30px;
+            text-align: center;
+            min-height: 150px; /* Memberi ruang agar pesan "belum ada lencana" tidak terlalu sempit */
+            align-content: flex-start;
+        }
+
+        .badge-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.3s ease; /* Transisi untuk animasi hover */
+        }
+        
+        /* Animasi Hover */
+        .badge-item:hover {
+            transform: scale(1.1) translateY(-5px);
+            cursor: pointer;
+        }
+        
+        .badge-icon {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background-color: #eee; /* Placeholder */
+        }
+        
+        /* Memberi warna border ikon secara acak */
+        .badge-icon.pink { border-color: var(--pastel-pink); }
+        .badge-icon.yellow { border-color: var(--pastel-yellow); }
+        .badge-icon.green { border-color: var(--pastel-green); }
+        .badge-icon.purple { border-color: var(--pastel-purple); }
+
+        .badge-item p {
+            margin: 0;
+            font-weight: 500;
+            word-break: break-word;
+        }
+        
+        /* Teks jika belum ada lencana */
+        #empty-message {
+            color: var(--text-secondary);
+            text-align: center;
+            width: 100%;
+            padding: 40px 0;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Profil Saya</h1>
+        <p style="text-align: center; color: var(--text-secondary); margin-top: 0;">Lihat semua pencapaian hebatmu di sini!</p>
+        
+        <h2>Lencana Saya</h2>
+        <!-- Kontainer untuk menampilkan lencana dari Firestore -->
+        <div id="my-badges-grid">
+            <!-- Pesan atau lencana akan dimuat di sini oleh JavaScript -->
+        </div>
+    </div>
+
+    <!-- Script Firebase SDK (versi modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Ganti dengan konfigurasi Firebase Anda
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+    authDomain: "forumwidara.firebaseapp.com",
+    projectId: "forumwidara",
+    storageBucket: "forumwidara.firebasestorage.app",
+    messagingSenderId: "216895655168",
+    appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+        };
+
+        // Inisialisasi Firebase dan Firestore
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Referensi ke elemen DOM
+        const badgesGrid = document.getElementById('my-badges-grid');
+        
+        // --- SIMULASI USER ---
+        // Di aplikasi nyata, ID ini akan didapat dari layanan autentikasi Firebase setelah user login.
+        // Untuk sekarang, kita gunakan ID statis sebagai contoh.
+        const currentUserId = "user_demo_123"; 
+        
+        // Array warna border untuk variasi
+        const borderColors = ['pink', 'yellow', 'green', 'purple'];
+
+        // --- Fungsi untuk Menampilkan Lencana ---
+        const renderBadges = (snapshot) => {
+            // Kosongkan grid sebelum menampilkan data baru
+            badgesGrid.innerHTML = '';
+
+            // Cek jika tidak ada lencana yang ditemukan
+            if (snapshot.empty) {
+                badgesGrid.innerHTML = `<p id="empty-message">Belum ada lencana, ayo ikuti tantangan! Semangat! ✨</p>`;
+                return;
+            }
+
+            let colorIndex = 0;
+            snapshot.docs.forEach(doc => {
+                const userBadge = doc.data();
+                
+                // Buat elemen untuk setiap lencana
+                const item = document.createElement('div');
+                item.className = 'badge-item';
+                
+                const borderColor = borderColors[colorIndex % borderColors.length];
+
+                // Isi HTML dengan data lencana
+                // Data seperti badgeName dan badgeImageUrl diambil langsung (denormalisasi)
+                item.innerHTML = `
+                    <img src="${userBadge.badgeImageUrl}" alt="${userBadge.badgeName}" class="badge-icon ${borderColor}" onerror="this.src='https://placehold.co/90x90/eee/333?text=Icon'; this.classList.remove('${borderColor}');">
+                    <p>${userBadge.badgeName}</p>
+                `;
+                
+                badgesGrid.appendChild(item);
+                colorIndex++;
+            });
+        };
+
+        // --- Membuat Query dan Mendengarkan Perubahan di Firestore ---
+        // Referensi ke koleksi 'user_badges'
+        const userBadgesRef = collection(db, 'user_badges');
+        
+        // Buat query untuk mendapatkan lencana HANYA untuk user yang sedang aktif (disimulasikan)
+        const q = query(userBadgesRef, where("userId", "==", currentUserId));
+
+        // onSnapshot akan berjalan setiap kali ada perubahan data (lencana baru ditambahkan/dihapus)
+        onSnapshot(q, renderBadges, (error) => {
+            console.error("Gagal mengambil data lencana pengguna: ", error);
+            badgesGrid.innerHTML = '<p id="empty-message" style="color: red;">Oops! Gagal memuat lencana.</p>';
+        });
+
+    </script>
+</body>
+</html>
+
