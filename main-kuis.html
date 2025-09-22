@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pilih Kuis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f0f8ff;
+            --container-bg: #ffffff;
+            --primary-blue: #5c9ced;
+            --text-color: #4c4c4c;
+            --shadow-color: rgba(92, 156, 237, 0.2);
+            --green: #4CAF50;
+            --red: #f44336;
+            --orange: #ff9800;
+        }
+
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--container-bg);
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px var(--shadow-color);
+        }
+        
+        h1, h2 {
+            text-align: center;
+            color: var(--primary-blue);
+        }
+
+        /* Tampilan Pemilihan Kuis */
+        #quiz-selection-container .quiz-card {
+            background-color: #fafcff;
+            border: 1px solid var(--primary-blue);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        #quiz-selection-container .quiz-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+        .quiz-card h3 { margin: 0; }
+        .quiz-card span { font-weight: 500; color: #777; }
+        .btn {
+            background-color: var(--green);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: background-color 0.3s;
+        }
+
+        /* Tampilan Pengerjaan Kuis */
+        #quiz-player-container { display: none; }
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        #timer {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--orange);
+        }
+        #question-container {
+            padding: 20px;
+            background-color: #fafcff;
+            border-radius: 15px;
+            min-height: 200px;
+        }
+        .question-text { font-size: 1.2em; margin-bottom: 20px; }
+        .options-container label {
+            display: block;
+            background-color: #f1f5f9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .options-container label:hover { background-color: #e2e8f0; }
+        .quiz-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        /* Tampilan Hasil */
+        #results-container {
+            display: none;
+            text-align: center;
+        }
+        .medal { font-size: 5em; }
+        .score { font-size: 2em; margin: 10px 0; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Tampilan 1: Daftar Kuis -->
+        <div id="quiz-selection-container">
+            <h1>Pilih Kuis untuk Dikerjakan</h1>
+            <div id="quiz-list">
+                <p>Memuat daftar kuis...</p>
+            </div>
+        </div>
+
+        <!-- Tampilan 2: Pengerjaan Kuis -->
+        <div id="quiz-player-container">
+            <div class="quiz-header">
+                <h2 id="quiz-title-player">Judul Kuis</h2>
+                <div id="timer">00:00</div>
+            </div>
+            <div id="question-container">
+                <!-- Soal akan dirender oleh JavaScript di sini -->
+            </div>
+            <div class="quiz-navigation">
+                <button id="prev-btn" class="btn">Sebelumnya</button>
+                <button id="next-btn" class="btn">Berikutnya</button>
+                <button id="finish-btn" class="btn" style="background-color: var(--orange);">Selesai</button>
+            </div>
+        </div>
+
+        <!-- Tampilan 3: Hasil Kuis -->
+        <div id="results-container">
+            <h1>Hasil Kuis</h1>
+            <div id="medal-display" class="medal"></div>
+            <p id="score-display" class="score"></p>
+            <p id="feedback-display"></p>
+            <button onclick="window.location.reload()" class="btn">Kembali ke Daftar Kuis</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Ganti dengan konfigurasi Firebase Anda
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+    authDomain: "forumwidara.firebaseapp.com",
+    projectId: "forumwidara",
+    storageBucket: "forumwidara.firebasestorage.app",
+    messagingSenderId: "216895655168",
+    appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // State Global
+        let currentQuizData = null;
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let timerInterval;
+
+        // Elemen DOM
+        const selectionContainer = document.getElementById('quiz-selection-container');
+        const playerContainer = document.getElementById('quiz-player-container');
+        const resultsContainer = document.getElementById('results-container');
+        const quizListDiv = document.getElementById('quiz-list');
+        const questionContainer = document.getElementById('question-container');
+
+        // Fungsi untuk memuat daftar kuis dari Firestore
+        async function loadQuizzes() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "kuis"));
+                quizListDiv.innerHTML = '';
+                if (querySnapshot.empty) {
+                    quizListDiv.innerHTML = '<p>Belum ada kuis yang dibuat oleh admin.</p>';
+                    return;
+                }
+                querySnapshot.forEach(doc => {
+                    const quiz = doc.data();
+                    const card = document.createElement('div');
+                    card.className = 'quiz-card';
+                    card.innerHTML = `
+                        <div>
+                            <h3>${quiz.title}</h3>
+                            <span>${quiz.questions.length} Soal, ${quiz.timerInMinutes} menit</span>
+                        </div>
+                        <button class="btn start-quiz-btn" data-id="${doc.id}">Mulai</button>
+                    `;
+                    quizListDiv.appendChild(card);
+                });
+            } catch (error) {
+                console.error("Error loading quizzes: ", error);
+                quizListDiv.innerHTML = '<p>Gagal memuat kuis.</p>';
+            }
+        }
+
+        // Fungsi untuk memulai sebuah kuis
+        async function startQuiz(quizId) {
+            try {
+                const docRef = doc(db, "kuis", quizId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    currentQuizData = docSnap.data();
+                    userAnswers = new Array(currentQuizData.questions.length).fill(null);
+                    currentQuestionIndex = 0;
+                    
+                    selectionContainer.style.display = 'none';
+                    playerContainer.style.display = 'block';
+                    
+                    document.getElementById('quiz-title-player').textContent = currentQuizData.title;
+                    renderQuestion();
+                    startTimer(currentQuizData.timerInMinutes);
+                }
+            } catch (error) {
+                console.error("Error starting quiz:", error);
+            }
+        }
+        
+        // Fungsi untuk menampilkan soal
+        function renderQuestion() {
+            const question = currentQuizData.questions[currentQuestionIndex];
+            let html = `<div class="question-text">${currentQuestionIndex + 1}. ${question.questionText}</div>`;
+            html += `<div class="options-container">`;
+
+            switch (question.type) {
+                case 'pilihan-ganda':
+                    question.options.forEach((opt, index) => {
+                        const isChecked = userAnswers[currentQuestionIndex] === index ? 'checked' : '';
+                        html += `
+                            <label>
+                                <input type="radio" name="option" value="${index}" ${isChecked}> ${opt.text}
+                            </label>`;
+                    });
+                    break;
+                case 'esai':
+                    const answer = userAnswers[currentQuestionIndex] || '';
+                    html += `<textarea rows="5" style="width: 100%;" placeholder="Ketik jawabanmu...">${answer}</textarea>`;
+                    break;
+                // Tambahkan case untuk tipe soal lain (susun-huruf, pencocokan) di sini
+            }
+
+            html += `</div>`;
+            questionContainer.innerHTML = html;
+            updateNavButtons();
+        }
+
+        function updateNavButtons() {
+            document.getElementById('prev-btn').style.visibility = currentQuestionIndex === 0 ? 'hidden' : 'visible';
+            document.getElementById('next-btn').style.visibility = currentQuestionIndex === currentQuizData.questions.length - 1 ? 'hidden' : 'visible';
+        }
+
+        function saveAnswer() {
+            const question = currentQuizData.questions[currentQuestionIndex];
+             switch (question.type) {
+                case 'pilihan-ganda':
+                    const selected = document.querySelector('input[name="option"]:checked');
+                    if (selected) userAnswers[currentQuestionIndex] = parseInt(selected.value, 10);
+                    break;
+                case 'esai':
+                    const textarea = questionContainer.querySelector('textarea');
+                    if (textarea) userAnswers[currentQuestionIndex] = textarea.value;
+                    break;
+             }
+        }
+        
+        function startTimer(minutes) {
+            let seconds = minutes * 60;
+            const timerEl = document.getElementById('timer');
+            timerInterval = setInterval(() => {
+                const min = Math.floor(seconds / 60);
+                const sec = seconds % 60;
+                timerEl.textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+                seconds--;
+                if (seconds < 0) {
+                    clearInterval(timerInterval);
+                    alert("Waktu habis!");
+                    finishQuiz();
+                }
+            }, 1000);
+        }
+
+        function finishQuiz() {
+            clearInterval(timerInterval);
+            saveAnswer(); // Simpan jawaban terakhir
+            
+            let score = 0;
+            currentQuizData.questions.forEach((q, index) => {
+                if (q.type === 'pilihan-ganda') {
+                    const correctOptionIndex = q.options.findIndex(opt => opt.isCorrect);
+                    if (userAnswers[index] === correctOptionIndex) {
+                        score++;
+                    }
+                }
+                // Penilaian esai diabaikan untuk skor otomatis
+            });
+
+            const totalScorableQuestions = currentQuizData.questions.filter(q => q.type === 'pilihan-ganda').length;
+            const finalScore = totalScorableQuestions > 0 ? (score / totalScorableQuestions) * 100 : 0;
+            
+            showResults(finalScore);
+        }
+
+        function showResults(score) {
+            playerContainer.style.display = 'none';
+            resultsContainer.style.display = 'block';
+
+            const thresholds = currentQuizData.scoreThresholds;
+            let medal = '🤔';
+            let feedback = "Coba lagi, ya! Semangat!";
+
+            if (score >= thresholds.gold) {
+                medal = '🥇';
+                feedback = "Luar biasa! Kamu mendapatkan medali emas!";
+            } else if (score >= thresholds.silver) {
+                medal = '🥈';
+                feedback = "Hebat! Kamu mendapatkan medali perak!";
+            } else if (score >= thresholds.bronze) {
+                medal = '🥉';
+                feedback = "Bagus! Kamu mendapatkan medali perunggu!";
+            }
+
+            document.getElementById('medal-display').textContent = medal;
+            document.getElementById('score-display').textContent = `Skor Kamu: ${Math.round(score)}%`;
+            document.getElementById('feedback-display').textContent = feedback;
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', loadQuizzes);
+
+        quizListDiv.addEventListener('click', (e) => {
+            if (e.target.classList.contains('start-quiz-btn')) {
+                const quizId = e.target.dataset.id;
+                startQuiz(quizId);
+            }
+        });
+        
+        document.getElementById('next-btn').addEventListener('click', () => {
+            saveAnswer();
+            if (currentQuestionIndex < currentQuizData.questions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            }
+        });
+
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            saveAnswer();
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        });
+        
+        document.getElementById('finish-btn').addEventListener('click', finishQuiz);
+
+    </script>
+</body>
+</html>
+
