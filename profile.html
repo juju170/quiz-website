@@ -8,69 +8,139 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        body { font-family: 'Nunito', sans-serif; background-color: #f0f9ff; }
-        .font-heading { font-family: 'Fredoka One', cursive; }
-        .profile-header { background: linear-gradient(135deg, #60A5FA, #3B82F6); border-radius: 0 0 50% 50% / 0 0 20% 20%; }
-        .badge-card { background-color: white; border-radius: 20px; padding: 1.5rem; text-align: center; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07); transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .badge-card:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1); }
-        .badge-icon-container { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items-center; justify-content: center; margin: 0 auto 1rem; }
-        .gold { background-color: #FFFBEB; border: 3px solid #FBBF24; color: #FBBF24; }
-        .silver { background-color: #F9FAFB; border: 3px solid #D1D5DB; color: #9CA3AF; }
-        .bronze { background-color: #FEF2F2; border: 3px solid #F59E0B; color: #D97706; }
-        .history-item { background: white; border-radius: 16px; padding: 1rem 1.5rem; display: flex; align-items-center; justify-content: space-between; margin-bottom: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .progress-bar { background-color: #e5e7eb; border-radius: 999px; height: 10px; width: 100px; overflow: hidden; }
+        /* MODIFIKASI: Latar belakang gradasi warna-warni yang ceria */
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background: linear-gradient(135deg, #fce38a, #f38181, #95e1d3, #eaffd0);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .font-heading { font-family: 'Fredoka', sans-serif; }
+
+        /* MODIFIKASI: Header profil dengan bentuk dan gradasi baru */
+        .profile-header {
+            background: linear-gradient(135deg, #818cf8, #a78bfa); 
+            color: white;
+            padding: 3rem 1rem 8rem 1rem;
+            margin-bottom: -6rem;
+            text-align: center;
+            position: relative;
+            clip-path: ellipse(80% 100% at 50% 0%);
+        }
+
+        /* TAMBAHAN: Efek Glow pada Kartu Lencana */
+        .badge-card { 
+            background-color: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 24px; 
+            padding: 1.5rem; 
+            text-align: center; 
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); 
+            transition: transform 0.3s ease, box-shadow 0.3s ease; 
+        }
+        .badge-card:hover { 
+            transform: translateY(-10px) scale(1.03); 
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15); 
+        }
+
+        /* MODIFIKASI: Tampilan ikon lencana lebih menarik dengan gradasi */
+        .badge-icon-container { 
+            width: 90px; height: 90px; 
+            border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            margin: 0 auto 1rem;
+            transition: transform 0.3s;
+        }
+        .badge-card:hover .badge-icon-container {
+             transform: rotate(15deg);
+        }
+
+        .gold { background: linear-gradient(45deg, #FBBF24, #FDE68A); color: white; box-shadow: 0 0 20px #FBBF24; }
+        .silver { background: linear-gradient(45deg, #9CA3AF, #E5E7EB); color: white; box-shadow: 0 0 20px #9CA3AF; }
+        .bronze { background: linear-gradient(45deg, #D97706, #FDBA74); color: white; box-shadow: 0 0 20px #D97706; }
+
+        /* MODIFIKASI: Kartu riwayat kuis lebih jelas */
+        .history-item { 
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            border-radius: 20px; 
+            padding: 1rem 1.5rem; 
+            display: flex; align-items: center; justify-content: space-between; 
+            margin-bottom: 1rem; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+            transition: all 0.3s ease;
+        }
+        .history-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+        
+        .progress-bar { background-color: #e5e7eb; border-radius: 999px; height: 12px; width: 100px; overflow: hidden; border: 1px solid #ddd; }
         .progress-bar-inner { height: 100%; background: linear-gradient(90deg, #34D399, #10B981); border-radius: 999px; }
     </style>
 </head>
-<body class="text-gray-700">
-        <header class="profile-header text-white text-center pt-12 pb-24 mb-[-100px] relative">
+<body class="text-gray-800">
+        <header class="profile-header">
+            <a href="index.html" class="absolute top-4 left-4 bg-white/20 p-2 rounded-full hover:bg-white/40 transition-colors">
+                <i data-lucide="arrow-left" class="w-6 h-6 text-white"></i>
+            </a>
             <div class="relative inline-block">
-                <div class="w-32 h-32 rounded-full bg-white/30 p-2 mx-auto">
+                <div class="w-32 h-32 rounded-full bg-white/30 p-2 mx-auto ring-4 ring-white/50">
                      <svg class="w-full h-full text-white" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                 </div>
-                <span class="absolute -bottom-2 -right-2 bg-yellow-400 text-yellow-900 p-2 rounded-full text-2xl">🤠</span>
+                <span class="absolute -bottom-2 -right-2 bg-yellow-400 text-yellow-900 p-2 rounded-full text-3xl shadow-lg border-2 border-white">🚀</span>
             </div>
-            <h1 id="profile-name" class="font-heading text-4xl md:text-5xl mt-4">Memuat Nama...</h1>
-            <p class="opacity-80">Siswa Kelas 4B</p>
+            <h1 id="profile-name" class="font-heading text-4xl md:text-5xl mt-4 drop-shadow-md">Memuat Nama...</h1>
+            <p id="user-email" class="opacity-80 drop-shadow-sm">Memuat email...</p>
         </header>
 
-        <main class="container mx-auto p-4 md:p-8 max-w-3xl relative z-10">
-            <section class="bg-white/70 backdrop-blur-sm p-6 md:p-8 rounded-3xl shadow-lg">
-                <h2 class="font-heading text-3xl text-center text-amber-600 mb-6">🥇 Lencana Prestasiku</h2>
+        <main class="container mx-auto p-4 md:p-8 max-w-4xl relative">
+            <section class="p-6 md:p-8">
+                <h2 class="font-heading text-3xl text-center text-white mb-6 drop-shadow-md">My Awesome Badges</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     <div class="badge-card">
-                        <div class="badge-icon-container gold"><i data-lucide="award" class="w-10 h-10"></i></div>
+                        <div class="badge-icon-container gold"><i data-lucide="award" class="w-12 h-12"></i></div>
                         <h3 class="text-xl font-extrabold text-gray-800">Lencana Emas</h3>
-                        <p id="gold-badge-count" class="text-4xl font-black text-amber-500">0</p>
+                        <p id="gold-badge-count" class="text-5xl font-bold text-amber-500">0</p>
                     </div>
                     <div class="badge-card">
-                        <div class="badge-icon-container silver"><i data-lucide="shield" class="w-10 h-10"></i></div>
+                        <div class="badge-icon-container silver"><i data-lucide="shield-check" class="w-12 h-12"></i></div>
                         <h3 class="text-xl font-extrabold text-gray-800">Lencana Perak</h3>
-                        <p id="silver-badge-count" class="text-4xl font-black text-gray-500">0</p>
+                        <p id="silver-badge-count" class="text-5xl font-bold text-gray-500">0</p>
                     </div>
                     <div class="badge-card">
-                        <div class="badge-icon-container bronze"><i data-lucide="medal" class="w-10 h-10"></i></div>
+                        <div class="badge-icon-container bronze"><i data-lucide="medal" class="w-12 h-12"></i></div>
                         <h3 class="text-xl font-extrabold text-gray-800">Lencana Perunggu</h3>
-                        <p id="bronze-badge-count" class="text-4xl font-black text-orange-500">0</p>
+                        <p id="bronze-badge-count" class="text-5xl font-bold text-orange-600">0</p>
                     </div>
                 </div>
             </section>
 
             <section class="mt-10">
-                <h2 class="font-heading text-3xl text-center text-blue-600 mb-6">📜 Riwayat Kuis</h2>
+                <h2 class="font-heading text-3xl text-center text-indigo-800 mb-6">📜 Riwayat Kuis</h2>
                 <div id="quiz-history-list" class="space-y-4">
-                    <p id="loading-history" class="text-center text-gray-500 col-span-full">Memuat riwayat kuis...</p>
+                    <p id="loading-history" class="text-center text-gray-600 col-span-full">Memuat riwayat kuis...</p>
                 </div>
             </section>
         </main>
 
     <script type="module">
+        // MODIFIKASI: Menggunakan versi Firebase yang sama dengan login.html
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, collection, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, collection, query, where, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
@@ -83,18 +153,18 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
-        // Pastikan ID Pengguna ini sama persis dengan yang ada di play.html
-        const DUMMY_USER_ID = 'user_abc_123'; 
+        const auth = getAuth(app); // TAMBAHAN: Inisialisasi Firebase Auth
 
         const profileNameEl = document.getElementById('profile-name');
+        const userEmailEl = document.getElementById('user-email');
         const goldBadgeEl = document.getElementById('gold-badge-count');
         const silverBadgeEl = document.getElementById('silver-badge-count');
         const bronzeBadgeEl = document.getElementById('bronze-badge-count');
         const historyListEl = document.getElementById('quiz-history-list');
 
         function renderProfile(data) {
-            profileNameEl.textContent = data.name || 'Nama Siswa';
+            profileNameEl.textContent = data.nama || 'Nama Pengguna';
+            userEmailEl.textContent = data.email || 'Email Pengguna';
             goldBadgeEl.textContent = data.badges?.gold || 0;
             silverBadgeEl.textContent = data.badges?.silver || 0;
             bronzeBadgeEl.textContent = data.badges?.bronze || 0;
@@ -103,7 +173,7 @@
         function renderHistory(docs) {
             historyListEl.innerHTML = '';
             if (docs.length === 0) {
-                 historyListEl.innerHTML = '<p class="text-center text-gray-500">Belum ada riwayat kuis.</p>';
+                 historyListEl.innerHTML = '<p class="text-center text-gray-500 bg-white/50 p-4 rounded-xl">Belum ada riwayat kuis. Ayo mulai main!</p>';
                  return;
             }
             docs.forEach(doc => {
@@ -111,36 +181,55 @@
                 const item = document.createElement('div');
                 item.className = 'history-item';
                 const date = result.completedAt?.toDate().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) || 'Baru saja';
-                let scoreColor = result.score >= 80 ? 'text-green-500' : result.score >= 60 ? 'text-yellow-500' : 'text-red-500';
+                const score = result.score || 0;
+                let scoreColorClass = score >= 80 ? 'text-green-500' : score >= 60 ? 'text-yellow-500' : 'text-red-500';
+                 let scoreGradient = score >= 80 ? 'linear-gradient(90deg, #34D399, #10B981)' : score >= 60 ? 'linear-gradient(90deg, #FBBF24, #F59E0B)' : 'linear-gradient(90deg, #F87171, #EF4444)';
+                
                 item.innerHTML = `
                     <div>
                         <p class="font-bold text-lg text-gray-800">${result.quizTitle}</p>
                         <p class="text-sm text-gray-500">${date}</p>
                     </div>
                     <div class="text-right">
-                         <p class="font-extrabold text-lg ${scoreColor}">Skor: ${result.score}</p>
-                         <div class="progress-bar mt-1"><div class="progress-bar-inner" style="width: ${result.score}%; background-color: ${scoreColor.replace('text-', '')};"></div></div>
+                         <p class="font-extrabold text-lg ${scoreColorClass}">Skor: ${score}</p>
+                         <div class="progress-bar mt-1"><div class="progress-bar-inner" style="width: ${score}%; background: ${scoreGradient};"></div></div>
                     </div>`;
                 historyListEl.appendChild(item);
             });
         }
 
-        function listenToProfile() {
-            const profileRef = doc(db, 'profiles', DUMMY_USER_ID);
-            onSnapshot(profileRef, (doc) => {
-                if (doc.exists()) {
-                    renderProfile(doc.data());
-                } else {
-                    console.log("Profil belum ada, akan dibuat saat kuis pertama diselesaikan.");
-                    renderProfile({ name: 'Siswa Baru', badges: { gold: 0, silver: 0, bronze: 0 } });
-                }
-            });
-        }
+        // MODIFIKASI: Fungsi untuk mengambil data dari koleksi 'users' dan 'profiles'
+        async function fetchAndRenderUserData(userId) {
+            const userRef = doc(db, 'users', userId);
+            const profileRef = doc(db, 'profiles', userId); // Asumsi lencana ada di koleksi 'profiles'
 
-        function listenToHistory() {
+            try {
+                // Ambil data pengguna (nama, email)
+                const userDoc = await getDoc(userRef);
+                const userData = userDoc.exists() ? userDoc.data() : { nama: 'Pengguna Baru', email: 'Tidak ada email' };
+                
+                // Pantau perubahan pada data profil (lencana)
+                onSnapshot(profileRef, (profileDoc) => {
+                    const profileData = profileDoc.exists() ? profileDoc.data() : { badges: { gold: 0, silver: 0, bronze: 0 } };
+                    
+                    // Gabungkan data dan render
+                    const combinedData = { ...userData, ...profileData };
+                    renderProfile(combinedData);
+                });
+
+                // Pantau riwayat kuis
+                listenToHistory(userId);
+
+            } catch (error) {
+                console.error("Gagal mengambil data pengguna:", error);
+                renderProfile({ nama: 'Gagal memuat', email: 'Coba lagi nanti' });
+            }
+        }
+        
+        // MODIFIKASI: Dulu 'listenToHistory', sekarang menerima userId
+        function listenToHistory(userId) {
             const resultsRef = collection(db, 'results');
-            // Urutkan riwayat dari yang terbaru
-            const q = query(resultsRef, where("userId", "==", DUMMY_USER_ID), orderBy("completedAt", "desc"));
+            const q = query(resultsRef, where("userId", "==", userId), orderBy("completedAt", "desc"));
             
             onSnapshot(q, (snapshot) => {
                 document.getElementById('loading-history').style.display = 'none';
@@ -150,11 +239,21 @@
                 historyListEl.innerHTML = '<p class="text-center text-red-500">Gagal memuat riwayat.</p>';
             });
         }
+        
+        // TAMBAHAN: Cek status login pengguna
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Pengguna sudah login, ambil datanya
+                fetchAndRenderUserData(user.uid);
+            } else {
+                // Pengguna belum login, arahkan ke halaman login
+                console.log("Pengguna belum login. Mengarahkan ke login.html...");
+                window.location.href = 'login.html';
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            listenToProfile();
-            listenToHistory();
         });
 
     </script>
