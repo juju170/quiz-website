@@ -7,7 +7,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstdocument.addEventListeneratic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Fredoka+One&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -47,8 +47,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        // MODIFIKASI: Menambahkan fungsi 'query', 'where', dan 'getDocs' dari Firestore
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, Timestamp, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = { 
@@ -60,25 +59,21 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
             appId: "1:216895655168:web:59255f600fc3b3b44eb7e5" 
         };
 
+        // Inisialisasi Firebase (HANYA SEKALI)
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-       const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app); // <-- TAMBAHKAN BARIS INI
+        const auth = getAuth(app);
 
         const grid = document.getElementById('announcement-grid');
         let countdownInterval;
 
         // FUNGSI BARU: Mengambil daftar ID kuis yang sudah diselesaikan oleh pengguna
-        // Fungsi ini akan mencari di koleksi 'results' semua data yang cocok dengan userId
         async function getCompletedQuizIds(userId) {
-            const completedIds = new Set(); // Menggunakan Set agar pengecekan lebih cepat dan tidak ada duplikat
+            const completedIds = new Set();
             try {
                 const resultsRef = collection(db, 'results');
-                // Membuat query untuk mencari dokumen di mana field 'userId' sama dengan ID pengguna saat ini
                 const q = query(resultsRef, where("userId", "==", userId));
                 const querySnapshot = await getDocs(q);
-                // Menambahkan setiap quizId yang ditemukan ke dalam Set
                 querySnapshot.forEach(doc => {
                     completedIds.add(doc.data().quizId);
                 });
@@ -99,8 +94,8 @@ const auth = getAuth(app); // <-- TAMBAHKAN BARIS INI
                 const timerWrapper = card.querySelector('.timer-wrapper');
 
                 if (distance <= 0) {
-                    timerWrapper.style.display = 'none'; // Sembunyikan timer jika waktu habis
-                    if (playButton) playButton.style.display = 'flex'; // Tampilkan tombol main
+                    timerWrapper.style.display = 'none';
+                    if (playButton) playButton.style.display = 'flex';
                 } else {
                     const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                     const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -115,7 +110,7 @@ const auth = getAuth(app); // <-- TAMBAHKAN BARIS INI
             });
         }
 
-        // FUNGSI UTAMA DIMODIFIKASI: Menjadi async dan memeriksa riwayat sebelum menampilkan kartu
+        // FUNGSI UTAMA: Memeriksa riwayat sebelum menampilkan kartu
         async function renderAnnouncements(docs, userId) {
             grid.innerHTML = '';
             if (docs.length === 0) {
@@ -123,7 +118,6 @@ const auth = getAuth(app); // <-- TAMBAHKAN BARIS INI
                 return;
             }
 
-            // MODIFIKASI: Panggil fungsi baru untuk mendapatkan daftar kuis yang sudah diselesaikan pengguna
             const completedQuizIds = await getCompletedQuizIds(userId);
 
             docs.forEach(doc => {
@@ -132,8 +126,6 @@ const auth = getAuth(app); // <-- TAMBAHKAN BARIS INI
                 card.className = 'info-card flex flex-col p-6';
 
                 const startTimeMs = a.startTime.toMillis();
-                
-                // MODIFIKASI: Cek apakah ID kuis dari pengumuman ini ada di daftar yang sudah diselesaikan
                 const isCompleted = completedQuizIds.has(a.quizId);
 
                 const badgesHTML = Object.entries(a.badges || {})
@@ -143,13 +135,10 @@ const auth = getAuth(app); // <-- TAMBAHKAN BARIS INI
                         return `<div class="badge-item"><i data-lucide="award" class="w-4 h-4 ${colors[key]}"></i><span class="font-semibold">${value}</span></div>`;
                     }).join('');
                 
-                // MODIFIKASI: Logika baru untuk menentukan tombol mana yang akan ditampilkan
                 const buttonHTML = isCompleted
-                    // Jika kuis sudah selesai, tampilkan tombol nonaktif
                     ? `<button class="btn-disabled w-full text-center font-bold py-3 rounded-lg mt-4 flex items-center justify-center gap-2" disabled>
                            <i data-lucide="check-circle" class="w-5 h-5"></i> Selesai Dikerjakan
                        </button>`
-                    // Jika belum, tampilkan link untuk bermain (yang akan diatur oleh countdown)
                     : `<a href="play.html?quizId=${a.quizId}" class="btn-play w-full text-center font-bold py-3 rounded-lg mt-4 transition-transform hover:scale-105 items-center justify-center gap-2">
                            <i data-lucide="play-circle" class="w-5 h-5"></i> Mulai Kuis!
                        </a>`;
@@ -182,23 +171,20 @@ const auth = getAuth(app); // <-- TAMBAHKAN BARIS INI
             updateAllCountdowns();
         }
 
+        // Alur Logika Utama: Cek status login, kemudian muat pengumuman
         onAuthStateChanged(auth, (user) => {
-    if (user) {
-        // Pengguna sudah login, kita punya ID aslinya (user.uid)
-        onSnapshot(collection(db, 'announcements'), (snapshot) => {
-            document.getElementById('loading-info').style.display = 'none';
-            // Kirim ID pengguna asli ke fungsi render
-            renderAnnouncements(snapshot.docs, user.uid);
-        });
-    } else {
-        // Pengguna belum login, arahkan ke halaman login
-        console.log("Pengguna belum login, mengalihkan...");
-        window.location.href = 'login.html';
-    }
-});
-                // Fungsi renderAnnouncements sekarang menangani semuanya
-                renderAnnouncements(snapshot.docs);
-            });
+            if (user) {
+                // Pengguna sudah login, ambil pengumuman
+                onSnapshot(collection(db, 'announcements'), (snapshot) => {
+                    document.getElementById('loading-info').style.display = 'none';
+                    // Kirim ID pengguna untuk memeriksa riwayat kuis
+                    renderAnnouncements(snapshot.docs, user.uid);
+                });
+            } else {
+                // Pengguna belum login, arahkan ke halaman login
+                console.log("Pengguna belum login, mengalihkan...");
+                window.location.href = 'login.html';
+            }
         });
     </script>
 </body>
