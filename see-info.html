@@ -7,7 +7,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstdocument.addEventListeneratic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Fredoka+One&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -47,6 +47,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         // MODIFIKASI: Menambahkan fungsi 'query', 'where', dan 'getDocs' dari Firestore
         import { getFirestore, collection, onSnapshot, Timestamp, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -61,21 +62,21 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
-        // ID Pengguna statis untuk simulasi, ini harus sesuai dengan ID pengguna yang sedang login
-        const DUMMY_USER_ID = 'user_abc_123';
+       const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app); // <-- TAMBAHKAN BARIS INI
 
         const grid = document.getElementById('announcement-grid');
         let countdownInterval;
 
         // FUNGSI BARU: Mengambil daftar ID kuis yang sudah diselesaikan oleh pengguna
-        // Fungsi ini akan mencari di koleksi 'results' semua data yang cocok dengan DUMMY_USER_ID
-        async function getCompletedQuizIds() {
+        // Fungsi ini akan mencari di koleksi 'results' semua data yang cocok dengan userId
+        async function getCompletedQuizIds(userId) {
             const completedIds = new Set(); // Menggunakan Set agar pengecekan lebih cepat dan tidak ada duplikat
             try {
                 const resultsRef = collection(db, 'results');
                 // Membuat query untuk mencari dokumen di mana field 'userId' sama dengan ID pengguna saat ini
-                const q = query(resultsRef, where("userId", "==", DUMMY_USER_ID));
+                const q = query(resultsRef, where("userId", "==", userId));
                 const querySnapshot = await getDocs(q);
                 // Menambahkan setiap quizId yang ditemukan ke dalam Set
                 querySnapshot.forEach(doc => {
@@ -115,7 +116,7 @@
         }
 
         // FUNGSI UTAMA DIMODIFIKASI: Menjadi async dan memeriksa riwayat sebelum menampilkan kartu
-        async function renderAnnouncements(docs) {
+        async function renderAnnouncements(docs, userId) {
             grid.innerHTML = '';
             if (docs.length === 0) {
                 grid.innerHTML = '<p class="col-span-full text-center text-gray-500">Belum ada pengumuman lomba saat ini. Cek lagi nanti ya!</p>';
@@ -123,7 +124,7 @@
             }
 
             // MODIFIKASI: Panggil fungsi baru untuk mendapatkan daftar kuis yang sudah diselesaikan pengguna
-            const completedQuizIds = await getCompletedQuizIds();
+            const completedQuizIds = await getCompletedQuizIds(userId);
 
             docs.forEach(doc => {
                 const a = doc.data();
@@ -181,9 +182,20 @@
             updateAllCountdowns();
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            onSnapshot(collection(db, 'announcements'), (snapshot) => {
-                document.getElementById('loading-info').style.display = 'none';
+        onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // Pengguna sudah login, kita punya ID aslinya (user.uid)
+        onSnapshot(collection(db, 'announcements'), (snapshot) => {
+            document.getElementById('loading-info').style.display = 'none';
+            // Kirim ID pengguna asli ke fungsi render
+            renderAnnouncements(snapshot.docs, user.uid);
+        });
+    } else {
+        // Pengguna belum login, arahkan ke halaman login
+        console.log("Pengguna belum login, mengalihkan...");
+        window.location.href = 'login.html';
+    }
+});
                 // Fungsi renderAnnouncements sekarang menangani semuanya
                 renderAnnouncements(snapshot.docs);
             });
