@@ -128,32 +128,33 @@ let quizId = '', announcementId = '', quizTitleText = '', questions = [], curren
 
         const shuffleArray = (array) => [...array].sort(() => Math.random() - 0.5);
 
-        async function loadQuiz(userId) {
+        // SALIN DAN GANTIKAN DENGAN KODE INI
+async function loadQuiz(userId) {
     quizId = new URLSearchParams(window.location.search).get('quizId');
-    announcementId = new URLSearchParams(window.location.search).get('announcementId'); // <-- TAMBAHKAN BARIS INI
-    if (!quizId) { 
- Baris ini yang perlu ditambahkan kembali
-        loadingContainer.innerHTML = '<h1 class="text-2xl font-bold text-red-600">Kuis tidak ditemukan!</h1>';
-        return;
-    }
+    announcementId = new URLSearchParams(window.location.search).get('announcementId');
+    
+    // Pemeriksaan quizId yang benar
+    if (!quizId) {
+        loadingContainer.innerHTML = '<h1 class="text-2xl font-bold text-red-600">Kuis tidak ditemukan!</h1><p>Pastikan URL Anda memiliki `?quizId=...`</p>';
+        return;
+    }
 
-            try {
-                const quizDoc = await getDoc(doc(db, 'quizzes', quizId));
-                if (quizDoc.exists()) {
-                    quizTitleText = quizDoc.data().title;
-                    const questionsSnapshot = await getDocs(collection(quizDoc.ref, 'questions'));
-                    questions = questionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    questions = shuffleArray(questions);
-                    startQuiz();
-                } else {
-                     loadingContainer.innerHTML = `<h1 class="text-2xl font-bold text-red-600">Error: Kuis tidak ada.</h1>`;
-                }
-            } catch (error) {
-                console.error("Gagal memuat kuis:", error);
-                loadingContainer.innerHTML = `<h1 class="text-2xl font-bold text-red-600">Gagal memuat kuis. Cek konsol untuk detail.</h1>`;
-            }
+    try {
+        const quizDoc = await getDoc(doc(db, 'quizzes', quizId));
+        if (quizDoc.exists()) {
+            quizTitleText = quizDoc.data().title;
+            const questionsSnapshot = await getDocs(collection(quizDoc.ref, 'questions'));
+            questions = questionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            questions = shuffleArray(questions);
+            startQuiz();
+        } else {
+             loadingContainer.innerHTML = `<h1 class="text-2xl font-bold text-red-600">Error: Kuis tidak ada.</h1>`;
         }
-        
+    } catch (error) {
+        console.error("Gagal memuat kuis:", error);
+        loadingContainer.innerHTML = `<h1 class="text-2xl font-bold text-red-600">Gagal memuat kuis. Cek konsol untuk detail.</h1>`;
+    }
+}        
         function startQuiz() {
             loadingContainer.classList.add('hidden');
             quizContainer.classList.remove('hidden');
