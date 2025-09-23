@@ -12,6 +12,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -98,6 +101,36 @@
         nav a:not(.active):hover {
             background-color: #FEF3C7;
             color: #D97706;
+        .tombol-beranda {
+    position: fixed; /* Membuat posisi tombol tetap saat di-scroll */
+    bottom: 20px;
+    right: 20px;
+    
+    background-color: #FFC107; /* Warna kuning amber */
+    color: #333; /* Warna teks gelap */
+    
+    padding: 12px 20px; /* Jarak antara teks dan tepi tombol */
+    border-radius: 50px; /* Membuat sudut menjadi bulat sempurna */
+    
+    display: flex; /* Mengaktifkan flexbox untuk menata ikon dan teks */
+    align-items: center; /* Menengahkan ikon dan teks secara vertikal */
+    gap: 8px; /* Jarak antara emoji dan teks "Beranda" */
+    
+    font-family: 'Baloo 2', sans-serif; /* (Opsional) Menggunakan font yang sesuai tema */
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-decoration: none; /* Menghilangkan garis bawah pada link */
+    
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Efek bayangan halus */
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Animasi halus */
+    z-index: 1000; /* Memastikan tombol selalu di lapisan paling atas */
+}
+
+.tombol-beranda:hover {
+    transform: translateY(-3px); /* Sedikit terangkat saat kursor di atasnya */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Bayangan menjadi lebih jelas */
+}
+            
         }
     </style>
 </head>
@@ -321,6 +354,10 @@
             populateQuizzes();
         });
     </script>
+    <a href="index.html" class="tombol-beranda" title="Kembali ke Beranda">
+    <span>🏠</span>
+    <span>Beranda</span>
+    </a>    
 </body>
 </html>
 
