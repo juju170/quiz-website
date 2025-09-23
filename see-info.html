@@ -47,8 +47,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, Timestamp, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = { 
             apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
@@ -59,97 +59,134 @@
             appId: "1:216895655168:web:59255f600fc3b3b44eb7e5" 
         };
 
-        // Inisialisasi Firebase (HANYA SEKALI)
+        // Inisialisasi Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
         const grid = document.getElementById('announcement-grid');
-        let countdownInterval;
+        let countdownIntervals = {};
 
-        // FUNGSI BARU: Mengambil daftar ID kuis yang sudah diselesaikan oleh pengguna
-        async function getCompletedQuizIds(userId) {
+        /**
+         * FUNGSI BARU: Mengambil daftar ID PENGUMUMAN yang sudah diselesaikan oleh pengguna.
+         * Ini adalah perubahan kunci: kita sekarang melacak penyelesaian per pengumuman, bukan per kuis.
+         * @param {string} userId - ID pengguna yang sedang login.
+         * @returns {Promise<Set<string>>} - Set yang berisi ID pengumuman yang telah diselesaikan.
+         */
+        async function getCompletedAnnouncementIds(userId) {
             const completedIds = new Set();
             try {
                 const resultsRef = collection(db, 'results');
+                // Query untuk mendapatkan hasil kuis milik pengguna ini
                 const q = query(resultsRef, where("userId", "==", userId));
                 const querySnapshot = await getDocs(q);
                 querySnapshot.forEach(doc => {
-                    completedIds.add(doc.data().quizId);
+                    // Jika hasil memiliki `announcementId`, tambahkan ke Set
+                    if (doc.data().announcementId) {
+                        completedIds.add(doc.data().announcementId);
+                    }
                 });
             } catch (error) {
                 console.error("Gagal mengambil riwayat kuis:", error);
             }
             return completedIds;
         }
+        
+        /**
+         * Memperbarui hitung mundur untuk satu kartu pengumuman.
+         * @param {HTMLElement} card - Elemen kartu yang berisi timer.
+         * @param {string} announcementId - ID dari pengumuman.
+         */
+        function updateCountdown(card, announcementId) {
+            const timerBox = card.querySelector('.timer-box');
+            if (!timerBox || !timerBox.dataset.starttime) return;
 
-        function updateAllCountdowns() {
-            document.querySelectorAll('.timer-box[data-starttime]').forEach(timerEl => {
-                const startTime = parseInt(timerEl.dataset.starttime, 10);
-                const now = new Date().getTime();
-                const distance = startTime - now;
+            const startTime = parseInt(timerBox.dataset.starttime, 10);
+            const now = new Date().getTime();
+            const distance = startTime - now;
 
-                const card = timerEl.closest('.info-card');
-                const playButton = card.querySelector('.btn-play');
-                const timerWrapper = card.querySelector('.timer-wrapper');
+            const playButton = card.querySelector('.btn-play');
+            const timerWrapper = card.querySelector('.timer-wrapper');
+            const isCompleted = playButton ? playButton.disabled : card.querySelector('.btn-disabled') !== null;
 
-                if (distance <= 0) {
-                    timerWrapper.style.display = 'none';
-                    if (playButton) playButton.style.display = 'flex';
-                } else {
-                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                    timerEl.querySelector('.days').textContent = String(days).padStart(2, '0');
-                    timerEl.querySelector('.hours').textContent = String(hours).padStart(2, '0');
-                    timerEl.querySelector('.minutes').textContent = String(minutes).padStart(2, '0');
-                    timerEl.querySelector('.seconds').textContent = String(seconds).padStart(2, '0');
+            // Jika waktu telah habis
+            if (distance <= 0) {
+                if (timerWrapper) timerWrapper.style.display = 'none';
+                // Tampilkan tombol 'Mulai' hanya jika belum selesai dikerjakan
+                if (playButton && !isCompleted) playButton.style.display = 'flex';
+                // Hentikan interval untuk timer ini
+                if (countdownIntervals[announcementId]) {
+                    clearInterval(countdownIntervals[announcementId]);
+                    delete countdownIntervals[announcementId];
                 }
-            });
+            } else {
+                // Jika masih ada waktu, update tampilan timer
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                timerBox.querySelector('.days').textContent = String(days).padStart(2, '0');
+                timerBox.querySelector('.hours').textContent = String(hours).padStart(2, '0');
+                timerBox.querySelector('.minutes').textContent = String(minutes).padStart(2, '0');
+                timerBox.querySelector('.seconds').textContent = String(seconds).padStart(2, '0');
+            }
         }
 
-        // FUNGSI UTAMA: Memeriksa riwayat sebelum menampilkan kartu
+        /**
+         * FUNGSI UTAMA (Dirombak): Menampilkan pengumuman dan memeriksa riwayat per pengumuman.
+         * @param {Array} docs - Array dokumen snapshot dari Firestore.
+         * @param {string} userId - ID pengguna yang sedang login.
+         */
         async function renderAnnouncements(docs, userId) {
-            grid.innerHTML = '';
+            grid.innerHTML = ''; // Kosongkan grid sebelum memuat data baru
             if (docs.length === 0) {
                 grid.innerHTML = '<p class="col-span-full text-center text-gray-500">Belum ada pengumuman lomba saat ini. Cek lagi nanti ya!</p>';
                 return;
             }
 
-            const completedQuizIds = await getCompletedQuizIds(userId);
+            // Hapus semua interval hitung mundur yang lama
+            Object.values(countdownIntervals).forEach(clearInterval);
+            countdownIntervals = {};
+
+            const completedAnnouncementIds = await getCompletedAnnouncementIds(userId);
 
             docs.forEach(doc => {
-                const a = doc.data();
+                const announcement = doc.data();
+                const announcementId = doc.id; // Ini adalah ID dokumen pengumuman
                 const card = document.createElement('div');
                 card.className = 'info-card flex flex-col p-6';
+                card.id = `announcement-${announcementId}`;
 
-                const startTimeMs = a.startTime.toMillis();
-                const isCompleted = completedQuizIds.has(a.quizId);
+                const startTimeMs = announcement.startTime.toMillis();
+                // PERUBAHAN LOGIKA: Cek apakah ID pengumuman ini ada di daftar yang sudah selesai
+                const isCompleted = completedAnnouncementIds.has(announcementId);
 
-                const badgesHTML = Object.entries(a.badges || {})
+                const badgesHTML = Object.entries(announcement.badges || {})
                     .filter(([key, value]) => value)
                     .map(([key, value]) => {
                         const colors = { gold: 'text-yellow-500', silver: 'text-gray-400', bronze: 'text-orange-500' };
                         return `<div class="badge-item"><i data-lucide="award" class="w-4 h-4 ${colors[key]}"></i><span class="font-semibold">${value}</span></div>`;
                     }).join('');
                 
+                // Logika tombol sekarang berdasarkan `isCompleted`
                 const buttonHTML = isCompleted
                     ? `<button class="btn-disabled w-full text-center font-bold py-3 rounded-lg mt-4 flex items-center justify-center gap-2" disabled>
                            <i data-lucide="check-circle" class="w-5 h-5"></i> Selesai Dikerjakan
                        </button>`
-                    : `<a href="play.html?quizId=${a.quizId}" class="btn-play w-full text-center font-bold py-3 rounded-lg mt-4 transition-transform hover:scale-105 items-center justify-center gap-2">
+                    // PERUBAHAN PENTING: Tambahkan announcementId ke URL
+                    : `<a href="play.html?quizId=${announcement.quizId}&announcementId=${announcementId}" class="btn-play w-full text-center font-bold py-3 rounded-lg mt-4 transition-transform hover:scale-105 items-center justify-center gap-2">
                            <i data-lucide="play-circle" class="w-5 h-5"></i> Mulai Kuis!
                        </a>`;
 
                 card.innerHTML = `
                     <div class="flex-grow">
-                        <h2 class="font-heading text-2xl font-bold text-gray-800">${a.title}</h2>
-                        <p class="text-gray-600 mt-2 mb-4">${a.description}</p>
+                        <h2 class="font-heading text-2xl font-bold text-gray-800">${announcement.title}</h2>
+                        <p class="text-gray-600 mt-2 mb-4">${announcement.description}</p>
                         <div class="flex flex-col gap-2 mb-6">${badgesHTML || '<p class="text-sm text-gray-400">Belum ada info lencana.</p>'}</div>
                     </div>
                     <div class="timer-wrapper">
+                        <p class="text-sm font-semibold text-gray-500 mb-2 text-center">Lomba Dimulai Dalam:</p>
                         <div class="timer-box" data-starttime="${startTimeMs}">
                             <div class="flex justify-around">
                                 <div class="timer-segment"><span class="timer-value days">00</span><span class="timer-label">Hari</span></div>
@@ -162,28 +199,36 @@
                     ${buttonHTML}
                 `;
                 grid.appendChild(card);
+                
+                // Jalankan hitung mundur awal dan set interval untuk setiap kartu
+                updateCountdown(card, announcementId);
+                countdownIntervals[announcementId] = setInterval(() => updateCountdown(card, announcementId), 1000);
             });
             
             lucide.createIcons();
-            
-            if (countdownInterval) clearInterval(countdownInterval);
-            countdownInterval = setInterval(updateAllCountdowns, 1000);
-            updateAllCountdowns();
         }
 
         // Alur Logika Utama: Cek status login, kemudian muat pengumuman
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Pengguna sudah login, ambil pengumuman
-                onSnapshot(collection(db, 'announcements'), (snapshot) => {
+                // Pengguna sudah login, ambil pengumuman. Urutkan berdasarkan yang terbaru.
+                const announcementsRef = collection(db, 'announcements');
+                const q = query(announcementsRef, orderBy("createdAt", "desc"));
+
+                onSnapshot(q, (snapshot) => {
                     document.getElementById('loading-info').style.display = 'none';
                     // Kirim ID pengguna untuk memeriksa riwayat kuis
                     renderAnnouncements(snapshot.docs, user.uid);
+                }, (error) => {
+                    console.error("Gagal memuat pengumuman: ", error);
+                    grid.innerHTML = '<p class="col-span-full text-center text-red-500">Oops! Gagal memuat data lomba.</p>';
                 });
             } else {
-                // Pengguna belum login, arahkan ke halaman login
-                console.log("Pengguna belum login, mengalihkan...");
-                window.location.href = 'login.html';
+                // Jika pengguna tidak login, coba login sebagai anonim
+                signInAnonymously(auth).catch((error) => {
+                    console.error("Gagal login anonim:", error);
+                     grid.innerHTML = '<p class="col-span-full text-center text-red-500">Anda harus login untuk melihat info lomba.</p>';
+                });
             }
         });
     </script>
