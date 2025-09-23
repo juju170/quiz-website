@@ -87,7 +87,8 @@
                 <p id="score-text" class="text-7xl font-black text-white" style="-webkit-text-stroke: 3px #f97316;">0</p>
             </div>
             <p id="score-summary" class="text-lg text-gray-600 font-semibold"></p>
-            <button onclick="location.reload()" class="btn-action mt-8 !bg-gradient-to-r from-green-500 to-emerald-500 text-white">Main Lagi!</button>
+            <!-- TAMBAHKAN BARIS INI DI TEMPAT TOMBOL TADI -->
+<p class="mt-8 text-gray-500 animate-pulse">Kamu akan diarahkan ke halaman profil...</p>             
         </main>
     </div>
 
@@ -254,10 +255,10 @@ async function saveResultAndAwardBadges(score, userId) {
     // Panggil fungsi baru untuk menyimpan hasil
     await saveResultAndAwardBadges(finalScore, userId);
 }
-
-
-        // --- RENDER & LOGIKA JAWABAN ---
-
+        setTimeout(() => {
+        window.location.href = 'profile.html';
+    }, 4000); 
+        }
         function renderAnswerOptions(q) {
             const optionColors = ['from-blue-400 to-cyan-400', 'from-purple-400 to-pink-400', 'from-yellow-400 to-orange-400', 'from-lime-400 to-green-400', 'from-red-400 to-rose-400'];
             
