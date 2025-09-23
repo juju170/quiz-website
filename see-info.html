@@ -47,7 +47,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        // Diperbarui: Menambahkan fungsi query dari Firestore
+        // MODIFIKASI: Menambahkan fungsi 'query', 'where', dan 'getDocs' dari Firestore
         import { getFirestore, collection, onSnapshot, Timestamp, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = { 
@@ -62,19 +62,22 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ID Pengguna statis untuk simulasi, harus sama dengan di file lain
+        // ID Pengguna statis untuk simulasi, ini harus sesuai dengan ID pengguna yang sedang login
         const DUMMY_USER_ID = 'user_abc_123';
 
         const grid = document.getElementById('announcement-grid');
         let countdownInterval;
 
         // FUNGSI BARU: Mengambil daftar ID kuis yang sudah diselesaikan oleh pengguna
+        // Fungsi ini akan mencari di koleksi 'results' semua data yang cocok dengan DUMMY_USER_ID
         async function getCompletedQuizIds() {
-            const completedIds = new Set(); // Menggunakan Set agar tidak ada ID duplikat dan pengecekan lebih cepat
+            const completedIds = new Set(); // Menggunakan Set agar pengecekan lebih cepat dan tidak ada duplikat
             try {
                 const resultsRef = collection(db, 'results');
+                // Membuat query untuk mencari dokumen di mana field 'userId' sama dengan ID pengguna saat ini
                 const q = query(resultsRef, where("userId", "==", DUMMY_USER_ID));
                 const querySnapshot = await getDocs(q);
+                // Menambahkan setiap quizId yang ditemukan ke dalam Set
                 querySnapshot.forEach(doc => {
                     completedIds.add(doc.data().quizId);
                 });
@@ -96,7 +99,7 @@
 
                 if (distance <= 0) {
                     timerWrapper.style.display = 'none'; // Sembunyikan timer jika waktu habis
-                    if (playButton) playButton.style.display = 'block'; // Tampilkan tombol main
+                    if (playButton) playButton.style.display = 'flex'; // Tampilkan tombol main
                 } else {
                     const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                     const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -111,7 +114,7 @@
             });
         }
 
-        // FUNGSI UTAMA DIMODIFIKASI: Menjadi async dan memeriksa riwayat
+        // FUNGSI UTAMA DIMODIFIKASI: Menjadi async dan memeriksa riwayat sebelum menampilkan kartu
         async function renderAnnouncements(docs) {
             grid.innerHTML = '';
             if (docs.length === 0) {
@@ -119,7 +122,7 @@
                 return;
             }
 
-            // Panggil fungsi baru kita untuk mendapatkan daftar kuis yang sudah selesai
+            // MODIFIKASI: Panggil fungsi baru untuk mendapatkan daftar kuis yang sudah diselesaikan pengguna
             const completedQuizIds = await getCompletedQuizIds();
 
             docs.forEach(doc => {
@@ -129,7 +132,7 @@
 
                 const startTimeMs = a.startTime.toMillis();
                 
-                // Cek apakah kuis di pengumuman ini ID-nya ada di daftar yang sudah selesai
+                // MODIFIKASI: Cek apakah ID kuis dari pengumuman ini ada di daftar yang sudah diselesaikan
                 const isCompleted = completedQuizIds.has(a.quizId);
 
                 const badgesHTML = Object.entries(a.badges || {})
@@ -139,13 +142,15 @@
                         return `<div class="badge-item"><i data-lucide="award" class="w-4 h-4 ${colors[key]}"></i><span class="font-semibold">${value}</span></div>`;
                     }).join('');
                 
-                // Logika baru untuk menentukan tampilan tombol
+                // MODIFIKASI: Logika baru untuk menentukan tombol mana yang akan ditampilkan
                 const buttonHTML = isCompleted
+                    // Jika kuis sudah selesai, tampilkan tombol nonaktif
                     ? `<button class="btn-disabled w-full text-center font-bold py-3 rounded-lg mt-4 flex items-center justify-center gap-2" disabled>
                            <i data-lucide="check-circle" class="w-5 h-5"></i> Selesai Dikerjakan
                        </button>`
-                    : `<a href="play.html?quizId=${a.quizId}" class="btn-play w-full text-center font-bold py-3 rounded-lg mt-4 transition-transform hover:scale-105">
-                           Mulai Kuis!
+                    // Jika belum, tampilkan link untuk bermain (yang akan diatur oleh countdown)
+                    : `<a href="play.html?quizId=${a.quizId}" class="btn-play w-full text-center font-bold py-3 rounded-lg mt-4 transition-transform hover:scale-105 items-center justify-center gap-2">
+                           <i data-lucide="play-circle" class="w-5 h-5"></i> Mulai Kuis!
                        </a>`;
 
                 card.innerHTML = `
@@ -179,6 +184,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             onSnapshot(collection(db, 'announcements'), (snapshot) => {
                 document.getElementById('loading-info').style.display = 'none';
+                // Fungsi renderAnnouncements sekarang menangani semuanya
                 renderAnnouncements(snapshot.docs);
             });
         });
