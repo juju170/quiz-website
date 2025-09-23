@@ -244,21 +244,21 @@ async function saveResultAndAwardBadges(score, userId) {
         console.error("Gagal menyimpan hasil atau memberi lencana:", error);
     }
 }
-
-        async function showResults(userId) { 
+        
+async function showResults(userId) { 
     quizContainer.classList.add('hidden');
     resultsContainer.classList.remove('hidden');
     const finalScore = Math.round((correctAnswersCount / questions.length) * 100);
     document.getElementById('score-text').textContent = finalScore;
     document.getElementById('score-summary').textContent = `Kamu berhasil menjawab ${correctAnswersCount} dari ${questions.length} soal dengan benar!`;
     
-    // Panggil fungsi baru untuk menyimpan hasil
     await saveResultAndAwardBadges(finalScore, userId);
-}
-        setTimeout(() => {
+
+    setTimeout(() => {
         window.location.href = 'profile.html';
     }, 4000); 
-        }
+    
+} 
         function renderAnswerOptions(q) {
             const optionColors = ['from-blue-400 to-cyan-400', 'from-purple-400 to-pink-400', 'from-yellow-400 to-orange-400', 'from-lime-400 to-green-400', 'from-red-400 to-rose-400'];
             
