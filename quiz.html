@@ -139,8 +139,8 @@
                     </div>
 
                     <div>
-                        <label for="badge-perunggu" class="label-text"><i data-lucide="award"></i>Nilai Perunggu (%)</label>
-                        <input type="number" id="badge-perunggu" class="input-field" value="60" min="0" max="100">
+                        <label for="badge-bronze" class="label-text"><i data-lucide="award"></i>Nilai Perunggu (%)</label>
+                        <input type="number" id="badge-bronze" class="input-field" value="60" min="0" max="100">
                     </div>
                 </div>
 
@@ -370,19 +370,17 @@
 
 
         // --- FUNGSI DATA ---
-
-                async function saveQuiz(e) {
+            async function saveQuiz(e) {
             e.preventDefault();
 
             const title = document.getElementById('judul').value.trim();
             const questionText = document.getElementById('pertanyaan').value.trim();
             const type = tipeSoalSelect.value;
             
-            // Mengambil nilai persentase lencana
+            // Mengambil nilai persentase lencana dari ID yang sudah benar
             const goldThreshold = parseInt(document.getElementById('badge-gold').value) || 90;
             const silverThreshold = parseInt(document.getElementById('badge-silver').value) || 75;
-            const bronzeThreshold = parseInt(document.getElementById('badge-perunggu').value) || 60;
-
+            const bronzeThreshold = parseInt(document.getElementById('badge-bronze').value) || 60; // <-- Sudah diperbaiki
 
             if (!title || !questionText) {
                 alert('Judul Kuis dan Teks Pertanyaan/Instruksi wajib diisi!');
@@ -394,7 +392,7 @@
                 type: type,
             };
 
-            // Mengumpulkan data berdasarkan tipe soal
+            // (Bagian switch case untuk tipe soal tidak perlu diubah, biarkan seperti apa adanya)
             try {
                 switch (type) {
                     case 'pilihan-ganda':
@@ -430,7 +428,6 @@
                         const answer = document.getElementById('susun-huruf-answer').value.trim().toUpperCase();
                         if (!answer) throw new Error('Jawaban susun huruf tidak boleh kosong.');
                         const decoysRaw = document.getElementById('susun-huruf-decoys').value.trim().toUpperCase();
-                        // Buat set untuk huruf unik, lalu ubah kembali ke array
                         const uniqueDecoys = [...new Set(decoysRaw.split(''))];
                         questionData.answer = answer;
                         questionData.decoys = uniqueDecoys;
@@ -467,7 +464,7 @@
                         if (correctAnswers.length === 0) throw new Error('Isi setidaknya satu kalimat jawaban yang benar!');
                         
                         questionData.correctAnswers = correctAnswers;
-                        questionData.words = correctAnswers[0].split(' '); // Ambil kata dari jawaban pertama
+                        questionData.words = correctAnswers[0].split(' ');
                         break;
                     
                     case 'tts-mini':
@@ -490,27 +487,24 @@
             try {
                 const quizDocRef = doc(db, 'quizzes', title);
 
-                // Data utama kuis, termasuk nilai lencana
+                // Field ini 'badgeThresholds' berbeda dari 'badges' di announcement.html, jadi tidak akan bentrok.
                 const quizMainData = {
                     title: title,
                     createdAt: serverTimestamp(),
-                    badgeThresholds: { // <-- Data baru yang disimpan
+                    badgeThresholds: {
                         gold: goldThreshold,
                         silver: silverThreshold,
-                        bronze: bronzeThreshold
+                        bronze: bronzeThreshold // <-- Kunci di Firestore sudah benar
                     }
                 };
                 
-                // Gunakan setDoc dengan merge:true untuk membuat atau memperbarui data utama
                 await setDoc(quizDocRef, quizMainData, { merge: true });
 
-                // Tambahkan soal ke sub-koleksi 'questions'
                 const questionsSubcollectionRef = collection(quizDocRef, 'questions');
                 await addDoc(questionsSubcollectionRef, questionData);
                 
                 alert(`Soal berhasil ditambahkan ke kuis "${title}"!`);
                 form.reset();
-                // Reset form dinamis
                 pgContainer.innerHTML = '';
                 pgOptionCount = 0;
                 addPgOption(true); addPgOption();
@@ -528,7 +522,7 @@
                 console.error("Error saving document: ", error);
                 alert('Gagal menyimpan. Lihat konsol untuk detail.');
             }
-        }
+            }
         
         // Render daftar kuis
         function renderQuizzes(docs) {
