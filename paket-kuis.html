@@ -116,13 +116,16 @@
             <form id="packageForm">
                 <div class="input-group">
                     <label for="package-title" class="label-text"><i data-lucide="package"></i>Judul Paket Kuis</label>
-                    <div class="input-group">
-    <label for="package-duration" class="label-text"><i data-lucide="timer"></i>Durasi Kuis (menit)</label>
-    <input type="number" id="package-duration" class="input-field" placeholder="Contoh: 15" min="1" required>
-                    </div>
-                    <input type="text" id="package-title" class="input-field" placeholder="Contoh: Petualangan Sains Kelas 5" required>
-                </div>
-                
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+    <div class="input-group">
+        <label for="package-title" class="label-text"><i data-lucide="package"></i>Judul Paket Kuis</label>
+        <input type="text" id="package-title" class="input-field" placeholder="Contoh: Petualangan Sains Kelas 5" required>
+    </div>
+    <div class="input-group">
+        <label for="package-duration" class="label-text"><i data-lucide="timer"></i>Durasi Kuis (menit)</label>
+        <input type="number" id="package-duration" class="input-field" placeholder="Contoh: 15" min="1" required>
+    </div>
+                    </div>                                    
                 <fieldset class="border-2 border-dashed border-gray-300 p-4 rounded-xl mb-6">
                     <legend class="text-lg font-bold px-2 text-gray-600 flex items-center gap-2"><i data-lucide="award"></i>Aturan Nilai Lencana (%)</legend>
                     <p class="text-sm text-gray-500 mb-4 px-2">Tentukan skor minimum untuk mendapatkan setiap lencana.</p>
