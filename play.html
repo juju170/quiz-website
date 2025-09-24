@@ -193,14 +193,18 @@ let quizBadgeThresholds = {};
         }
 
         function handleActionClick(userId) {
-            if (!isAnswerChecked) {
-                checkAnswer();
-            } else {
-                currentQuestionIndex++;
-                if (currentQuestionIndex < questions.length) showQuestion();
-                showResults(userId);
-            }
+    if (!isAnswerChecked) {
+        checkAnswer();
+    } else {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            showQuestion();
+        } else { // <-- TAMBAHKAN 'else' di sini
+            showResults(userId); // <-- PINDAHKAN ke dalam 'else'
         }
+    }
+        }
+        
 
 // FUNGSI BARU: untuk menyimpan hasil dan memberikan lencana
                 async function saveResultAndAwardBadges(score, userId) {
@@ -617,9 +621,7 @@ async function showResults(userId) {
             }
             feedbackBox.classList.remove('hidden');
             feedbackBox.style.animation = 'pop-in 0.3s';
-        }
-
-        actionBtn.addEventListener('click', handleActionClick);
+        }    
         // Gantikan document.addEventListener('DOMContentLoaded', loadQuiz); dengan ini:
 
 onAuthStateChanged(auth, (user) => {
