@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buat Kuis Ceria - Untuk Guru Hebat!</title>
+    <title>Kelola Soal Kuis</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts: Poppins -->
+    <!-- Google Fonts: Poppins & Baloo 2 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -68,48 +68,32 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(52, 211, 153, 0.5);
         }
-        .quiz-card {
-            padding: 24px;
-            border-radius: 20px;
-            color: #1F2937;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-        .quiz-card:hover {
-            transform: scale(1.05);
-        }
-        /* Sembunyikan fieldset spesifik secara default */
+        /* Sembunyikan fieldset secara default */
         .question-type-fields {
             display: none;
         }
         .tombol-beranda {
-            position: fixed; /* Membuat posisi tombol tetap saat di-scroll */
+            position: fixed;
             bottom: 20px;
             right: 20px;
-            
-            background-color: #FFC107; /* Warna kuning amber yang cerah */
-            color: #333; /* Warna teks gelap agar mudah dibaca */
-            
-            padding: 12px 20px; /* Jarak antara teks dan tepi tombol */
-            border-radius: 50px; /* Sudut cembung/bulat sempurna (pill shape) */
-            
-            display: flex; /* Mengaktifkan flexbox untuk alignment */
-            align-items: center; /* Menengahkan teks dan ikon secara vertikal */
-            gap: 8px; /* Jarak antara emoji dan teks "Beranda" */
-            
-            font-family: 'Baloo 2', sans-serif; /* Menggunakan font yang sesuai tema */
+            background-color: #FFC107;
+            color: #333;
+            padding: 12px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Baloo 2', sans-serif;
             font-size: 1.1rem;
             font-weight: 700;
-            text-decoration: none; /* Menghilangkan garis bawah pada link */
-            
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Efek bayangan halus */
-            transition: transform 0.2s ease, box-shadow 0.2s ease; /* Animasi halus */
-            z-index: 1000; /* Memastikan tombol selalu di lapisan paling atas */
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            z-index: 1000;
         }
-
         .tombol-beranda:hover {
-            transform: translateY(-3px); /* Sedikit terangkat saat disentuh */
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Bayangan lebih jelas */
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
@@ -117,33 +101,13 @@
     <div class="container mx-auto p-4 md:p-8 max-w-5xl">
 
         <header class="text-center mb-10">
-            <h1 class="text-4xl md:text-5xl font-bold text-blue-600">Buat Kuis Baru yang Seru! 🚀</h1>
-            <p class="text-gray-500 mt-2">Isi formulir di bawah untuk membuat kuis yang asyik bagi para siswa.</p>
+            <h1 id="quiz-title-header" class="text-4xl md:text-5xl font-bold text-blue-600">Memuat Kuis... 🚀</h1>
+            <p class="text-gray-500 mt-2">Isi formulir di bawah untuk menambahkan soal baru ke dalam paket kuis ini.</p>
         </header>
 
         <main id="form-kuis" class="form-container mb-12">
-            <h2 class="text-2xl font-bold mb-6 text-gray-700">Detail Soal</h2>
+            <h2 class="text-2xl font-bold mb-6 text-gray-700">Detail Soal Baru</h2>
             <form id="quizCreatorForm">
-                 <div class="input-group">
-                    <label for="judul" class="label-text"><i data-lucide="edit-3"></i>Judul Kuis (Topik)</label>
-                    <input type="text" id="judul" class="input-field" placeholder="Contoh: Kuis Hewan Laut" required>
-                </div>
-<div class="grid md:grid-cols-3 gap-4 input-group">
-                    <div>
-                        <label for="badge-gold" class="label-text"><i data-lucide="award"></i>Nilai Emas (%)</label>
-                        <input type="number" id="badge-gold" class="input-field" value="90" min="0" max="100">
-                    </div>
-                    <div>
-                        <label for="badge-silver" class="label-text"><i data-lucide="award"></i>Nilai Perak (%)</label>
-                        <input type="number" id="badge-silver" class="input-field" value="75" min="0" max="100">
-                    </div>
-
-                    <div>
-                        <label for="badge-bronze" class="label-text"><i data-lucide="award"></i>Nilai Perunggu (%)</label>
-                        <input type="number" id="badge-bronze" class="input-field" value="60" min="0" max="100">
-                    </div>
-                </div>
-
                 <div class="input-group">
                     <label for="pertanyaan" class="label-text"><i data-lucide="help-circle"></i>Teks Pertanyaan / Instruksi</label>
                     <textarea id="pertanyaan" rows="3" class="input-field" placeholder="Tuliskan pertanyaan atau instruksi pengerjaan soal..."></textarea>
@@ -163,25 +127,17 @@
                 </div>
 
                 <!-- === FORM SPESIFIK UNTUK SETIAP TIPE SOAL === -->
-
-                <!-- 1. Pilihan Ganda -->
                 <fieldset id="fields-pilihan-ganda" class="question-type-fields space-y-4">
                     <label class="label-text"><i data-lucide="list"></i>Opsi Jawaban & Penjelasan</label>
-                    <div id="pg-options-container" class="space-y-4">
-                        <!-- Opsi akan ditambahkan oleh JS -->
-                    </div>
+                    <div id="pg-options-container" class="space-y-4"></div>
                     <button type="button" id="add-pg-option-btn" class="text-sm text-blue-600 font-semibold flex items-center gap-2"><i data-lucide="plus-circle" class="w-4 h-4"></i>Tambah Opsi</button>
                 </fieldset>
-
-                <!-- 2. Esai -->
                 <fieldset id="fields-esai" class="question-type-fields">
                      <div class="input-group">
                         <label for="esai-answer" class="label-text"><i data-lucide="key-round"></i>Kunci Jawaban Esai</label>
                         <textarea id="esai-answer" rows="3" class="input-field" placeholder="Tuliskan acuan jawaban benar untuk esai..."></textarea>
                     </div>
                 </fieldset>
-
-                <!-- 3. Susun Huruf -->
                 <fieldset id="fields-susun-huruf" class="question-type-fields space-y-4">
                      <div class="input-group">
                         <label for="susun-huruf-answer" class="label-text"><i data-lucide="key-round"></i>Jawaban (Kata yang Benar)</label>
@@ -190,20 +146,13 @@
                     <div class="input-group">
                         <label for="susun-huruf-decoys" class="label-text"><i data-lucide="shuffle"></i>Huruf Pengecoh</label>
                         <input type="text" id="susun-huruf-decoys" class="input-field" placeholder="Ketik beberapa huruf tanpa spasi (Contoh: XYZ)">
-                        <p class="text-xs text-gray-500 mt-1">Huruf yang sama akan diabaikan.</p>
                     </div>
                 </fieldset>
-
-                <!-- 4. Pencocokkan -->
                 <fieldset id="fields-pencocokkan" class="question-type-fields space-y-4">
                     <label class="label-text"><i data-lucide="link-2"></i>Pasangan untuk Dicocokkan</label>
-                    <div id="matching-pairs-container" class="space-y-3">
-                        <!-- Pasangan akan ditambahkan oleh JS -->
-                    </div>
+                    <div id="matching-pairs-container" class="space-y-3"></div>
                     <button type="button" id="add-matching-pair-btn" class="text-sm text-blue-600 font-semibold flex items-center gap-2"><i data-lucide="plus-circle" class="w-4 h-4"></i>Tambah Pasangan</button>
                 </fieldset>
-
-                <!-- 5. Benar atau Salah -->
                 <fieldset id="fields-benar-salah" class="question-type-fields space-y-4">
                     <label class="label-text"><i data-lucide="check-circle-2"></i>Pilih Jawaban yang Benar</label>
                     <div class="flex gap-4">
@@ -217,19 +166,12 @@
                         </label>
                     </div>
                 </fieldset>
-                
-                <!-- 6. Susun Kata Jadi Kalimat -->
                 <fieldset id="fields-susun-kalimat" class="question-type-fields space-y-4">
                     <label class="label-text"><i data-lucide="key-round"></i>Kalimat Jawaban yang Benar</label>
-                    <div id="sk-answers-container" class="space-y-3">
-                        <!-- Jawaban benar akan ditambahkan oleh JS -->
-                    </div>
+                    <div id="sk-answers-container" class="space-y-3"></div>
                     <button type="button" id="add-sk-answer-btn" class="text-sm text-blue-600 font-semibold flex items-center gap-2"><i data-lucide="plus-circle" class="w-4 h-4"></i>Tambah Alternatif Jawaban Benar</button>
-                    <p class="text-xs text-gray-500 mt-1">Kata-kata dari kalimat pertama yang Anda masukkan akan digunakan untuk diacak di dalam permainan.</p>
                 </fieldset>
-
-                <!-- 7. TTS Mini -->
-                 <fieldset id="fields-tts-mini" class="question-type-fields grid md:grid-cols-2 gap-6">
+                <fieldset id="fields-tts-mini" class="question-type-fields grid md:grid-cols-2 gap-6">
                      <div class="input-group">
                         <label for="tts-mendatar" class="label-text"><i data-lucide="arrow-right"></i>Jawaban Mendatar</label>
                         <input type="text" id="tts-mendatar" class="input-field" placeholder="Contoh: APEL">
@@ -238,30 +180,26 @@
                         <label for="tts-menurun" class="label-text"><i data-lucide="arrow-down"></i>Jawaban Menurun</label>
                         <input type="text" id="tts-menurun" class="input-field" placeholder="Contoh: EMBUN">
                     </div>
-                     <p class="text-xs text-gray-500 mt-1 md:col-span-2">Pastikan ada satu huruf yang sama antara kedua kata sebagai titik potong.</p>
                 </fieldset>
                 
                 <div class="mt-8">
                     <button type="submit" class="btn-simpan flex items-center justify-center gap-2">
-                        <i data-lucide="save"></i>
-                        Simpan Soal ke Kuis
+                        <i data-lucide="plus-circle"></i>
+                        Tambahkan Soal ke Paket
                     </button>
                 </div>
             </form>
         </main>
-
-        <section>
-            <h2 class="text-3xl font-bold text-center mb-8 text-blue-600">Daftar Kuis yang Sudah Dibuat 🎨</h2>
-            <div id="daftar-kuis" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <p id="loading-quizzes" class="text-center text-gray-500 col-span-full">Memuat kuis...</p>
-            </div>
-        </section>
-
     </div>
+
+    <a href="paket-kuis.html" class="tombol-beranda" title="Kembali ke Manajemen Paket Kuis">
+        <span>🏠</span>
+        <span>Manajemen Kuis</span>
+    </a>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
@@ -274,134 +212,101 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
-        const quizzesCollectionRef = collection(db, 'quizzes');
+        
+        // --- AMBIL ID KUIS DARI URL ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const quizId = urlParams.get('quizId');
+        let quizTitle = '';
 
         // --- ELEMEN DOM ---
         const form = document.getElementById('quizCreatorForm');
         const tipeSoalSelect = document.getElementById('tipe-soal');
-        const daftarKuisContainer = document.getElementById('daftar-kuis');
+        const quizTitleHeader = document.getElementById('quiz-title-header');
+        const pgContainer = document.getElementById('pg-options-container');
+        const matchingContainer = document.getElementById('matching-pairs-container');
+        const skContainer = document.getElementById('sk-answers-container');
+        
+        if (!quizId) {
+            alert("Paket kuis tidak ditemukan! Anda akan diarahkan kembali.");
+            window.location.href = 'paket-kuis.html';
+        }
 
-        // --- FUNGSI UI ---
+        // --- FUNGSI-FUNGSI ---
+
+        async function fetchQuizData() {
+            const quizDocRef = doc(db, 'quizzes', quizId);
+            try {
+                const docSnap = await getDoc(quizDocRef);
+                if (docSnap.exists()) {
+                    quizTitle = docSnap.data().title;
+                    quizTitleHeader.textContent = `📝 Kelola Soal: ${quizTitle}`;
+                } else {
+                    quizTitleHeader.textContent = "Paket Kuis Tidak Ditemukan";
+                    form.style.display = 'none';
+                }
+            } catch (error) {
+                console.error("Error fetching quiz data: ", error);
+                quizTitleHeader.textContent = "Gagal Memuat Kuis";
+            }
+        }
         
         function updateFormUI() {
-            const selectedType = tipeSoalSelect.value;
-            document.querySelectorAll('.question-type-fields').forEach(field => {
-                field.style.display = 'none';
-            });
-            const activeFieldset = document.getElementById(`fields-${selectedType}`);
+            document.querySelectorAll('.question-type-fields').forEach(field => field.style.display = 'none');
+            const activeFieldset = document.getElementById(`fields-${tipeSoalSelect.value}`);
             if (activeFieldset) {
                 activeFieldset.style.display = 'block';
             }
         }
-        
-        // --- Fungsi Dinamis untuk Form ---
-        const pgContainer = document.getElementById('pg-options-container');
-        const addPgBtn = document.getElementById('add-pg-option-btn');
-        let pgOptionCount = 0;
 
+        let pgOptionCount = 0;
         function addPgOption(isCorrect = false) {
             if (pgOptionCount >= 5) return;
             pgOptionCount++;
             const div = document.createElement('div');
             div.className = 'p-3 border rounded-lg';
-            div.innerHTML = `
-                <div class="flex items-center gap-3 mb-2">
-                    <input type="radio" name="pg-correct-option" value="${pgOptionCount}" class="h-5 w-5 text-blue-600" ${isCorrect ? 'checked' : ''}>
-                    <input type="text" class="input-field" name="pg-option-text" placeholder="Teks Opsi ${pgOptionCount}">
-                    <button type="button" class="remove-pg-option text-red-500 hover:text-red-700 font-bold text-2xl">&times;</button>
-                </div>
-                <textarea name="pg-option-explanation" class="input-field text-sm mt-2" rows="1" placeholder="Penjelasan untuk opsi ini (misal: mengapa salah/benar)"></textarea>
-            `;
+            div.innerHTML = `<div class="flex items-center gap-3 mb-2"><input type="radio" name="pg-correct-option" value="${pgOptionCount}" class="h-5 w-5 text-blue-600" ${isCorrect ? 'checked' : ''}><input type="text" class="input-field" name="pg-option-text" placeholder="Teks Opsi ${pgOptionCount}"><button type="button" class="remove-pg-option text-red-500 hover:text-red-700 font-bold text-2xl">&times;</button></div><textarea name="pg-option-explanation" class="input-field text-sm mt-2" rows="1" placeholder="Penjelasan untuk opsi ini"></textarea>`;
             pgContainer.appendChild(div);
-            div.querySelector('.remove-pg-option').addEventListener('click', () => {
-                div.remove();
-                pgOptionCount--;
-                 // Pastikan selalu ada satu radio button yang terpilih jika sisa satu
-                if (pgContainer.querySelectorAll('div').length === 1) {
-                    pgContainer.querySelector('input[type="radio"]').checked = true;
-                }
-            });
+            div.querySelector('.remove-pg-option').addEventListener('click', () => { div.remove(); pgOptionCount--; if (pgContainer.querySelectorAll('div').length === 1) pgContainer.querySelector('input[type="radio"]').checked = true; });
         }
-        addPgBtn.addEventListener('click', () => addPgOption());
 
-
-        const matchingContainer = document.getElementById('matching-pairs-container');
-        const addMatchingBtn = document.getElementById('add-matching-pair-btn');
         let matchingPairCount = 0;
-        
         function addMatchingPair() {
             matchingPairCount++;
             const div = document.createElement('div');
             div.className = 'flex items-center gap-3';
-            div.innerHTML = `
-                <input type="text" class="input-field" name="matching-prompt" placeholder="Item Kiri ${matchingPairCount}">
-                <span class="font-bold">=</span>
-                <input type="text" class="input-field" name="matching-match" placeholder="Item Kanan ${matchingPairCount}">
-                <button type="button" class="remove-matching-pair text-red-500 hover:text-red-700 font-bold text-2xl">&times;</button>
-            `;
+            div.innerHTML = `<input type="text" class="input-field" name="matching-prompt" placeholder="Item Kiri ${matchingPairCount}"><span>=</span><input type="text" class="input-field" name="matching-match" placeholder="Item Kanan ${matchingPairCount}"><button type="button" class="remove-matching-pair text-red-500 hover:text-red-700 font-bold text-2xl">&times;</button>`;
             matchingContainer.appendChild(div);
-             div.querySelector('.remove-matching-pair').addEventListener('click', () => {
-                div.remove();
-                matchingPairCount--;
-            });
+            div.querySelector('.remove-matching-pair').addEventListener('click', () => { div.remove(); matchingPairCount--; });
         }
-        addMatchingBtn.addEventListener('click', addMatchingPair);
-        
-        const skContainer = document.getElementById('sk-answers-container');
-        const addSkBtn = document.getElementById('add-sk-answer-btn');
-        let skAnswerCount = 0;
 
+        let skAnswerCount = 0;
         function addSkAnswer() {
             skAnswerCount++;
             const div = document.createElement('div');
             div.className = 'flex items-center gap-3';
-            div.innerHTML = `
-                <input type="text" class="input-field" name="sk-answer" placeholder="Alternatif jawaban benar ${skAnswerCount}">
-                <button type="button" class="remove-sk-answer text-red-500 hover:text-red-700 font-bold text-2xl">&times;</button>
-            `;
+            div.innerHTML = `<input type="text" class="input-field" name="sk-answer" placeholder="Alternatif jawaban benar ${skAnswerCount}"><button type="button" class="remove-sk-answer text-red-500 hover:text-red-700 font-bold text-2xl">&times;</button>`;
             skContainer.appendChild(div);
-            div.querySelector('.remove-sk-answer').addEventListener('click', () => {
-                div.remove();
-                skAnswerCount--;
-            });
+            div.querySelector('.remove-sk-answer').addEventListener('click', () => { div.remove(); skAnswerCount--; });
         }
-        addSkBtn.addEventListener('click', addSkAnswer);
-
-
-        // --- FUNGSI DATA ---
-            async function saveQuiz(e) {
+        
+        async function saveQuestion(e) {
             e.preventDefault();
-
-            const title = document.getElementById('judul').value.trim();
             const questionText = document.getElementById('pertanyaan').value.trim();
             const type = tipeSoalSelect.value;
-            
-            // Mengambil nilai persentase lencana dari ID yang sudah benar
-            const goldThreshold = parseInt(document.getElementById('badge-gold').value) || 90;
-            const silverThreshold = parseInt(document.getElementById('badge-silver').value) || 75;
-            const bronzeThreshold = parseInt(document.getElementById('badge-bronze').value) || 60; // <-- Sudah diperbaiki
-
-            if (!title || !questionText) {
-                alert('Judul Kuis dan Teks Pertanyaan/Instruksi wajib diisi!');
+            if (!questionText) {
+                alert('Teks Pertanyaan/Instruksi wajib diisi!');
                 return;
             }
-            
-            let questionData = {
-                question: questionText,
-                type: type,
-            };
-
-            // (Bagian switch case untuk tipe soal tidak perlu diubah, biarkan seperti apa adanya)
+            let questionData = { question: questionText, type: type };
             try {
+                // (Logika switch case tidak diubah, sudah benar)
                 switch (type) {
                     case 'pilihan-ganda':
                         const options = [];
                         const optionElements = pgContainer.querySelectorAll('div.p-3');
                         const correctRadio = pgContainer.querySelector('input[name="pg-correct-option"]:checked');
-                        if (!correctRadio) throw new Error('Pilih salah satu jawaban yang benar untuk Pilihan Ganda!');
+                        if (!correctRadio) throw new Error('Pilih salah satu jawaban yang benar!');
                         const correctValue = correctRadio.value;
-
                         optionElements.forEach((opt) => {
                             const radio = opt.querySelector('input[type="radio"]');
                             const textInput = opt.querySelector('input[name="pg-option-text"]');
@@ -417,64 +322,47 @@
                         if (options.length < 2) throw new Error('Pilihan ganda harus memiliki minimal 2 opsi.');
                         questionData.options = options;
                         break;
-
                     case 'esai':
                         const esaiAnswer = document.getElementById('esai-answer').value.trim();
                         if (!esaiAnswer) throw new Error('Kunci jawaban esai tidak boleh kosong.');
                         questionData.answer = esaiAnswer;
                         break;
-                    
                     case 'susun-huruf':
                         const answer = document.getElementById('susun-huruf-answer').value.trim().toUpperCase();
                         if (!answer) throw new Error('Jawaban susun huruf tidak boleh kosong.');
                         const decoysRaw = document.getElementById('susun-huruf-decoys').value.trim().toUpperCase();
-                        const uniqueDecoys = [...new Set(decoysRaw.split(''))];
                         questionData.answer = answer;
-                        questionData.decoys = uniqueDecoys;
+                        questionData.decoys = [...new Set(decoysRaw.split(''))];
                         break;
-                    
                     case 'pencocokkan':
                         const pairs = [];
                         const pairElements = matchingContainer.querySelectorAll('div.flex');
                         pairElements.forEach(pair => {
                             const prompt = pair.querySelector('input[name="matching-prompt"]').value.trim();
                             const match = pair.querySelector('input[name="matching-match"]').value.trim();
-                            if (prompt && match) {
-                                pairs.push({ prompt, match });
-                            }
+                            if (prompt && match) pairs.push({ prompt, match });
                         });
-                        if (pairs.length < 2) throw new Error('Tipe Pencocokkan membutuhkan minimal 2 pasang.');
+                        if (pairs.length < 2) throw new Error('Tipe Pencocokkan butuh minimal 2 pasang.');
                         questionData.matchingPairs = pairs;
                         break;
-
                     case 'benar-salah':
                         const bsAnswer = document.querySelector('input[name="bs-answer"]:checked');
                         if (!bsAnswer) throw new Error('Pilih jawaban Benar atau Salah!');
                         questionData.answer = bsAnswer.value === 'Benar';
                         break;
-
                     case 'susun-kalimat':
-                        const correctAnswers = [];
-                        const skElements = skContainer.querySelectorAll('input[name="sk-answer"]');
-                        skElements.forEach(input => {
-                            if (input.value.trim()) {
-                                correctAnswers.push(input.value.trim());
-                            }
-                        });
-                        if (correctAnswers.length === 0) throw new Error('Isi setidaknya satu kalimat jawaban yang benar!');
-                        
+                        const correctAnswers = Array.from(skContainer.querySelectorAll('input[name="sk-answer"]'))
+                                                    .map(input => input.value.trim())
+                                                    .filter(Boolean);
+                        if (correctAnswers.length === 0) throw new Error('Isi setidaknya satu kalimat jawaban!');
                         questionData.correctAnswers = correctAnswers;
                         questionData.words = correctAnswers[0].split(' ');
                         break;
-                    
                     case 'tts-mini':
                         const horizontal = document.getElementById('tts-mendatar').value.trim().toUpperCase();
                         const vertical = document.getElementById('tts-menurun').value.trim().toUpperCase();
                         if (!horizontal || !vertical) throw new Error('Isi jawaban mendatar dan menurun!');
-                        
-                        const hasIntersection = [...horizontal].some(char => vertical.includes(char));
-                        if (!hasIntersection) throw new Error('Jawaban mendatar dan menurun harus memiliki minimal satu huruf yang sama (titik potong).');
-
+                        if (![...horizontal].some(char => vertical.includes(char))) throw new Error('Jawaban harus memiliki huruf perpotongan.');
                         questionData.crossword = { horizontal, vertical };
                         break;
                 }
@@ -482,98 +370,50 @@
                 alert(`Error: ${error.message}`);
                 return;
             }
-            
-            // Simpan ke Firestore
             try {
-                const quizDocRef = doc(db, 'quizzes', title);
-
-                // Field ini 'badgeThresholds' berbeda dari 'badges' di announcement.html, jadi tidak akan bentrok.
-                const quizMainData = {
-                    title: title,
-                    createdAt: serverTimestamp(),
-                    badgeThresholds: {
-                        gold: goldThreshold,
-                        silver: silverThreshold,
-                        bronze: bronzeThreshold // <-- Kunci di Firestore sudah benar
-                    }
-                };
-                
-                await setDoc(quizDocRef, quizMainData, { merge: true });
-
-                const questionsSubcollectionRef = collection(quizDocRef, 'questions');
+                const questionsSubcollectionRef = collection(db, 'quizzes', quizId, 'questions');
                 await addDoc(questionsSubcollectionRef, questionData);
-                
-                alert(`Soal berhasil ditambahkan ke kuis "${title}"!`);
+                alert(`Soal berhasil ditambahkan ke paket kuis "${quizTitle}"!`);
                 form.reset();
-                pgContainer.innerHTML = '';
-                pgOptionCount = 0;
-                addPgOption(true); addPgOption();
-                
-                matchingContainer.innerHTML = '';
-                matchingPairCount = 0;
-                addMatchingPair(); addMatchingPair();
-
-                skContainer.innerHTML = '';
-                skAnswerCount = 0;
-                addSkAnswer();
-                
+                pgContainer.innerHTML = ''; pgOptionCount = 0; addPgOption(true); addPgOption();
+                matchingContainer.innerHTML = ''; matchingPairCount = 0; addMatchingPair(); addMatchingPair();
+                skContainer.innerHTML = ''; skAnswerCount = 0; addSkAnswer();
                 updateFormUI();
             } catch (error) {
-                console.error("Error saving document: ", error);
-                alert('Gagal menyimpan. Lihat konsol untuk detail.');
+                console.error("Error saving question: ", error);
+                alert('Gagal menyimpan soal.');
             }
-            }
-        
-        // Render daftar kuis
-        function renderQuizzes(docs) {
-            daftarKuisContainer.innerHTML = '';
-             if (docs.length === 0) {
-                 daftarKuisContainer.innerHTML = '<p class="text-center text-gray-500 col-span-full">Belum ada kuis yang dibuat.</p>';
-                 return;
-            }
-            const cardColors = ['from-yellow-300 to-orange-300', 'from-cyan-300 to-blue-400', 'from-pink-300 to-purple-400', 'from-green-300 to-teal-400'];
-
-            docs.forEach((doc, index) => {
-                const quiz = doc.data();
-                const card = document.createElement('a'); // Ubah jadi link
-                card.href = `play.html?quizId=${doc.id}`; // Tambah link ke halaman play
-                card.target = "_blank"; // Buka di tab baru
-                const selectedColor = cardColors[index % cardColors.length];
-                card.className = `quiz-card block bg-gradient-to-br ${selectedColor}`;
-                card.innerHTML = `
-                    <h3 class="text-2xl font-bold mb-2">${quiz.title}</h3>
-                    <span class="font-semibold bg-white/50 px-3 py-1 rounded-full text-sm self-start">Mainkan Kuis</span>
-                `;
-                daftarKuisContainer.appendChild(card);
-            });
         }
+        
+        // --- INISIALISASI & EVENT LISTENERS ---
 
-
-        // --- EVENT LISTENERS ---
-        form.addEventListener('submit', saveQuiz);
+        // Listener untuk mengubah tampilan form berdasarkan tipe soal
         tipeSoalSelect.addEventListener('change', updateFormUI);
         
+        // Listener untuk tombol submit
+        form.addEventListener('submit', saveQuestion);
+        
+        // Listeners untuk tombol tambah/kurang dinamis
+        document.getElementById('add-pg-option-btn').addEventListener('click', () => addPgOption());
+        document.getElementById('add-matching-pair-btn').addEventListener('click', addMatchingPair);
+        document.getElementById('add-sk-answer-btn').addEventListener('click', addSkAnswer);
+            
+        // Jalankan saat halaman dimuat
         document.addEventListener('DOMContentLoaded', () => {
+            fetchQuizData();
             lucide.createIcons();
-            // Inisialisasi form
-            addPgOption(true);
+            
+            // Siapkan form dinamis dengan nilai default
+            addPgOption(true); 
             addPgOption();
-            addMatchingPair();
+            addMatchingPair(); 
             addMatchingPair();
             addSkAnswer();
+            
+            // Tampilkan form yang benar saat pertama kali halaman dimuat
             updateFormUI();
-
-             onSnapshot(quizzesCollectionRef, (snapshot) => {
-                document.getElementById('loading-quizzes').style.display = 'none';
-                renderQuizzes(snapshot.docs);
-            });
         });
-
     </script>
-    <a href="index.html" class="tombol-beranda" title="Kembali ke Beranda">
-        <span>🏠</span>
-        <span>Beranda</span>
-    </a>
 </body>
 </html>
 
