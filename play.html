@@ -67,10 +67,21 @@
             <div id="progress-bar" class="bg-gradient-to-r from-green-400 to-blue-500 h-full rounded-full" style="width: 0%"></div>
         </div>
         <main class="quiz-card" style="animation: pop-in 0.5s ease-out;">
-            <p id="question-counter" class="text-right font-bold text-gray-400 mb-2">Soal 1/10</p>
+            <div class="flex justify-between items-center mb-2">
+    <div id="timer-display" class="flex items-center gap-2 font-bold text-blue-600 text-lg">
+        <i data-lucide="clock" class="w-5 h-5"></i>
+        <span>--:--</span>
+    </div>
+    <div class="flex justify-between items-center mb-2">
+    <div id="timer-display" class="flex items-center gap-2 font-bold text-blue-600 text-lg">
+        <i data-lucide="clock" class="w-5 h-5"></i>
+        <span>--:--</span>
+    </div>
+    <p id="question-counter" class="font-bold text-gray-400">Soal 1/10</p>
+    </div>           
+            </div>
             <h1 id="quiz-title" class="text-2xl font-black text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-pink-500">Judul Kuis</h1>
-            
-            <div id="question-area" class="min-h-[250px] flex flex-col justify-center">
+                 <div id="question-area" class="min-h-[250px] flex flex-col justify-center">
                 <p id="question-text" class="text-xl font-bold text-gray-700 mb-6 text-center">Teks Pertanyaan...</p>
                 <div id="answer-options" class="space-y-3 mb-4"></div>
             </div>
@@ -114,9 +125,12 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app); // <-- TAMBAHKAN BARIS INI
 
+// Deklarasikan bersama variabel lain
 let quizId = '', announcementId = '', quizTitleText = '', questions = [], currentQuestionIndex = 0, correctAnswersCount = 0, isAnswerChecked = false;
-let quizBadgeThresholds = {}; 
-
+let quizBadgeThresholds = {};
+let timerInterval = null; // <-- VARIABEL BARU UNTUK MENYIMPAN INTERVAL
+let quizDurationInSeconds = 0; // <-- VARIABEL BARU UNTUK DURASI
+        
 
         const loadingContainer = document.getElementById('loading-container');
         const quizContainer = document.getElementById('quiz-container');
@@ -146,6 +160,7 @@ let quizBadgeThresholds = {};
                 const quizDoc = await getDoc(doc(db, 'quizzes', quizId));
                 if (quizDoc.exists()) {
                     const quizData = quizDoc.data();
+                    quizDurationInSeconds = (quizData.duration || 10) * 60; // Ambil durasi dari DB, default 10 menit jika tidak ada       
                     quizTitleText = quizData.title;
                     
                     // Ambil nilai lencana dari database, atau gunakan default jika tidak ada
@@ -158,7 +173,7 @@ let quizBadgeThresholds = {};
                     const questionsSnapshot = await getDocs(collection(quizDoc.ref, 'questions'));
                     questions = questionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     questions = shuffleArray(questions);
-                    startQuiz();
+                    startQuiz(userId);
                 } else {
                      loadingContainer.innerHTML = `<h1 class="text-2xl font-bold text-red-600">Error: Kuis tidak ada.</h1>`;
                 }
@@ -168,11 +183,13 @@ let quizBadgeThresholds = {};
             }
         }
 
-        function startQuiz() {
+        function startQuiz(userId) {
             loadingContainer.classList.add('hidden');
             quizContainer.classList.remove('hidden');
             resultsContainer.classList.add('hidden');
             quizTitle.textContent = quizTitleText;
+            lucide.createIcons(); // <-- PANGGIL INI UNTUK MERENDER IKON JAM
+            startTimer(quizDurationInSeconds, userId);
             showQuestion();
         }
 
@@ -204,6 +221,31 @@ let quizBadgeThresholds = {};
         }
     }
         }
+
+        function startTimer(durationInSeconds, userId) {
+    const timerDisplay = document.querySelector("#timer-display span");
+    let timer = durationInSeconds;
+
+    // Hentikan timer sebelumnya jika ada
+    if(timerInterval) clearInterval(timerInterval);
+
+    timerInterval = setInterval(() => {
+        let minutes = parseInt(timer / 60, 10);
+        let seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        timerDisplay.textContent = minutes + ":" + seconds;
+
+        if (--timer < 0) {
+            clearInterval(timerInterval);
+            alert("Waktu Habis!");
+            showResults(userId); // Akhiri kuis secara otomatis
+        }
+    }, 1000);
+        }
+        
         
 
 // FUNGSI BARU: untuk menyimpan hasil dan memberikan lencana
@@ -258,6 +300,7 @@ let quizBadgeThresholds = {};
 
         
 async function showResults(userId) { 
+    clearInterval(timerInterval);
     quizContainer.classList.add('hidden');
     resultsContainer.classList.remove('hidden');
     const finalScore = Math.round((correctAnswersCount / questions.length) * 100);
