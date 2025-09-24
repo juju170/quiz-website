@@ -72,13 +72,8 @@
         <i data-lucide="clock" class="w-5 h-5"></i>
         <span>--:--</span>
     </div>
-<div class="flex justify-between items-center mb-2">
-    <div id="timer-display" class="flex items-center gap-2 font-bold text-blue-600 text-lg">
-        <i data-lucide="clock" class="w-5 h-5"></i>
-        <span>--:--</span>
-    </div>
     <p id="question-counter" class="font-bold text-gray-400">Soal 1/10</p>
-</div>               
+            </div>            
             <h1 id="quiz-title" class="text-2xl font-black text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-pink-500">Judul Kuis</h1>
                  <div id="question-area" class="min-h-[250px] flex flex-col justify-center">
                 <p id="question-text" class="text-xl font-bold text-gray-700 mb-6 text-center">Teks Pertanyaan...</p>
@@ -238,15 +233,17 @@ let quizDurationInSeconds = 0; // <-- VARIABEL BARU UNTUK DURASI
         timerDisplay.textContent = minutes + ":" + seconds;
 
         if (--timer < 0) {
-            clearInterval(timerInterval);
-            alert("Waktu Habis!");
-            showResults(userId); // Akhiri kuis secara otomatis
-        }
-    }, 1000);
-        }
-        
-        
+    clearInterval(timerInterval);
+    // Tampilkan notifikasi di dalam feedback box
+    feedbackBox.className = 'p-4 rounded-lg text-center font-semibold text-white bg-gradient-to-r from-orange-400 to-red-500';
+    feedbackBox.innerHTML = 'Waktu Habis!';
+    feedbackBox.classList.remove('hidden');
 
+    // Langsung tampilkan hasil setelah jeda singkat
+    setTimeout(() => {
+        showResults(userId);
+    }, 1500); // Tunggu 1.5 detik sebelum pindah
+        }                 
 // FUNGSI BARU: untuk menyimpan hasil dan memberikan lencana
                 async function saveResultAndAwardBadges(score, userId) {
             try {
