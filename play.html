@@ -400,30 +400,33 @@ async function showResults(userId) {
                     });
 
                     function handleSelect(item, type) {
-                        if (item.classList.contains('paired')) return;
+    if (item.classList.contains('paired')) return;
 
-                        if (item.classList.contains('selected-blue') || item.classList.contains('selected-pink')) {
-                            item.classList.remove('selected-blue', 'selected-pink');
-                            selected[type] = null;
-                            return;
-                        }
+    // BARIS TAMBAHAN: Logika untuk membatalkan pilihan
+    // Jika item yang diklik sudah punya kelas 'selected', berarti pengguna ingin membatalkannya
+    if (item.classList.contains('selected-blue') || item.classList.contains('selected-pink')) {
+        item.classList.remove('selected-blue', 'selected-pink'); // Hapus style
+        selected[type] = null; // Kosongkan variabel pilihan
+        return; // Hentikan eksekusi fungsi
+    }
+    // AKHIR DARI BARIS TAMBAHAN
 
-                        document.querySelectorAll(`.${type}-item`).forEach(i => i.classList.remove(type === 'prompt' ? 'selected-blue' : 'selected-pink'));
-                        item.classList.add(type === 'prompt' ? 'selected-blue' : 'selected-pink');
-                        selected[type] = item;
-                        
-                        if (selected.prompt && selected.match) {
-                            selected.prompt.classList.add('paired');
-                            selected.match.classList.add('paired');
-                            selected.prompt.classList.remove('selected-blue');
-                            selected.match.classList.remove('selected-pink');
-                            selected.prompt.dataset.pairedWith = selected.match.textContent;
-                            selected = { prompt: null, match: null };
-                            
-                            if (document.querySelectorAll('.prompt-item.paired').length === prompts.length) {
-                                actionBtn.disabled = false;
-                            }
-                        }
+    document.querySelectorAll(`.${type}-item`).forEach(i => i.classList.remove(type === 'prompt' ? 'selected-blue' : 'selected-pink'));
+    item.classList.add(type === 'prompt' ? 'selected-blue' : 'selected-pink');
+    selected[type] = item;
+    
+    if (selected.prompt && selected.match) {
+        selected.prompt.classList.add('paired');
+        selected.match.classList.add('paired');
+        selected.prompt.classList.remove('selected-blue');
+        selected.match.classList.remove('selected-pink');
+        selected.prompt.dataset.pairedWith = selected.match.textContent;
+        selected = { prompt: null, match: null };
+        
+        if (document.querySelectorAll('.prompt-item.paired').length === prompts.length) {
+            actionBtn.disabled = false;
+        }
+    }                    
                     };
                     break;
                 case 'tts-mini':
