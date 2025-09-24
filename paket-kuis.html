@@ -114,19 +114,18 @@
         <main class="form-container mb-12">
             <h2 class="text-2xl font-bold mb-6 text-gray-700">Buat Paket Kuis Baru</h2>
             <form id="packageForm">
-                <div class="input-group">
-                    <label for="package-title" class="label-text"><i data-lucide="package"></i>Judul Paket Kuis</label>
-                    <div class="grid md:grid-cols-2 gap-6 mb-6">
-<div class="grid md:grid-cols-2 gap-6 mb-6">
-    <div class="input-group">
-        <label for="package-title" class="label-text"><i data-lucide="package"></i>Judul Paket Kuis</label>
-        <input type="text" id="package-title" class="input-field" placeholder="Contoh: Petualangan Sains Kelas 5" required>
-    </div>
-    <div class="input-group">
-        <label for="package-duration" class="label-text"><i data-lucide="timer"></i>Durasi Kuis (menit)</label>
-        <input type="number" id="package-duration" class="input-field" placeholder="Contoh: 15" min="1" required>
-    </div>
-</div>                        
+                <!-- === BAGIAN HTML YANG DIPERBAIKI === -->
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div class="input-group">
+                        <label for="package-title" class="label-text"><i data-lucide="package"></i>Judul Paket Kuis</label>
+                        <input type="text" id="package-title" class="input-field" placeholder="Contoh: Petualangan Sains Kelas 5" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="package-duration" class="label-text"><i data-lucide="timer"></i>Durasi Kuis (menit)</label>
+                        <input type="number" id="package-duration" class="input-field" placeholder="Contoh: 15" min="1" required>
+                    </div>
+                </div>
+                
                 <fieldset class="border-2 border-dashed border-gray-300 p-4 rounded-xl mb-6">
                     <legend class="text-lg font-bold px-2 text-gray-600 flex items-center gap-2"><i data-lucide="award"></i>Aturan Nilai Lencana (%)</legend>
                     <p class="text-sm text-gray-500 mb-4 px-2">Tentukan skor minimum untuk mendapatkan setiap lencana.</p>
@@ -193,49 +192,47 @@
         const form = document.getElementById('packageForm');
         const packageListContainer = document.getElementById('package-list');
 
-        // Versi baru dengan field durasi
-async function saveQuizPackage(e) {
-    e.preventDefault();
+        async function saveQuizPackage(e) {
+            e.preventDefault();
 
-    const title = document.getElementById('package-title').value.trim();
-    const duration = parseInt(document.getElementById('package-duration').value); // <-- AMBIL NILAI DURASI
+            const title = document.getElementById('package-title').value.trim();
+            const duration = parseInt(document.getElementById('package-duration').value);
 
-    if (!title || !duration) {
-        alert('Judul dan Durasi Kuis wajib diisi!');
-        return;
-    }
+            if (!title || !duration) {
+                alert('Judul dan Durasi Kuis wajib diisi!');
+                return;
+            }
 
-    if (duration <= 0) {
-        alert('Durasi harus bernilai positif.');
-        return;
-    }
+            if (duration <= 0) {
+                alert('Durasi harus bernilai positif.');
+                return;
+            }
 
-    const badgeThresholds = {
-        gold: parseInt(document.getElementById('badge-gold').value),
-        silver: parseInt(document.getElementById('badge-silver').value),
-        bronze: parseInt(document.getElementById('badge-bronze').value),
-    };
+            const badgeThresholds = {
+                gold: parseInt(document.getElementById('badge-gold').value),
+                silver: parseInt(document.getElementById('badge-silver').value),
+                bronze: parseInt(document.getElementById('badge-bronze').value),
+            };
 
-    try {
-        const quizDocRef = doc(db, 'quizzes', title);
-        
-        await setDoc(quizDocRef, {
-            title: title,
-            duration: duration, // <-- SIMPAN DURASI KE FIREBASE
-            badgeThresholds: badgeThresholds,
-            createdAt: serverTimestamp()
-        }, { merge: true });
+            try {
+                const quizDocRef = doc(db, 'quizzes', title);
+                
+                await setDoc(quizDocRef, {
+                    title: title,
+                    duration: duration,
+                    badgeThresholds: badgeThresholds,
+                    createdAt: serverTimestamp()
+                }, { merge: true });
 
-        alert(`Paket kuis "${title}" berhasil disimpan!`);
-        form.reset();
+                alert(`Paket kuis "${title}" berhasil disimpan!`);
+                form.reset();
 
-    } catch (error) {
-        console.error("Error saving package: ", error);
-        alert("Gagal menyimpan paket kuis.");
-    }
+            } catch (error) {
+                console.error("Error saving package: ", error);
+                alert("Gagal menyimpan paket kuis.");
+            }
         }
         
-        // Fungsi untuk merender daftar paket kuis
         function renderPackages(docs) {
             packageListContainer.innerHTML = '';
             if (docs.length === 0) {
@@ -248,16 +245,17 @@ async function saveQuizPackage(e) {
                 const quizId = doc.id;
                 const card = document.createElement('div');
                 card.className = 'package-card flex flex-col justify-between';
-                card.innerHTML = `                          
-        <div>
-        <h3 class="text-2xl font-bold mb-2 text-gray-800">${quiz.title}</h3>
-        <div class="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500 mb-6">
-            <span class="flex items-center gap-1"><i data-lucide="clock" class="w-4 h-4 text-blue-500"></i><strong class="text-gray-700">${quiz.duration || 'N/A'} menit</strong></span>
-            <span class="flex items-center gap-1"><i data-lucide="award" class="w-4 h-4 text-yellow-500"></i><strong>Emas:</strong> ${quiz.badgeThresholds?.gold || 'N/A'}%</span>
-            <span class="flex items-center gap-1"><i data-lucide="award" class="w-4 h-4 text-gray-400"></i><strong>Perak:</strong> ${quiz.badgeThresholds?.silver || 'N/A'}%</span>
-            <span class="flex items-center gap-1"><i data-lucide="award" class="w-4 h-4 text-orange-400"></i><strong>Perunggu:</strong> ${quiz.badgeThresholds?.bronze || 'N/A'}%</span>
-        </div>
-    </div>                         
+                // === BAGIAN JAVASCRIPT YANG DIPERBAIKI ===
+                card.innerHTML = `
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2 text-gray-800">${quiz.title}</h3>
+                        <div class="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500 mb-6">
+                            <span class="flex items-center gap-1"><i data-lucide="clock" class="w-4 h-4 text-blue-500"></i><strong class="text-gray-700">${quiz.duration || 'N/A'} menit</strong></span>
+                            <span class="flex items-center gap-1"><i data-lucide="award" class="w-4 h-4 text-yellow-500"></i><strong>Emas:</strong> ${quiz.badgeThresholds?.gold || 'N/A'}%</span>
+                            <span class="flex items-center gap-1"><i data-lucide="award" class="w-4 h-4 text-gray-400"></i><strong>Perak:</strong> ${quiz.badgeThresholds?.silver || 'N/A'}%</span>
+                            <span class="flex items-center gap-1"><i data-lucide="award" class="w-4 h-4 text-orange-400"></i><strong>Perunggu:</strong> ${quiz.badgeThresholds?.bronze || 'N/A'}%</span>
+                        </div>
+                    </div>                         
                     <div class="flex flex-col md:flex-row gap-3 mt-4">
                         <a href="quiz.html?quizId=${encodeURIComponent(quizId)}" class="btn btn-primary flex-1">
                             <i data-lucide="edit"></i> Kelola Soal
@@ -270,7 +268,6 @@ async function saveQuizPackage(e) {
                 packageListContainer.appendChild(card);
             });
             
-            // Tambahkan event listener untuk tombol hapus
             document.querySelectorAll('.delete-btn').forEach(button => {
                 button.addEventListener('click', async (e) => {
                     const id = e.currentTarget.dataset.id;
@@ -290,13 +287,11 @@ async function saveQuizPackage(e) {
             lucide.createIcons();
         }
 
-        // --- Event Listeners ---
         form.addEventListener('submit', saveQuizPackage);
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             
-            // Listener untuk menampilkan paket kuis secara real-time
             onSnapshot(quizzesCollectionRef, (snapshot) => {
                 document.getElementById('loading-packages').style.display = 'none';
                 renderPackages(snapshot.docs);
