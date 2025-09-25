@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Ceria Anak Hebat!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        body { 
+            font-family: 'Baloo 2', sans-serif; 
+            background: linear-gradient(-45deg, #fde68a, #fca5a5, #818cf8, #60a5fa, #f472b6);
+            background-size: 400% 400%;
+            animation: gradient-animation 25s ease infinite;
+            color: #4B5563;
+        }
+        .font-heading { font-family: 'Fredoka One', cursive; }
+        .profile-header { 
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            border-bottom: 5px solid white;
+            border-radius: 0 0 50% 50% / 0 0 30% 30%; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+        .badge-card { 
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 24px; 
+            padding: 1.5rem; 
+            text-align: center; 
+            border: 3px solid white;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07); 
+            transition: transform 0.3s ease, box-shadow 0.3s ease; 
+            cursor: pointer;
+        }
+        .badge-card:hover { 
+            transform: translateY(-10px) rotate(2deg); 
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1); 
+        }
+        .badge-icon-container { 
+            width: 80px; 
+            height: 80px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin: 0 auto 1rem; 
+            transition: transform 0.3s ease;
+        }
+        .badge-card:hover .badge-icon-container {
+            transform: scale(1.1) rotate(-5deg);
+        }
+        .gold { background-color: #FFFBEB; border: 4px solid #FBBF24; color: #FBBF24; }
+        .silver { background-color: #F9FAFB; border: 4px solid #D1D5DB; color: #9CA3AF; }
+        .bronze { background-color: #FEF2F2; border: 4px solid #F59E0B; color: #D97706; }
+        .history-item { 
+            background: rgba(255, 255, 255, 0.8); 
+            border-radius: 20px; 
+            padding: 1.25rem 1.5rem; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            margin-bottom: 1rem; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 2px solid white;
+        }
+        .progress-bar { 
+            background-color: rgba(0,0,0,0.1); 
+            border-radius: 999px; 
+            height: 12px; 
+            width: 100px; 
+            overflow: hidden; 
+            border: 1px solid white;
+        }
+        .progress-bar-inner { 
+            height: 100%; 
+            border-radius: 999px; 
+        }
+        .tombol-beranda {
+            position: fixed; bottom: 20px; right: 20px;
+            background-color: #FFC107; color: #333;
+            padding: 12px 20px; border-radius: 50px;
+            display: flex; align-items: center; gap: 8px;
+            font-family: 'Baloo 2', sans-serif; font-size: 1.1rem; font-weight: 700;
+            text-decoration: none; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s ease, box-shadow 0.2s ease; z-index: 1000;
+        }
+        .tombol-beranda:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); }
+        /* Modal styles */
+        .modal-bg {
+            display: none;
+            position: fixed;
+            z-index: 40;
+            left: 0; top: 0; width: 100vw; height: 100vh;
+            background: rgba(31,41,55,0.6);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-bg.active { display: flex; }
+        .modal-content {
+            background: #fff;
+            border-radius: 20px;
+            max-width: 95vw;
+            width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 2rem;
+            position: relative;
+            box-shadow: 0 8px 40px rgba(0,0,0,.15);
+        }
+        .modal-close {
+            position: absolute;
+            top: 1.2rem;
+            right: 1.2rem;
+            background: #f87171;
+            color: #fff;
+            border: none;
+            border-radius: 9999px;
+            width: 32px; height: 32px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 32px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="">
+    <!-- Header Profil -->
+    <header class="profile-header text-gray-800 text-center pt-12 pb-24 mb-[-100px] relative">
+        <div class="relative inline-block">
+            <div class="w-32 h-32 rounded-full bg-white/50 p-2 mx-auto ring-4 ring-white">
+                <img src="https://placehold.co/128x128/fca5a5/7c2d12.png?text=A" id="profile-avatar" class="w-full h-full rounded-full object-cover" alt="Avatar Pengguna">
+            </div>
+            <!-- Emoji Ceria -->
+            <span class="absolute -bottom-2 -right-2 bg-yellow-300 text-yellow-800 p-3 rounded-full text-3xl shadow-md transform rotate-12">⭐</span>
+        </div>
+        <h1 id="profile-name" class="font-heading text-4xl md:text-5xl mt-4 drop-shadow-md">Memuat Nama...</h1>
+        <p id="profile-email" class="opacity-70 mt-1">Memuat email...</p>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8 max-w-3xl relative z-10">
+        <!-- Bagian Lencana Prestasi -->
+        <section class="bg-white/40 backdrop-blur-sm p-6 md:p-8 rounded-3xl shadow-lg border-4 border-white">
+            <h2 class="font-heading text-3xl text-center text-rose-500 mb-6 drop-shadow-sm">🏆 Lencana Prestasiku 🏆</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <!-- Kartu Lencana Emas -->
+                <div class="badge-card" id="gold-badge-card">
+                    <div class="badge-icon-container gold"><i data-lucide="award" class="w-10 h-10"></i></div>
+                    <h3 class="text-xl font-extrabold text-gray-800">Lencana Emas</h3>
+                    <p id="gold-badge-count" class="text-5xl font-black text-amber-500 drop-shadow-md">0</p>
+                </div>
+                <!-- Kartu Lencana Perak -->
+                <div class="badge-card" id="silver-badge-card">
+                    <div class="badge-icon-container silver"><i data-lucide="shield" class="w-10 h-10"></i></div>
+                    <h3 class="text-xl font-extrabold text-gray-800">Lencana Perak</h3>
+                    <p id="silver-badge-count" class="text-5xl font-black text-gray-500 drop-shadow-md">0</p>
+                </div>
+                <!-- Kartu Lencana Perunggu -->
+                <div class="badge-card" id="bronze-badge-card">
+                    <div class="badge-icon-container bronze"><i data-lucide="medal" class="w-10 h-10"></i></div>
+                    <h3 class="text-xl font-extrabold text-gray-800">Lencana Perunggu</h3>
+                    <p id="bronze-badge-count" class="text-5xl font-black text-orange-500 drop-shadow-md">0</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modal Daftar Lencana -->
+        <div id="badge-modal-bg" class="modal-bg">
+            <div class="modal-content">
+                <button class="modal-close" id="modal-close-btn" title="Tutup">&times;</button>
+                <h3 id="modal-badge-title" class="font-heading text-2xl mb-4"></h3>
+                <ul id="modal-badge-list" class="space-y-4"></ul>
+                <p id="modal-badge-empty" class="text-center text-gray-400 mt-4 hidden"></p>
+            </div>
+        </div>
+
+        <!-- Bagian Riwayat Kuis -->
+        <section class="mt-10">
+            <h2 class="font-heading text-3xl text-center text-indigo-500 mb-6 drop-shadow-sm">📜 Riwayat Belajarku</h2>
+            <div id="quiz-history-list" class="space-y-4">
+                <p id="loading-history" class="text-center text-white font-bold bg-indigo-400 p-4 rounded-xl">Memuat riwayat kuis...</p>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+            authDomain: "forumwidara.firebaseapp.com",
+            projectId: "forumwidara",
+            storageBucket: "forumwidara.appspot.com",
+            messagingSenderId: "216895655168",
+            appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const profileNameEl = document.getElementById('profile-name');
+        const profileEmailEl = document.getElementById('profile-email');
+        const profileAvatarEl = document.getElementById('profile-avatar');
+        const goldBadgeEl = document.getElementById('gold-badge-count');
+        const silverBadgeEl = document.getElementById('silver-badge-count');
+        const bronzeBadgeEl = document.getElementById('bronze-badge-count');
+        const historyListEl = document.getElementById('quiz-history-list');
+
+        // Modal elements
+        const badgeModalBg = document.getElementById('badge-modal-bg');
+        const modalBadgeTitle = document.getElementById('modal-badge-title');
+        const modalBadgeList = document.getElementById('modal-badge-list');
+        const modalBadgeEmpty = document.getElementById('modal-badge-empty');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+
+        let allUserBadges = [];
+
+        function openBadgeModal(type) {
+            let title = '';
+            if (type === 'gold') title = 'Daftar Lencana Emas';
+            if (type === 'silver') title = 'Daftar Lencana Perak';
+            if (type === 'bronze') title = 'Daftar Lencana Perunggu';
+            modalBadgeTitle.textContent = title;
+
+            // Filter badge type
+            const filtered = allUserBadges.filter(b => b.badgeType === type);
+
+            // Tampilkan/hidden jika kosong
+            if (filtered.length === 0) {
+                modalBadgeList.innerHTML = '';
+                modalBadgeEmpty.textContent = 'Belum ada lencana jenis ini yang kamu dapatkan.';
+                modalBadgeEmpty.classList.remove('hidden');
+            } else {
+                modalBadgeEmpty.classList.add('hidden');
+                modalBadgeList.innerHTML = filtered.map(badge => `
+                    <li class="flex items-center gap-4 border-b pb-2">
+                        <img src="${badge.badgeImageUrl}" alt="${badge.badgeName}" class="w-12 h-12 rounded-full border" onerror="this.src='https://placehold.co/80x80/e2e8f0/4a5568?text=🖼️'">
+                        <div>
+                          <div class="font-bold">${badge.badgeName}</div>
+                          <div class="text-xs text-gray-500">Diperoleh: ${badge.earnedAt ? new Date(badge.earnedAt.seconds * 1000).toLocaleString('id-ID') : '-'}</div>
+                        </div>
+                    </li>
+                `).join('');
+            }
+            badgeModalBg.classList.add('active');
+        }
+
+        function closeBadgeModal() {
+            badgeModalBg.classList.remove('active');
+        }
+
+        modalCloseBtn.onclick = closeBadgeModal;
+        badgeModalBg.onclick = e => { if (e.target === badgeModalBg) closeBadgeModal(); }
+        document.getElementById('gold-badge-card').onclick = () => openBadgeModal('gold');
+        document.getElementById('silver-badge-card').onclick = () => openBadgeModal('silver');
+        document.getElementById('bronze-badge-card').onclick = () => openBadgeModal('bronze');
+
+        // Fungsi untuk menampilkan data pengguna (nama, email, avatar)
+        function renderUserData(data) {
+            const name = data.nama || 'Siswa Hebat';
+            profileNameEl.textContent = name;
+            profileEmailEl.textContent = data.email || 'email@anak.id';
+            const firstLetter = name.charAt(0).toUpperCase();
+            profileAvatarEl.src = `https://placehold.co/128x128/fca5a5/7c2d12.png?text=${firstLetter}`;
+        }
+        function renderBadgeData(data) {
+            goldBadgeEl.textContent = data.badges?.gold || 0;
+            silverBadgeEl.textContent = data.badges?.silver || 0;
+            bronzeBadgeEl.textContent = data.badges?.bronze || 0;
+        }
+        function renderHistory(docs) {
+            historyListEl.innerHTML = '';
+            if (docs.length === 0) {
+                 historyListEl.innerHTML = '<p class="text-center text-white font-bold bg-rose-400 p-4 rounded-xl">Kamu belum mengerjakan kuis apapun. Yuk, mulai belajar!</p>';
+                 return;
+            }
+            docs.forEach(doc => {
+                const result = doc.data();
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                const date = result.completedAt?.toDate().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) || 'Baru saja';
+                let scoreColor = result.score >= 80 ? '#22c55e' : result.score >= 60 ? '#f59e0b' : '#ef4444';
+                item.innerHTML = `
+                    <div>
+                        <p class="font-bold text-lg text-gray-800">${result.quizTitle}</p>
+                        <p class="text-sm text-gray-500">${date}</p>
+                    </div>
+                    <div class="text-right">
+                         <p class="font-extrabold text-lg" style="color:${scoreColor}">Skor: ${result.score}</p>
+                         <div class="progress-bar mt-1"><div class="progress-bar-inner" style="width: ${result.score}%; background-color: ${scoreColor};"></div></div>
+                    </div>`;
+                historyListEl.appendChild(item);
+            });
+        }
+
+        // Listener data user
+        function listenToUserData(userId) {
+            const userRef = doc(db, 'users', userId);
+            onSnapshot(userRef, (doc) => {
+                if (doc.exists()) {
+                    renderUserData(doc.data());
+                } else {
+                    renderUserData({ nama: 'Siswa Baru', email: 'tidak diketahui' });
+                }
+            });
+        }
+        // Listener badge summary
+        function listenToProfileBadges(userId) {
+            const profileRef = doc(db, 'profiles', userId);
+            onSnapshot(profileRef, (doc) => {
+                if (doc.exists()) {
+                    renderBadgeData(doc.data());
+                } else {
+                    renderBadgeData({ badges: { gold: 0, silver: 0, bronze: 0 } });
+                }
+            });
+        }
+        // Listener riwayat kuis
+        function listenToHistory(userId) {
+            const resultsRef = collection(db, 'results');
+            const q = query(resultsRef, where("userId", "==", userId), orderBy("completedAt", "desc"));
+            onSnapshot(q, (snapshot) => {
+                const loadingEl = document.getElementById('loading-history');
+                if(loadingEl) loadingEl.style.display = 'none';
+                renderHistory(snapshot.docs);
+            }, (error) => {
+                historyListEl.innerHTML = '<p class="text-center text-red-500">Gagal memuat riwayat.</p>';
+            });
+        }
+        // Load semua user_badges untuk modal
+        async function loadUserBadges(userId) {
+            if (!userId) return;
+            const q = query(collection(db, "user_badges"), where("userId", "==", userId), orderBy("earnedAt", "desc"));
+            const querySnapshot = await getDocs(q);
+            allUserBadges = [];
+            querySnapshot.forEach(doc => {
+                allUserBadges.push(doc.data());
+            });
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const uid = user.uid;
+                listenToUserData(uid);
+                listenToProfileBadges(uid);
+                listenToHistory(uid);
+                await loadUserBadges(uid); // panggil sekali saat login
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Inisialisasi ikon saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+
+    </script>
+    <a href="index.html" class="tombol-beranda" title="Kembali ke Beranda">
+        <span>🏠</span>
+        <span>Beranda</span>
+    </a>
+</body>
+</html>
