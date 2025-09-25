@@ -287,12 +287,13 @@
                         answerOptionsContainer.appendChild(btn);
                     });
                     break;
-                case 'esai':
-                    answerOptionsContainer.innerHTML = `
-                        <textarea id="esai-input" class="w-full p-3 text-lg border-2 rounded-xl border-gray-300 focus:border-blue-500 outline-none" rows="4" placeholder="Ketik jawabanmu di sini..."></textarea>
-                    `;
-                    document.getElementById('esai-input').oninput = (e) => actionBtn.disabled = e.target.value.trim() === '';
-                    break;
+                case 'esai': {
+    const userAnswer = document.getElementById('esai-input').value.trim().toLowerCase();
+    // Jadikan array jika hanya satu string
+    let possibleAnswers = Array.isArray(q.answer) ? q.answer : [q.answer];
+    possibleAnswers = possibleAnswers.map(a => a.trim().toLowerCase());
+    isCorrect = possibleAnswers.includes(userAnswer);
+    // dst...
                 case 'susun-huruf':
                     const decoys = q.decoys || [];
                     const letters = shuffleArray([...q.answer.split(''), ...decoys]);
