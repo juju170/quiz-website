@@ -114,7 +114,6 @@
         <main class="form-container mb-12">
             <h2 class="text-2xl font-bold mb-6 text-gray-700">Buat Paket Kuis Baru</h2>
             <form id="packageForm">
-                <!-- === BAGIAN HTML YANG DIPERBAIKI === -->
                 <div class="grid md:grid-cols-2 gap-6 mb-6">
                     <div class="input-group">
                         <label for="package-title" class="label-text"><i data-lucide="package"></i>Judul Paket Kuis</label>
@@ -245,7 +244,6 @@
                 const quizId = doc.id;
                 const card = document.createElement('div');
                 card.className = 'package-card flex flex-col justify-between';
-                // === BAGIAN JAVASCRIPT YANG DIPERBAIKI ===
                 card.innerHTML = `
                     <div>
                         <h3 class="text-2xl font-bold mb-2 text-gray-800">${quiz.title}</h3>
@@ -257,10 +255,10 @@
                         </div>
                     </div>                         
                     <div class="flex flex-col md:flex-row gap-3 mt-4">
-                        <a href="quiz.html?quizId=${encodeURIComponent(quizId)}" class="btn btn-primary flex-1">
-                            <i data-lucide="edit"></i> Kelola Soal
+                        <a href="riwayat-soal.html?quizId=${encodeURIComponent(quizId)}" class="btn btn-primary flex-1">
+                            <i data-lucide="list"></i> Kelola Soal
                         </a>
-                        <button class="btn btn-secondary delete-btn" data-id="${quizId}" data-title="${quiz.title}">
+                        <button class="btn btn-secondary delete-btn flex-1" data-id="${quizId}" data-title="${quiz.title}">
                            <i data-lucide="trash-2"></i> Hapus
                         </button>
                     </div>
@@ -300,4 +298,3 @@
     </script>
 </body>
 </html>
-
