@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Fredoka+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
@@ -29,6 +30,32 @@
         .btn-play { background: linear-gradient(135deg, #48bb78, #38a169); color: white; }
         .btn-disabled { background-color: #cbd5e0; color: #718096; cursor: not-allowed; }
         .badge-item { display: flex; align-items: center; gap: 0.75rem; background-color: #f7fafc; padding: 0.5rem 1rem; border-radius: 999px; font-size: 0.875rem; }
+        
+        /* Gaya Tombol Beranda dari kelola-kuis.html */
+        .tombol-beranda {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #FFC107;
+            color: #333;
+            padding: 12px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Baloo 2', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            z-index: 1000;
+        }
+
+        .tombol-beranda:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 <body class="text-gray-800">
@@ -44,6 +71,12 @@
             <p id="loading-info" class="col-span-full text-center text-gray-500">Memuat info lomba...</p>
         </div>
     </main>
+
+    <!-- Tombol Beranda ditambahkan di sini -->
+    <a href="index.html" class="tombol-beranda" title="Kembali ke Beranda">
+        <span>🏠</span>
+        <span>Beranda</span>
+    </a>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -96,7 +129,6 @@
 
             if (distance <= 0) {
                 if (timerWrapper) timerWrapper.style.display = 'none';
-                // LOGIKA BARU: Cek tombol play sebelum mengubah display, karena bisa saja tidak ada (jika sudah kedaluwarsa)
                 if (playButton) playButton.style.display = 'flex';
                 
                 if (countdownIntervals[announcementId]) {
@@ -138,13 +170,11 @@
                 const startTimeMs = announcement.startTime.toMillis();
                 const isCompleted = completedAnnouncementIds.has(announcementId);
 
-                // --- LOGIKA KEDALUWARSA BARU ---
                 const now = new Date().getTime();
                 const sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000;
                 const expirationTimeMs = startTimeMs + sevenDaysInMillis;
                 const isExpired = now > expirationTimeMs;
                 const isCountingDown = now < startTimeMs;
-                // --- END ---
 
                 const badgesHTML = Object.entries(announcement.badges || {})
                     .filter(([key, value]) => value)
@@ -153,7 +183,6 @@
                         return `<div class="badge-item"><i data-lucide="award" class="w-4 h-4 ${colors[key]}"></i><span class="font-semibold">${value}</span></div>`;
                     }).join('');
                 
-                // --- LOGIKA KONDISIONAL BARU UNTUK TIMER & TOMBOL ---
                 let bottomContentHTML = '';
 
                 if (isCompleted) {
@@ -161,12 +190,10 @@
                                            <i data-lucide="check-circle" class="w-5 h-5"></i> Kuis ini sudah dituntaskan
                                        </button>`;
                 } else if (isExpired) {
-                    // Tampilkan tombol "kedaluwarsa" jika sudah lewat 7 hari dari waktu mulai
                     bottomContentHTML = `<button class="btn-disabled w-full text-center font-bold py-3 rounded-lg mt-4 flex items-center justify-center gap-2" disabled>
                                            <i data-lucide="x-circle" class="w-5 h-5"></i> Kuis telah kedaluwarsa
                                        </button>`;
                 } else if (isCountingDown) {
-                    // Tampilkan timer jika waktu sekarang masih sebelum waktu mulai
                     bottomContentHTML = `<div class="timer-wrapper">
                                             <p class="text-sm font-semibold text-gray-500 mb-2 text-center">Lomba Dimulai Dalam:</p>
                                             <div class="timer-box" data-starttime="${startTimeMs}">
@@ -178,17 +205,14 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- Tombol play disembunyikan dan akan ditampilkan oleh updateCountdown -->
                                         <a href="play.html?quizId=${announcement.quizId}&announcementId=${announcementId}" class="btn-play w-full text-center font-bold py-3 rounded-lg mt-4 transition-transform hover:scale-105 items-center justify-center gap-2" style="display: none;">
                                             <i data-lucide="play-circle" class="w-5 h-5"></i> Mulai Kuis!
                                         </a>`;
                 } else {
-                    // Jika tidak ada kondisi di atas, berarti kuis aktif dan bisa dimainkan
                     bottomContentHTML = `<a href="play.html?quizId=${announcement.quizId}&announcementId=${announcementId}" class="btn-play w-full text-center font-bold py-3 rounded-lg mt-4 transition-transform hover:scale-105 flex items-center justify-center gap-2">
                                            <i data-lucide="play-circle" class="w-5 h-5"></i> Mulai Kuis!
                                        </a>`;
                 }
-                // --- END ---
 
                 card.innerHTML = `
                     <div class="flex-grow">
@@ -200,7 +224,6 @@
                 `;
                 grid.appendChild(card);
                 
-                // Jalankan countdown hanya jika kartu memiliki timer
                 if (isCountingDown && !isCompleted && !isExpired) {
                     updateCountdown(card, announcementId);
                     countdownIntervals[announcementId] = setInterval(() => updateCountdown(card, announcementId), 1000);
