@@ -294,6 +294,8 @@
     possibleAnswers = possibleAnswers.map(a => a.trim().toLowerCase());
     isCorrect = possibleAnswers.includes(userAnswer);
     // dst...
+                    });
+                    break;
                 case 'susun-huruf':
                     const decoys = q.decoys || [];
                     const letters = shuffleArray([...q.answer.split(''), ...decoys]);
