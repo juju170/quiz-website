@@ -289,13 +289,17 @@
                     break;
                 case 'esai': {
     const userAnswer = document.getElementById('esai-input').value.trim().toLowerCase();
-    // Jadikan array jika hanya satu string
     let possibleAnswers = Array.isArray(q.answer) ? q.answer : [q.answer];
     possibleAnswers = possibleAnswers.map(a => a.trim().toLowerCase());
     isCorrect = possibleAnswers.includes(userAnswer);
-    // dst...
-                    });
-                    break;
+    let alasan = '';
+    if (q.explanation && typeof q.explanation === 'object') {
+        if (isCorrect && q.explanation.right) alasan = q.explanation.right;
+        else if (!isCorrect && q.explanation.wrong) alasan = q.explanation.wrong;
+    }
+    feedbackText = alasan ? `Penjelasan: ${alasan}` : (isCorrect ? '' : `Jawaban yang benar: <strong>${possibleAnswers[0]}</strong>`);
+    break;
+                }
                 case 'susun-huruf':
                     const decoys = q.decoys || [];
                     const letters = shuffleArray([...q.answer.split(''), ...decoys]);
