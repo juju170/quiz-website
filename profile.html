@@ -27,6 +27,32 @@
     .history-item { background: rgba(255, 255, 255, 0.8); border-radius: 20px; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 2px solid white; }
     .progress-bar { background-color: rgba(0,0,0,0.1); border-radius: 999px; height: 12px; width: 100px; overflow: hidden; border: 1px solid white; }
     .progress-bar-inner { height: 100%; border-radius: 999px; }
+    
+    /* Gaya Tombol Beranda dari kelola-kuis.html */
+    .tombol-beranda {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #FFC107;
+        color: #333;
+        padding: 12px 20px;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'Baloo 2', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        z-index: 1000;
+    }
+
+    .tombol-beranda:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    }
 </style>
 
 </head>
@@ -72,6 +98,12 @@
         <button id="close-badge-modal" class="mt-6 w-full bg-gray-200 hover:bg-gray-300 rounded-lg py-2 font-semibold">Tutup</button>
       </div>
     </div>
+    
+    <!-- Tombol Beranda ditambahkan di sini -->
+    <a href="index.html" class="tombol-beranda" title="Kembali ke Beranda">
+        <span>🏠</span>
+        <span>Beranda</span>
+    </a>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -143,34 +175,28 @@
         });
     }
 
-    // Fitur modal lencana
     const showBadgesBtn = document.getElementById('show-badges-btn');
     const badgeModal = document.getElementById('badge-modal');
     const badgeList = document.getElementById('badge-list');
     const closeBadgeModal = document.getElementById('close-badge-modal');
 
-    // --- LOGIKA BARU UNTUK MENAMPILKAN LENCANA YANG DIPEROLEH ---
     async function loadUserBadges(userId) {
       badgeList.innerHTML = "<li class='text-center text-gray-500'>Memuat...</li>";
       try {
-        // 1. Ambil semua riwayat kuis (results) pengguna
         const resultsRef = collection(db, "results");
         const q = query(resultsRef, where("userId", "==", userId));
         const resultsSnap = await getDocs(q);
 
-        const earnedBadges = []; // Array untuk menyimpan nama lencana yang diperoleh
+        const earnedBadges = [];
 
-        // 2. Loop melalui setiap hasil kuis
         for (const resultDoc of resultsSnap.docs) {
           const resultData = resultDoc.data();
           const score = resultData.score;
           const announcementId = resultData.announcementId;
           const quizId = resultData.quizId;
 
-          // Lewati jika tidak ada ID pengumuman atau kuis
           if (!announcementId || !quizId) continue;
 
-          // 3. Ambil data dari pengumuman (untuk nama lencana) dan paket kuis (untuk ambang batas skor)
           const annRef = doc(db, "announcements", announcementId);
           const quizRef = doc(db, "quizzes", quizId);
           
@@ -180,10 +206,9 @@
             const annData = annSnap.data();
             const quizData = quizSnap.data();
             
-            const badgeNames = annData.badges || {}; // Nama lencana (cth: Juara Sains)
-            const badgeThresholds = quizData.badgeThresholds || {}; // Skor minimum (cth: gold: 90)
+            const badgeNames = annData.badges || {};
+            const badgeThresholds = quizData.badgeThresholds || {};
 
-            // 4. Tentukan lencana mana yang didapat berdasarkan skor
             if (score >= (badgeThresholds.gold || 90) && badgeNames.gold) {
               earnedBadges.push(`🥇 ${badgeNames.gold}`);
             } else if (score >= (badgeThresholds.silver || 75) && badgeNames.silver) {
@@ -194,7 +219,6 @@
           }
         }
 
-        // 5. Tampilkan daftar lencana yang telah dikumpulkan
         badgeList.innerHTML = earnedBadges.length > 0 
           ? earnedBadges.map(b => `<li class="p-3 rounded-lg bg-yellow-100 text-yellow-800 font-semibold text-center shadow-sm">${b}</li>`).join("")
           : "<li class='text-center text-gray-500'>Kamu belum pernah mendapatkan lencana. Ayo mainkan kuis!</li>";
