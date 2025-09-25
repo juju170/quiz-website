@@ -287,19 +287,15 @@
                         answerOptionsContainer.appendChild(btn);
                     });
                     break;
-                case 'esai': {
-    const userAnswer = document.getElementById('esai-input').value.trim().toLowerCase();
-    let possibleAnswers = Array.isArray(q.answer) ? q.answer : [q.answer];
-    possibleAnswers = possibleAnswers.map(a => a.trim().toLowerCase());
-    isCorrect = possibleAnswers.includes(userAnswer);
-    let alasan = '';
-    if (q.explanation && typeof q.explanation === 'object') {
-        if (isCorrect && q.explanation.right) alasan = q.explanation.right;
-        else if (!isCorrect && q.explanation.wrong) alasan = q.explanation.wrong;
-    }
-    feedbackText = alasan ? `Penjelasan: ${alasan}` : (isCorrect ? '' : `Jawaban yang benar: <strong>${possibleAnswers[0]}</strong>`);
+                case 'esai':
+    answerOptionsContainer.innerHTML = `
+        <textarea id="esai-input" class="input-field w-full" rows="3" placeholder="Tulis jawabanmu di sini..."></textarea>
+    `;
+    // Aktifkan tombol jika ada input
+    document.getElementById('esai-input').addEventListener('input', (e) => {
+        actionBtn.disabled = !e.target.value.trim();
+    });
     break;
-                }
                 case 'susun-huruf':
                     const decoys = q.decoys || [];
                     const letters = shuffleArray([...q.answer.split(''), ...decoys]);
