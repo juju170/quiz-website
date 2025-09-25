@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Soal Kuis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #F9FAFB;
+        }
+        .soal-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.07);
+            border: 1.5px solid #E5E7EB;
+            margin-bottom: 18px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.97rem;
+            transition: all 0.18s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+            color: white;
+        }
+        .btn-primary:hover { opacity: 0.93; }
+        .btn-warning {
+            background: #fff4e5;
+            color: #b45309;
+            border: 1px solid #fbbf24;
+        }
+        .btn-warning:hover { background: #fee2b2; }
+        .btn-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #f87171;
+        }
+        .btn-danger:hover { background: #ffc9c9; }
+        .tombol-beranda {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #FFC107;
+            color: #333;
+            padding: 12px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Baloo 2', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s, box-shadow 0.2s;
+            z-index: 1000;
+        }
+        .tombol-beranda:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.22);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 id="quiz-title-header" class="text-3xl md:text-4xl font-bold text-blue-700">Riwayat Soal</h1>
+            <p class="text-gray-500 mt-1 mb-4">Lihat, edit, atau hapus soal-soal dari paket kuis ini.</p>
+            <div class="flex justify-center mb-2">
+                <button id="add-question-btn" class="btn btn-primary">
+                    <i data-lucide="plus-circle"></i> Tambah Soal
+                </button>
+            </div>
+        </header>
+        <section>
+            <div id="questions-list">
+                <p class="text-center text-gray-500">Memuat soal...</p>
+            </div>
+        </section>
+        <div class="flex justify-between items-center mt-8">
+            <a href="paket-kuis.html" class="btn btn-warning">
+                <i data-lucide="arrow-left"></i> Kembali ke Paket Kuis
+            </a>
+            <button id="delete-quiz-btn" class="btn btn-danger">
+                <i data-lucide="trash-2"></i> Hapus Paket Kuis Ini
+            </button>
+        </div>
+    </div>
+    <a href="index.html" class="tombol-beranda" title="Kembali ke Beranda">
+        <span>🏠</span>
+        <span>Beranda</span>
+    </a>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, doc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+            authDomain: "forumwidara.firebaseapp.com",
+            projectId: "forumwidara",
+            storageBucket: "forumwidara.appspot.com",
+            messagingSenderId: "216895655168",
+            appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Get quizId from query params
+        const urlParams = new URLSearchParams(window.location.search);
+        const quizId = urlParams.get('quizId');
+        if (!quizId) {
+            alert("quizId tidak ditemukan! Anda akan diarahkan ke halaman Paket Kuis.");
+            window.location.href = "paket-kuis.html";
+        }
+
+        const quizDocRef = doc(db, 'quizzes', quizId);
+        const questionsColRef = collection(db, 'quizzes', quizId, 'questions');
+
+        // Set quiz title
+        async function setQuizTitle() {
+            try {
+                const docSnap = await getDoc(quizDocRef);
+                if (docSnap.exists()) {
+                    document.getElementById('quiz-title-header').textContent = `Riwayat Soal: ${docSnap.data().title || quizId}`;
+                }
+            } catch (e) {}
+        }
+        setQuizTitle();
+
+        // Render Questions
+        function renderQuestions(docs) {
+            const list = document.getElementById('questions-list');
+            list.innerHTML = "";
+            if (docs.length === 0) {
+                list.innerHTML = `<p class="text-center text-gray-500">Belum ada soal di paket kuis ini.</p>`;
+                return;
+            }
+            docs.forEach(docSnap => {
+                const soal = docSnap.data();
+                const id = docSnap.id;
+                let jawabanTeks = "";
+                switch(soal.type) {
+                    case 'pilihan-ganda':
+                        jawabanTeks = soal.options?.map(opt => opt.isCorrect ? `<span class="bg-blue-100 px-2 rounded">${opt.text}</span>` : '').join('');
+                        break;
+                    case 'esai':
+                        jawabanTeks = soal.answer?.map(ans => `<span class="bg-green-100 px-2 rounded">${ans}</span>`).join('');
+                        break;
+                    case 'susun-huruf':
+                        jawabanTeks = soal.answer || '';
+                        break;
+                    case 'pencocokkan':
+                        jawabanTeks = soal.matchingPairs?.map(pair => `<span class="block">${pair.prompt} = ${pair.match}</span>`).join('');
+                        break;
+                    case 'benar-salah':
+                        jawabanTeks = soal.answer === true ? 'Benar' : soal.answer === false ? 'Salah' : '';
+                        break;
+                    case 'susun-kalimat':
+                        jawabanTeks = soal.correctAnswers?.map(ans => `<span class="block">${ans}</span>`).join('');
+                        break;
+                    case 'tts-mini':
+                        jawabanTeks = soal.crossword ? `<span class="block">Mendatar: ${soal.crossword.horizontal}</span><span class="block">Menurun: ${soal.crossword.vertical}</span>` : '';
+                        break;
+                    default:
+                        jawabanTeks = "";
+                }
+                list.innerHTML += `
+                    <div class="soal-card">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-1">
+                            <div>
+                                <div class="font-semibold text-blue-700 text-sm mb-1">${soal.type?.replace(/-/g,' ')?.replace(/\b\w/g, l => l.toUpperCase()) || '-'}</div>
+                                <div class="font-medium mb-2">${soal.question || '(Pertanyaan kosong)'}</div>
+                                <div class="text-gray-700"><b>Jawaban:</b> <span>${jawabanTeks || '-'}</span></div>
+                            </div>
+                            <div class="flex gap-2 mt-3 md:mt-0">
+                                <button class="btn btn-primary" data-edit="${id}">
+                                    <i data-lucide="edit"></i> Edit
+                                </button>
+                                <button class="btn btn-danger" data-delete="${id}">
+                                    <i data-lucide="trash-2"></i> Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+            // Event binding
+            list.querySelectorAll('button[data-edit]').forEach(btn => {
+                btn.onclick = () => {
+                    const qid = btn.getAttribute('data-edit');
+                    window.location.href = `quiz.html?quizId=${encodeURIComponent(quizId)}&questionId=${encodeURIComponent(qid)}`;
+                }
+            });
+            list.querySelectorAll('button[data-delete]').forEach(btn => {
+                btn.onclick = async () => {
+                    const qid = btn.getAttribute('data-delete');
+                    if (confirm('Yakin ingin menghapus soal ini?')) {
+                        try {
+                            await deleteDoc(doc(db, 'quizzes', quizId, 'questions', qid));
+                        } catch (e) {
+                            alert('Gagal menghapus soal!');
+                        }
+                    }
+                }
+            });
+        }
+
+        // Live Questions
+        onSnapshot(questionsColRef, snapshot => {
+            renderQuestions(snapshot.docs);
+        });
+
+        // Tambah Soal
+        document.getElementById('add-question-btn').onclick = () => {
+            window.location.href = `quiz.html?quizId=${encodeURIComponent(quizId)}`;
+        };
+
+        // Hapus Paket Kuis
+        document.getElementById('delete-quiz-btn').onclick = async () => {
+            if (confirm('Yakin ingin menghapus seluruh paket kuis ini beserta semua soal di dalamnya?')) {
+                try {
+                    // Hapus semua soal dulu
+                    const qsnap = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')
+                        .then(m => m.getDocs(questionsColRef));
+                    const batchDeletes = qsnap.docs.map(d => deleteDoc(doc(db, 'quizzes', quizId, 'questions', d.id)));
+                    await Promise.all(batchDeletes);
+                    // Hapus dokumen quiz utama
+                    await deleteDoc(quizDocRef);
+                    alert('Paket kuis berhasil dihapus.');
+                    window.location.href = 'paket-kuis.html';
+                } catch (e) {
+                    alert('Gagal menghapus paket kuis.');
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => { lucide.createIcons(); });
+    </script>
+</body>
+  </html>
