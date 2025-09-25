@@ -149,35 +149,59 @@
     const badgeList = document.getElementById('badge-list');
     const closeBadgeModal = document.getElementById('close-badge-modal');
 
+    // --- LOGIKA BARU UNTUK MENAMPILKAN LENCANA YANG DIPEROLEH ---
     async function loadUserBadges(userId) {
       badgeList.innerHTML = "<li class='text-center text-gray-500'>Memuat...</li>";
       try {
+        // 1. Ambil semua riwayat kuis (results) pengguna
         const resultsRef = collection(db, "results");
         const q = query(resultsRef, where("userId", "==", userId));
         const resultsSnap = await getDocs(q);
-        const announcementIds = resultsSnap.docs.map(d => d.data().announcementId);
 
-        const badges = [];
-        for (let id of announcementIds) {
-          if (!id) continue;
-          const annRef = doc(db, "announcements", id);
-          const annSnap = await getDoc(annRef);
-          if (annSnap.exists()) {
-            const data = annSnap.data();
-            if (data.badges) {
-              if (data.badges.gold) badges.push(`🥇 ${data.badges.gold}`);
-              if (data.badges.silver) badges.push(`🥈 ${data.badges.silver}`);
-              if (data.badges.bronze) badges.push(`🥉 ${data.badges.bronze}`);
+        const earnedBadges = []; // Array untuk menyimpan nama lencana yang diperoleh
+
+        // 2. Loop melalui setiap hasil kuis
+        for (const resultDoc of resultsSnap.docs) {
+          const resultData = resultDoc.data();
+          const score = resultData.score;
+          const announcementId = resultData.announcementId;
+          const quizId = resultData.quizId;
+
+          // Lewati jika tidak ada ID pengumuman atau kuis
+          if (!announcementId || !quizId) continue;
+
+          // 3. Ambil data dari pengumuman (untuk nama lencana) dan paket kuis (untuk ambang batas skor)
+          const annRef = doc(db, "announcements", announcementId);
+          const quizRef = doc(db, "quizzes", quizId);
+          
+          const [annSnap, quizSnap] = await Promise.all([getDoc(annRef), getDoc(quizRef)]);
+
+          if (annSnap.exists() && quizSnap.exists()) {
+            const annData = annSnap.data();
+            const quizData = quizSnap.data();
+            
+            const badgeNames = annData.badges || {}; // Nama lencana (cth: Juara Sains)
+            const badgeThresholds = quizData.badgeThresholds || {}; // Skor minimum (cth: gold: 90)
+
+            // 4. Tentukan lencana mana yang didapat berdasarkan skor
+            if (score >= (badgeThresholds.gold || 90) && badgeNames.gold) {
+              earnedBadges.push(`🥇 ${badgeNames.gold}`);
+            } else if (score >= (badgeThresholds.silver || 75) && badgeNames.silver) {
+              earnedBadges.push(`🥈 ${badgeNames.silver}`);
+            } else if (score >= (badgeThresholds.bronze || 60) && badgeNames.bronze) {
+              earnedBadges.push(`🥉 ${badgeNames.bronze}`);
             }
           }
         }
 
-        badgeList.innerHTML = badges.length > 0 
-          ? badges.map(b => `<li class=\"p-2 rounded bg-gray-100 font-semibold\">${b}</li>`).join("")
-          : "<li class='text-center text-gray-500'>Belum ada lencana yang diperoleh.</li>";
+        // 5. Tampilkan daftar lencana yang telah dikumpulkan
+        badgeList.innerHTML = earnedBadges.length > 0 
+          ? earnedBadges.map(b => `<li class="p-3 rounded-lg bg-yellow-100 text-yellow-800 font-semibold text-center shadow-sm">${b}</li>`).join("")
+          : "<li class='text-center text-gray-500'>Kamu belum pernah mendapatkan lencana. Ayo mainkan kuis!</li>";
+
       } catch (err) {
-        console.error("Gagal ambil lencana:", err);
-        badgeList.innerHTML = "<li class='text-red-500'>Gagal memuat lencana.</li>";
+        console.error("Gagal mengambil lencana:", err);
+        badgeList.innerHTML = "<li class='text-red-500'>Oops! Gagal memuat daftar lencana.</li>";
       }
     }
 
@@ -200,3 +224,4 @@
 
 </body>
 </html>
+
