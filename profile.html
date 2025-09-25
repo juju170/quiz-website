@@ -14,38 +14,12 @@
         50% { background-position: 100% 50%; }
         100% { background-position: 0% 50%; }
     }
-
-    body { 
-        font-family: 'Baloo 2', sans-serif; 
-        background: linear-gradient(-45deg, #fde68a, #fca5a5, #818cf8, #60a5fa, #f472b6);
-        background-size: 400% 400%;
-        animation: gradient-animation 25s ease infinite;
-        color: #4B5563;
-    }
+    body { font-family: 'Baloo 2', sans-serif; background: linear-gradient(-45deg, #fde68a, #fca5a5, #818cf8, #60a5fa, #f472b6); background-size: 400% 400%; animation: gradient-animation 25s ease infinite; color: #4B5563; }
     .font-heading { font-family: 'Fredoka One', cursive; }
-    .profile-header { 
-        background: rgba(255, 255, 255, 0.5);
-        backdrop-filter: blur(10px);
-        border-bottom: 5px solid white;
-        border-radius: 0 0 50% 50% / 0 0 30% 30%; 
-        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-    }
-    .badge-card { 
-        background-color: rgba(255, 255, 255, 0.7);
-        border-radius: 24px; 
-        padding: 1.5rem; 
-        text-align: center; 
-        border: 3px solid white;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07); 
-        transition: transform 0.3s ease, box-shadow 0.3s ease; 
-    }
-    .badge-card:hover { 
-        transform: translateY(-10px) rotate(2deg); 
-        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1); 
-    }
-    .badge-icon-container { 
-        width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; transition: transform 0.3s ease;
-    }
+    .profile-header { background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px); border-bottom: 5px solid white; border-radius: 0 0 50% 50% / 0 0 30% 30%; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+    .badge-card { background-color: rgba(255, 255, 255, 0.7); border-radius: 24px; padding: 1.5rem; text-align: center; border: 3px solid white; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .badge-card:hover { transform: translateY(-10px) rotate(2deg); box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1); }
+    .badge-icon-container { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; transition: transform 0.3s ease; }
     .badge-card:hover .badge-icon-container { transform: scale(1.1) rotate(-5deg); }
     .gold { background-color: #FFFBEB; border: 4px solid #FBBF24; color: #FBBF24; }
     .silver { background-color: #F9FAFB; border: 4px solid #D1D5DB; color: #9CA3AF; }
@@ -72,9 +46,9 @@
         <section class="bg-white/40 backdrop-blur-sm p-6 md:p-8 rounded-3xl shadow-lg border-4 border-white">
             <h2 class="font-heading text-3xl text-center text-rose-500 mb-6 drop-shadow-sm">🏆 Lencana Prestasiku 🏆</h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <div class="badge-card"><div class="badge-icon-container gold"><i data-lucide="award" class="w-10 h-10"></i></div><h3 class="text-xl font-extrabold text-gray-800">Lencana Emas</h3><p id="gold-badge-count" class="text-5xl font-black text-amber-500 drop-shadow-md">0</p></div>
-                <div class="badge-card"><div class="badge-icon-container silver"><i data-lucide="shield" class="w-10 h-10"></i></div><h3 class="text-xl font-extrabold text-gray-800">Lencana Perak</h3><p id="silver-badge-count" class="text-5xl font-black text-gray-500 drop-shadow-md">0</p></div>
-                <div class="badge-card"><div class="badge-icon-container bronze"><i data-lucide="medal" class="w-10 h-10"></i></div><h3 class="text-xl font-extrabold text-gray-800">Lencana Perunggu</h3><p id="bronze-badge-count" class="text-5xl font-black text-orange-500 drop-shadow-md">0</p></div>
+                <div class="badge-card"><div class="badge-icon-container gold"><img src="https://cdn-icons-png.flaticon.com/512/2583/2583344.png" class="w-12 h-12" alt="Medali Emas"></div><h3 class="text-xl font-extrabold text-gray-800">Lencana Emas</h3><p id="gold-badge-count" class="text-5xl font-black text-amber-500 drop-shadow-md">0</p></div>
+                <div class="badge-card"><div class="badge-icon-container silver"><img src="https://cdn-icons-png.flaticon.com/512/2583/2583343.png" class="w-12 h-12" alt="Medali Perak"></div><h3 class="text-xl font-extrabold text-gray-800">Lencana Perak</h3><p id="silver-badge-count" class="text-5xl font-black text-gray-500 drop-shadow-md">0</p></div>
+                <div class="badge-card"><div class="badge-icon-container bronze"><img src="https://cdn-icons-png.flaticon.com/512/2583/2583342.png" class="w-12 h-12" alt="Medali Perunggu"></div><h3 class="text-xl font-extrabold text-gray-800">Lencana Perunggu</h3><p id="bronze-badge-count" class="text-5xl font-black text-orange-500 drop-shadow-md">0</p></div>
             </div>
             <div class="text-center mt-6">
                 <button id="show-badges-btn" class="px-6 py-3 bg-amber-400 text-white font-bold rounded-full shadow-lg hover:bg-amber-500 transition">🎖️ Lihat Daftar Lencana</button>
@@ -199,7 +173,7 @@
         }
 
         badgeList.innerHTML = badges.length > 0 
-          ? badges.map(b => `<li class="p-2 rounded bg-gray-100 font-semibold">${b}</li>`).join("")
+          ? badges.map(b => `<li class=\"p-2 rounded bg-gray-100 font-semibold\">${b}</li>`).join("")
           : "<li class='text-center text-gray-500'>Belum ada lencana yang diperoleh.</li>";
       } catch (err) {
         console.error("Gagal ambil lencana:", err);
