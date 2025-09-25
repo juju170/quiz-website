@@ -316,6 +316,8 @@
                         break;
                     case 'esai':
                         const esaiAnswer = document.getElementById('esai-answer').value.trim();
+// Split berdasarkan '||' lalu trim hasilnya
+questionData.answer = esaiAnswer.split('||').map(a => a.trim()).filter(Boolean);
                         const esaiExplanationRight = document.getElementById('esai-explanation-right').value.trim();
                         const esaiExplanationWrong = document.getElementById('esai-explanation-wrong').value.trim();
                         if (!esaiAnswer) throw new Error('Kunci jawaban esai tidak boleh kosong.');
