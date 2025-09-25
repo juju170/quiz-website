@@ -315,18 +315,15 @@
                         questionData.options = options;
                         break;
                     case 'esai':
-                        const esaiAnswer = document.getElementById('esai-answer').value.trim();
-// Split berdasarkan '||' lalu trim hasilnya
-questionData.answer = esaiAnswer.split('||').map(a => a.trim()).filter(Boolean);
-                        const esaiExplanationRight = document.getElementById('esai-explanation-right').value.trim();
-                        const esaiExplanationWrong = document.getElementById('esai-explanation-wrong').value.trim();
-                        if (!esaiAnswer) throw new Error('Kunci jawaban esai tidak boleh kosong.');
-                        questionData.answer = esaiAnswer;
-                        questionData.explanation = {
-                            right: esaiExplanationRight,
-                            wrong: esaiExplanationWrong
-                        };
-                        break;
+    const esaiAnswer = document.getElementById('esai-answer').value.trim();
+    if (!esaiAnswer) throw new Error('Kunci jawaban esai tidak boleh kosong.');
+    // Selalu array!
+    questionData.answer = esaiAnswer.split('||').map(a => a.trim()).filter(Boolean);
+    questionData.explanation = {
+        right: document.getElementById('esai-explanation-right').value.trim(),
+        wrong: document.getElementById('esai-explanation-wrong').value.trim()
+    };
+    break;
                     case 'susun-huruf':
                         const answer = document.getElementById('susun-huruf-answer').value.trim().toUpperCase();
                         if (!answer) throw new Error('Jawaban susun huruf tidak boleh kosong.');
