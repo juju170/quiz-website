@@ -153,20 +153,31 @@
         const icons = ['fa-dragon', 'fa-castle', 'fa-hat-wizard', 'fa-rocket', 'fa-ghost'];
         let iconIndex = 0;
 
-        querySnapshot.forEach((doc) => {
-            const story = doc.data();
+        for (const docSnap of querySnapshot.docs) {
+            const story = docSnap.data();
+            let authorName = "";
+            if (story.createdBy) {
+                const userRef = doc(db, "users", story.createdBy);
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                    authorName = userSnap.data().nama || "Pengguna Tanpa Nama";
+                } else {
+                    authorName = "(User tidak ditemukan)";
+                }
+            }
+
             const storyCard = document.createElement('div');
             storyCard.className = 'bg-white p-5 rounded-2xl shadow-lg cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all flex items-center gap-4';
             storyCard.innerHTML = `
                 <i class="fas ${icons[iconIndex % icons.length]} text-3xl text-white p-4 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500"></i>
                 <div>
                     <h3 class="text-xl font-bold text-gray-800">${story.title}</h3>
-                    <p class="text-sm text-gray-500">Ketuk untuk memulai petualangan!</p>
+                    <p class="text-sm text-gray-500">Dibuat oleh: ${authorName}</p>
                 </div>`;
-            storyCard.onclick = () => loadStory(doc.id);
+            storyCard.onclick = () => loadStory(docSnap.id);
             storyListContainer.appendChild(storyCard);
             iconIndex++;
-        });
+        }
     }
 
     backToListBtn.addEventListener('click', () => {
