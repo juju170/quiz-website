@@ -57,14 +57,16 @@
         </div>
     </div>
 
-<script type="module">
+            <script type="module">
     // --- KONFIGURASI WAJIB DIISI ---
-    const firebaseConfig = { apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
-    authDomain: "forumwidara.firebaseapp.com",
-    projectId: "forumwidara",
-    storageBucket: "forumwidara.firebasestorage.app",
-    messagingSenderId: "216895655168",
-    appId: "1:216895655168:web:59255f600fc3b3b44eb7e5" };
+    const firebaseConfig = { 
+        apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
+        authDomain: "forumwidara.firebaseapp.com",
+        projectId: "forumwidara",
+        storageBucket: "forumwidara.firebasestorage.app",
+        messagingSenderId: "216895655168",
+        appId: "1:216895655168:web:59255f600fc3b3b44eb7e5" 
+    };
     // --------------------------------
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -84,7 +86,51 @@
 
     let currentStoryData = null;
 
-    function renderNode(nodeId) {
+    // === IndexedDB Setup ===
+    let imgDB;
+    const request = indexedDB.open("storyCacheDB", 1);
+
+    request.onupgradeneeded = function(e) {
+        imgDB = e.target.result;
+        imgDB.createObjectStore("images", { keyPath: "url" });
+    };
+    request.onsuccess = function(e) {
+        imgDB = e.target.result;
+    };
+
+    function cacheImage(url, blob) {
+        if (!imgDB) return;
+        const tx = imgDB.transaction("images", "readwrite");
+        const store = tx.objectStore("images");
+        store.put({ url: url, blob: blob });
+    }
+
+    function getCachedImage(url) {
+        return new Promise((resolve, reject) => {
+            if (!imgDB) return resolve(null);
+            const tx = imgDB.transaction("images", "readonly");
+            const store = tx.objectStore("images");
+            const req = store.get(url);
+            req.onsuccess = () => resolve(req.result ? req.result.blob : null);
+            req.onerror = reject;
+        });
+    }
+
+    async function loadImage(url) {
+        if (!url) return 'https://placehold.co/600x400/e2e8f0/adb5bd?text=...';
+        let cached = await getCachedImage(url);
+        if (cached) {
+            return URL.createObjectURL(cached); // pakai cache
+        } else {
+            let response = await fetch(url);
+            let blob = await response.blob();
+            cacheImage(url, blob); // simpan ke cache
+            return URL.createObjectURL(blob); // tampilkan
+        }
+    }
+    // === End IndexedDB ===
+
+    async function renderNode(nodeId) {
         if (!currentStoryData || !currentStoryData.nodes[nodeId]) {
             storyNodeTitle.textContent = "Akhir Cerita";
             storyNodeText.textContent = "Petualanganmu telah berakhir di sini. Sampai jumpa di cerita lainnya!";
@@ -96,8 +142,11 @@
         const node = currentStoryData.nodes[nodeId];
         storyNodeTitle.textContent = node.title;
         storyNodeText.innerHTML = node.text.replace(/\n/g, '<br>');
-        storyImage.src = node.imageUrl || 'https://placehold.co/600x400/e2e8f0/adb5bd?text=...';
-        
+
+        // --- modifikasi pakai IndexedDB cache ---
+        const imgUrl = await loadImage(node.imageUrl);
+        storyImage.src = imgUrl;
+
         storyOptions.innerHTML = ''; 
         if (node.options && node.options.length > 0) {
             const colors = ['bg-sky-500', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500'];
@@ -132,7 +181,7 @@
     
     async function displayStoryList() {
         const storiesRef = collection(db, "ceritaBercabang");
-        const q = query(storiesRef, orderBy("createdAt", "desc")); // Urutkan cerita terbaru di atas
+        const q = query(storiesRef, orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
 
         storyListContainer.innerHTML = '';
@@ -149,8 +198,6 @@
             const storyCard = document.createElement('div');
             storyCard.className = 'bg-white p-5 rounded-2xl shadow-lg cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all flex items-center gap-4';
             
-            // --- PERUBAHAN DI SINI ---
-            // Menambahkan nama penulis (authorName) ke dalam kartu cerita
             storyCard.innerHTML = `
                 <i class="fas ${icons[iconIndex % icons.length]} text-3xl text-white p-4 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500"></i>
                 <div>
@@ -158,7 +205,6 @@
                     <p class="text-sm text-gray-500">Oleh: <span class="font-semibold">${story.authorName || 'Penulis Anonim'}</span></p>
                     <p class="text-sm text-gray-500 mt-1">Ketuk untuk memulai petualangan!</p>
                 </div>`;
-            // --- AKHIR PERUBAHAN ---
             
             storyCard.onclick = () => loadStory(doc.id);
             storyListContainer.appendChild(storyCard);
@@ -173,7 +219,7 @@
     });
 
     displayStoryList();
-</script>
+                    </script>
 </body>
 </html>
 
