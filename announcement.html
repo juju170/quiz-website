@@ -166,8 +166,8 @@
                     </div>
                 </fieldset>
 
-                <!-- Kuis dan Waktu Mulai -->
-                <div class="grid md:grid-cols-2 gap-6">
+                <!-- Kuis, Waktu Mulai, dan Maks Partisipan -->
+                <div class="grid md:grid-cols-3 gap-6">
                     <div class="input-group">
                         <label for="quiz-select" class="label-text"><i data-lucide="link"></i>Hubungkan Kuis</label>
                         <select id="quiz-select" class="input-field bg-white" required>
@@ -177,6 +177,11 @@
                      <div class="input-group">
                         <label for="start-time" class="label-text"><i data-lucide="calendar-clock"></i>Waktu Mulai Lomba</label>
                         <input type="datetime-local" id="start-time" class="input-field" required>
+                    </div>
+                    <!-- [MODIFIED] Input untuk maksimal partisipan -->
+                    <div class="input-group">
+                        <label for="max-participants" class="label-text"><i data-lucide="users"></i>Maksimal Partisipan</label>
+                        <input type="number" id="max-participants" class="input-field" placeholder="Contoh: 30" min="1" required>
                     </div>
                 </div>
                
@@ -285,15 +290,27 @@
                         console.error("Error fetching quiz title:", error);
                     }
                 }
+                
+                // [MODIFIED] Menampilkan info maks partisipan di kartu
+                const maxParticipantsInfo = announcement.maxParticipants 
+                    ? `<div class="flex justify-between items-center text-sm font-semibold bg-white/30 px-4 py-2 rounded-lg mt-2">
+                            <span><i data-lucide="users" class="inline-block mr-1"></i>Maks Partisipan</span>
+                            <span class="font-bold">${announcement.maxParticipants}</span>
+                       </div>`
+                    : '';
+
 
                 card.innerHTML = `
                     <div>
                         <h3 class="text-2xl font-bold mb-2">${announcement.title}</h3>
                         <p class="mb-4 text-gray-800">${announcement.description}</p>
                     </div>
-                    <div class="flex justify-between items-center text-sm font-semibold bg-white/30 px-4 py-2 rounded-lg mt-auto">
-                        <span><i data-lucide="book-open" class="inline-block mr-1"></i>${quizTitle}</span>
-                        <a href="play.html?quizId=${announcement.quizId}" class="bg-white text-gray-800 px-3 py-1 rounded-full hover:bg-gray-100">Mainkan!</a>
+                    <div class="mt-auto">
+                        <div class="flex justify-between items-center text-sm font-semibold bg-white/30 px-4 py-2 rounded-lg">
+                            <span><i data-lucide="book-open" class="inline-block mr-1"></i>${quizTitle}</span>
+                            <a href="see-info.html" class="bg-white text-gray-800 px-3 py-1 rounded-full hover:bg-gray-100">Lihat Info</a>
+                        </div>
+                        ${maxParticipantsInfo}
                     </div>
                 `;
                 announcementListContainer.appendChild(card);
@@ -309,12 +326,19 @@
             const description = form.deskripsi.value;
             const quizId = form['quiz-select'].value;
             const startTimeValue = form['start-time'].value;
+            // [MODIFIED] Mengambil nilai maksimal partisipan
+            const maxParticipants = parseInt(form['max-participants'].value, 10);
 
-            if (!title || !quizId || !startTimeValue) {
-                alert('Judul, Kuis, dan Waktu Mulai wajib diisi!');
+            if (!title || !quizId || !startTimeValue || !maxParticipants) {
+                alert('Semua kolom wajib diisi, termasuk maksimal partisipan!');
                 return;
             }
             
+            if (maxParticipants <= 0) {
+                alert('Maksimal partisipan harus lebih dari 0.');
+                return;
+            }
+
             const badges = {
                 gold: form['badge-gold'].value.trim(),
                 silver: form['badge-silver'].value.trim(),
@@ -328,6 +352,7 @@
                 description,
                 quizId,
                 startTime,
+                maxParticipants, // [MODIFIED] Menyimpan maxParticipants ke Firestore
                 badges,
                 createdAt: serverTimestamp()
             };
