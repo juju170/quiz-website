@@ -1,246 +1,270 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buat Pertanyaan Baru - Komunitas Ceria</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Baloo 2', sans-serif; margin: 0; background-color: #f0f9ff; color: #333; }
-        .container { max-width: 800px; margin: 30px auto; padding: 20px; }
-        .page-header { text-align: center; margin-bottom: 30px; }
-        .page-header h1 { font-size: 2.5rem; margin: 0; color: #0277bd; }
-        .form-container { background-color: white; padding: 30px; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
-        .input-group { margin-bottom: 20px; }
-        .input-group label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 1.1rem; }
-        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #ccc; box-sizing: border-box; font-family: 'Baloo 2', sans-serif; font-size: 1rem; }
-        .input-group .info-text { font-size: 0.9rem; color: #666; margin-top: 5px; }
-        .kuota-container { text-align: center; padding: 15px; background-color: #e3f2fd; border: 2px solid #90caf9; border-radius: 10px; margin-bottom: 25px; font-weight: 700; }
-        .kuota-container.no-quota { background-color: #ffebee; border-color: #ef9a9a; color: #c62828; }
-        .answer-options { display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 15px; }
-        .answer-option { display: flex; flex-direction: column; gap: 8px; }
-        .option-main { display: flex; align-items: center; }
-        .option-main input[type="radio"] { margin-right: 10px; width: 20px; height: 20px; flex-shrink: 0; }
-        .option-main input[type="text"] { flex-grow: 1; }
-        .option-explanation input[type="text"] { width: 100%; padding: 10px; border-radius: 6px; border: 2px solid #e0e0e0; box-sizing: border-box; font-size: 0.9rem; background-color: #fafafa; }
-        .submit-section { text-align: center; margin-top: 30px; }
-        .btn-submit { padding: 15px 40px; font-size: 1.2rem; font-weight: 800; background-color: #ff8f00; border-bottom: 4px solid #e65100; cursor: pointer; border: none; border-radius: 8px; color: white; }
-        .btn-submit:disabled { background-color: #9e9e9e; color: #e0e0e0; cursor: not-allowed; border-bottom: 4px solid #616161; }
-        .message { text-align: center; padding: 15px; border-radius: 8px; font-weight: 700; margin-top: 20px; display: none; }
-        .message.success { background-color: #e8f5e9; color: #2e7d32; }
-        .message.error { background-color: #ffebee; color: #c62828; }
-        .tombol-beranda { position: fixed; bottom: 20px; right: 20px; background-color: #FFC107; color: #333; padding: 12px 20px; border-radius: 50px; display: flex; align-items: center; gap: 8px; font-family: 'Baloo 2', sans-serif; font-size: 1.1rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); transition: transform 0.2s ease, box-shadow 0.2s ease; z-index: 1000; }
-        .tombol-beranda:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buat Pertanyaan Baru - Komunitas Ceria</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Baloo 2', sans-serif; margin: 0; background-color: #f0f9ff; color: #333; }
+    .container { max-width: 900px; margin: 30px auto; padding: 20px; }
+    .page-header { text-align: center; margin-bottom: 30px; }
+    .page-header h1 { font-size: 2.5rem; margin: 0; color: #0277bd; }
+    .form-container { background-color: white; padding: 30px; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+    .input-group { margin-bottom: 20px; }
+    .input-group label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 1.1rem; }
+    .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #ccc; font-size: 1rem; box-sizing: border-box; }
+    .dynamic-fields { margin-top: 20px; }
+    .answer-pair { display: flex; gap: 10px; margin-bottom: 10px; }
+    .answer-pair input { flex: 1; }
+    .btn-small { background: #0288d1; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 700; }
+    .btn-small:hover { background: #0277bd; }
+    .submit-section { text-align: center; margin-top: 30px; }
+    .btn-submit { padding: 15px 40px; font-size: 1.2rem; font-weight: 800; background-color: #ff8f00; border-bottom: 4px solid #e65100; cursor: pointer; border: none; border-radius: 8px; color: white; }
+    .btn-submit:disabled { background-color: #9e9e9e; border-bottom: 4px solid #616161; cursor: not-allowed; }
+    .message { text-align: center; padding: 15px; border-radius: 8px; font-weight: 700; margin-top: 20px; display: none; }
+    .message.success { background-color: #e8f5e9; color: #2e7d32; }
+    .message.error { background-color: #ffebee; color: #c62828; }
+    .tombol-beranda { position: fixed; bottom: 20px; right: 20px; background-color: #FFC107; color: #333; padding: 12px 20px; border-radius: 50px; text-decoration: none; font-weight: 700; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header class="page-header">
-            <h1>Buat Pertanyaan Baru ✍️</h1>
-            <p>Satu pertanyaan yang kamu buat sangat berarti untuk teman sekelasmu!</p>
-        </header>
-        <main>
-            <div id="kuota-container" class="kuota-container">Memeriksa data...</div>
-            <form id="question-form" class="form-container">
-                <fieldset id="form-fieldset" disabled>
-                    <div class="input-group">
-                        <label for="pertanyaan-teks">Tulis Pertanyaanmu</label>
-                        <textarea id="pertanyaan-teks" placeholder="Contoh: Hewan yang suka mengejar tikus adalah..." required rows="3"></textarea>
-                    </div>
-                    <div class="input-group">
-                        <label for="url-gambar">URL Gambar (Opsional)</label>
-                        <input type="url" id="url-gambar" placeholder="Tempel link Google Drive atau link file GitHub di sini">
-                    </div>
-                     <div class="input-group">
-                        <label for="url-suara">URL Suara (Opsional)</label>
-                        <input type="url" id="url-suara" placeholder="Tempel link Google Drive atau link file GitHub di sini">
-                    </div>
-                    <div class="input-group">
-                        <label for="kategori-pilihan">Pilih Kategori Soal</label>
-                        <!-- PERUBAHAN 1: Menyesuaikan daftar pelajaran -->
-                        <select id="kategori-pilihan" required>
-                            <option value="">-- Pilih Mata Pelajaran --</option>
-                            <option value="matematika">Matematika</option>
-                            <option value="bahasa_indonesia">Bahasa Indonesia</option>
-                            <option value="bahasa_inggris">Bahasa Inggris</option>
-                            <option value="ipa">Ilmu Pengetahuan Alam</option>
-                            <option value="agama_islam">Ilmu Agama Islam</option>
-                            <option value="ips">Ilmu Sosial</option>
-                            <option value="sejarah">Ilmu Sejarah</option>
-                            <option value="pkn">Ilmu Kewarganegaraan</option>
-                            <option value="basa_sunda">Basa Sunda</option>
-                            <option value="olahraga">Ilmu Olahraga</option>
-                            <option value="seni">Ilmu Seni</option>
-                            <option value="campuran_seru">Campuran Teka Teki</option>
-                        </select>
-                    </div>
-                    <div id="pilihan-ganda-container">
-                        <hr><label style="font-weight:700;">Tulis 4 Pilihan Jawaban</label>
-                        <div id="answer-options-container" class="answer-options"></div>
-                    </div>
-                    <!-- PERUBAHAN 2: Menambahkan field penjelasan yang opsional -->
-                    <div class="input-group">
-                        <label for="penjelasan-jawaban">Penjelasan Jawaban (Opsional)</label>
-                        <textarea id="penjelasan-jawaban" placeholder="Jelaskan mengapa jawaban yang benar itu benar. Ini akan membantu temanmu belajar." rows="3"></textarea>
-                        <div class="info-text">Penjelasan ini akan muncul setelah kuis selesai. Boleh dikosongkan.</div>
-                    </div>
-                    <div class="submit-section">
-                        <button type="submit" id="submit-btn" class="btn-submit">Simpan Pertanyaan ✅</button>
-                    </div>
-                </fieldset>
-                <div id="message-box" class="message"></div>
-            </form>
-        </main>
-    </div>
-    <a href="index.html" class="tombol-beranda" title="Kembali ke Beranda">
-        <span>🏠</span>
-        <span>Beranda</span>
-    </a>
+  <div class="container">
+    <header class="page-header">
+      <h1>Buat Pertanyaan Baru ✍️</h1>
+      <p>Satu pertanyaan yang kamu buat sangat berarti untuk teman sekelasmu!</p>
+    </header>
+    <main>
+      <div id="kuota-container" class="kuota-container">Memeriksa data...</div>
+      <form id="question-form" class="form-container">
+        <fieldset id="form-fieldset" disabled>
+          <div class="input-group">
+            <label for="pertanyaan-teks">Tulis Pertanyaanmu</label>
+            <textarea id="pertanyaan-teks" required rows="3"></textarea>
+          </div>
+          <div class="input-group">
+            <label for="url-gambar">URL Gambar (Opsional)</label>
+            <input type="url" id="url-gambar">
+          </div>
+          <div class="input-group">
+            <label for="url-suara">URL Suara (Opsional)</label>
+            <input type="url" id="url-suara">
+          </div>
+          <div class="input-group">
+            <label for="kategori-pilihan">Pilih Kategori Soal</label>
+            <select id="kategori-pilihan" required>
+              <option value="">-- Pilih Mata Pelajaran --</option>
+              <option value="matematika">Matematika</option>
+              <option value="bahasa_indonesia">Bahasa Indonesia</option>
+              <option value="bahasa_inggris">Bahasa Inggris</option>
+              <option value="ipa">IPA</option>
+              <option value="sejarah">Sejarah</option>
+              <option value="ips">IPS</option>
+              <option value="pkn">PKn</option>
+              <option value="seni">Seni</option>
+              <option value="olahraga">Olahraga</option>
+              <option value="campuran_seru">Campuran Seru</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="tipe-soal">Tipe Soal</label>
+            <select id="tipe-soal" required>
+              <option value="pilihan_ganda">Pilihan Ganda</option>
+              <option value="esai">Esai (jawaban bisa pakai ||)</option>
+              <option value="pencocokan">Pencocokan</option>
+              <option value="susun_kata">Susun Kata jadi Kalimat</option>
+              <option value="multi_benar">Beberapa Jawaban Benar</option>
+              <option value="benar_salah">Benar / Salah</option>
+              <option value="tts_mini">TTS Mini</option>
+            </select>
+          </div>
+          <div id="dynamic-fields" class="dynamic-fields"></div>
+          <div class="submit-section">
+            <button type="submit" id="submit-btn" class="btn-submit">Simpan Pertanyaan ✅</button>
+          </div>
+        </fieldset>
+        <div id="message-box" class="message"></div>
+      </form>
+    </main>
+  </div>
+  <a href="index.html" class="tombol-beranda">🏠 Beranda</a>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, doc, Timestamp, writeBatch, query, where, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, doc, Timestamp, writeBatch, query, where, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc", authDomain: "forumwidara.firebaseapp.com", projectId: "forumwidara", storageBucket: "forumwidara.appspot.com", messagingSenderId: "216895655168", appId: "1:216895655168:web:59255f600fc3b3b44eb7e5" };
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    const firebaseConfig = { apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc", authDomain: "forumwidara.firebaseapp.com", projectId: "forumwidara", storageBucket: "forumwidara.appspot.com", messagingSenderId: "216895655168", appId: "1:216895655168:web:59255f600fc3b3b44eb7e5" };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        const formFieldset = document.getElementById('form-fieldset');
-        const questionForm = document.getElementById('question-form');
-        const messageBox = document.getElementById('message-box');
-        const kuotaContainer = document.getElementById('kuota-container');
-        
-        let currentUser = null;
-        let userProfile = null;
-        const MAX_QUOTA = 5;
- 
-        async function checkUserData(user) {
-            if (!user) return;
-            
-            const profileRef = doc(db, 'profiles', user.uid);
-            const profileSnap = await getDoc(profileRef);
+    const formFieldset = document.getElementById('form-fieldset');
+    const questionForm = document.getElementById('question-form');
+    const messageBox = document.getElementById('message-box');
+    const kuotaContainer = document.getElementById('kuota-container');
+    const tipeSoalSelect = document.getElementById('tipe-soal');
+    const dynamicFields = document.getElementById('dynamic-fields');
 
-            if (!profileSnap.exists() || !profileSnap.data().class) {
-                kuotaContainer.textContent = "Kamu harus mengatur kelas di profilmu terlebih dahulu!";
-                kuotaContainer.classList.add('no-quota');
-                formFieldset.disabled = true;
-                setTimeout(() => { window.location.href = 'profil.html'; }, 3000);
-                return;
-            }
-            userProfile = profileSnap.data();
+    let currentUser = null;
+    let userProfile = null;
+    const MAX_QUOTA = 5;
 
-            const startOfToday = new Date();
-            startOfToday.setHours(0, 0, 0, 0);
-            const startOfTodayTimestamp = Timestamp.fromDate(startOfToday);
-            
-            const questionsRef = collection(db, "pertanyaan");
-            const q = query(questionsRef, 
-                where("dibuatOleh", "==", user.uid),
-                where("dibuatPada", ">=", startOfTodayTimestamp)
-            );
+    function showMessage(type, text) {
+      messageBox.className = `message ${type}`;
+      messageBox.textContent = text;
+      messageBox.style.display = 'block';
+      setTimeout(() => messageBox.style.display = 'none', 4000);
+    }
 
-            try {
-                const querySnapshot = await getDocs(q);
-                const questionsMadeToday = querySnapshot.size;
-                const sisaKuota = MAX_QUOTA - questionsMadeToday;
-                if (sisaKuota > 0) {
-                    kuotaContainer.textContent = `Sisa kuota membuat pertanyaan hari ini: ${sisaKuota}`;
-                    kuotaContainer.classList.remove('no-quota');
-                    formFieldset.disabled = false;
-                } else {
-                    kuotaContainer.textContent = `Batas ${MAX_QUOTA} pertanyaan hari ini tercapai. Coba lagi besok!`;
-                    kuotaContainer.classList.add('no-quota');
-                    formFieldset.disabled = true;
-                }
-            } catch (error) {
-                console.error("Gagal memeriksa kuota:", error);
-                kuotaContainer.textContent = "Gagal memeriksa kuota.";
-                kuotaContainer.classList.add('no-quota');
-                formFieldset.disabled = true;
-            }
+    function renderDynamicFields(type) {
+      dynamicFields.innerHTML = "";
+      if (type === "pilihan_ganda") {
+        for (let i = 0; i < 4; i++) {
+          dynamicFields.innerHTML += `
+            <div><input type="radio" name="correct" value="${i}" ${i===0?"checked":""}> 
+              <input type="text" class="jawaban" placeholder="Pilihan ${i+1}"></div>`;
         }
+      } else if (type === "esai") {
+        dynamicFields.innerHTML = `<textarea id="esai-answer" placeholder="Jawaban benar, pisahkan dengan || jika variasi"></textarea>`;
+      } else if (type === "pencocokan") {
+        dynamicFields.innerHTML = `<div id="pairs"></div>
+          <button type="button" class="btn-small" onclick="addPair()">+ Tambah Pasangan</button>`;
+      } else if (type === "susun_kata") {
+        dynamicFields.innerHTML = `<input id="susun-kata" placeholder="Kalimat benar">
+          <textarea id="alasan-benar" placeholder="Alasan jika benar"></textarea>
+          <textarea id="alasan-salah" placeholder="Alasan jika salah"></textarea>`;
+      } else if (type === "multi_benar") {
+        for (let i=0;i<4;i++) {
+          dynamicFields.innerHTML += `<div><input type="checkbox" class="multi-check"> 
+            <input type="text" class="multi-answer" placeholder="Jawaban ${i+1}">
+            <input type="text" class="multi-reason" placeholder="Alasan"></div>`;
+        }
+      } else if (type === "benar_salah") {
+        dynamicFields.innerHTML = `<label><input type="radio" name="bs" value="benar" checked> Benar</label>
+          <label><input type="radio" name="bs" value="salah"> Salah</label>
+          <textarea id="alasan-benar-bs" placeholder="Alasan jika benar"></textarea>
+          <textarea id="alasan-salah-bs" placeholder="Alasan jika salah"></textarea>`;
+      } else if (type === "tts_mini") {
+        dynamicFields.innerHTML = `
+          <input id="mendatar" placeholder="Jawaban Mendatar">
+          <input id="menurun" placeholder="Jawaban Menurun">
+          <input id="cross-index" type="number" placeholder="Index huruf yang sama (0-based)">
+          <textarea id="alasan-semua-benar" placeholder="Alasan jika semua benar"></textarea>
+          <textarea id="alasan-semua-salah" placeholder="Alasan jika semua salah"></textarea>
+          <textarea id="alasan-mendatar" placeholder="Alasan jika mendatar saja benar"></textarea>
+          <textarea id="alasan-menurun" placeholder="Alasan jika menurun saja benar"></textarea>`;
+      }
+    }
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                renderAnswerOptions();
-                await checkUserData(user);
-            } else {
-                window.location.href = 'index.html'; 
-            }
+    window.addPair = function() {
+      const div = document.createElement("div");
+      div.className = "answer-pair";
+      div.innerHTML = `<input placeholder="Kiri"><input placeholder="Kanan"><input placeholder="Alasan">`;
+      document.getElementById("pairs").appendChild(div);
+    };
+
+    tipeSoalSelect.addEventListener("change", e => renderDynamicFields(e.target.value));
+
+    async function checkUserData(user) {
+      if (!user) return;
+      const profileRef = doc(db, 'profiles', user.uid);
+      const profileSnap = await getDoc(profileRef);
+      if (!profileSnap.exists() || !profileSnap.data().class) {
+        kuotaContainer.textContent = "Atur kelas di profil dulu!";
+        formFieldset.disabled = true;
+        return;
+      }
+      userProfile = profileSnap.data();
+      formFieldset.disabled = false;
+      kuotaContainer.textContent = "Kamu bisa membuat soal!";
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        await checkUserData(user);
+        renderDynamicFields(tipeSoalSelect.value);
+      } else {
+        window.location.href = 'index.html';
+      }
+    });
+
+    questionForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const tipe = tipeSoalSelect.value;
+      const data = {
+        untukKelas: userProfile.class,
+        teksPertanyaan: document.getElementById("pertanyaan-teks").value,
+        kategori: document.getElementById("kategori-pilihan").value,
+        dibuatOleh: currentUser.uid,
+        dibuatPada: Timestamp.now(),
+        tipeSoal: tipe,
+        urlGambar: document.getElementById("url-gambar").value.trim() || null,
+        urlSuara: document.getElementById("url-suara").value.trim() || null
+      };
+
+      if (tipe==="pilihan_ganda") {
+        const opts = [...document.querySelectorAll(".jawaban")].map(i=>i.value);
+        const correct = document.querySelector("input[name='correct']:checked").value;
+        data.pilihanJawaban = opts;
+        data.jawabanBenar = opts[correct];
+      } else if (tipe==="esai") {
+        data.jawabanBenar = document.getElementById("esai-answer").value;
+      } else if (tipe==="pencocokan") {
+        const pairs = [...document.querySelectorAll("#pairs .answer-pair")].map(div=>{
+          const [l,r,a] = [...div.querySelectorAll("input")].map(i=>i.value);
+          return {kiri:l, kanan:r, alasan:a};
         });
-
-        questionForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!userProfile || !userProfile.class) {
-                showMessage('error', 'Tidak bisa menyimpan, kelas tidak ditemukan di profil.');
-                return;
-            }
-            formFieldset.disabled = true;
-            
-            try {
-                const batch = writeBatch(db);
-                const pertanyaanRef = doc(collection(db, "pertanyaan"));
-                
-                const dataPertanyaan = {
-                    untukKelas: userProfile.class,
-                    teksPertanyaan: document.getElementById('pertanyaan-teks').value,
-                    kategori: document.getElementById('kategori-pilihan').value,
-                    dibuatOleh: currentUser.uid,
-                    dibuatPada: Timestamp.now(),
-                    tipeSoal: 'pilihan_ganda',
-                    urlGambar: document.getElementById('url-gambar').value.trim() || null,
-                    urlSuara: document.getElementById('url-suara').value.trim() || null,
-                    // PERUBAHAN 2: Menyimpan data dari field penjelasan
-                    penjelasan: document.getElementById('penjelasan-jawaban').value.trim() || null
-                };
-
-                const jawabanTeks = document.querySelectorAll('.jawaban-teks');
-                const correctIndex = document.querySelector('input[name="correct-answer"]:checked').value;
-                
-                dataPertanyaan.pilihanJawaban = Array.from(jawabanTeks).map(input => input.value);
-                dataPertanyaan.jawabanBenar = dataPertanyaan.pilihanJawaban[correctIndex];
-
-                batch.set(pertanyaanRef, dataPertanyaan);
-                await batch.commit();
-                
-                showMessage('success', 'Pertanyaan berhasil disimpan!');
-                questionForm.reset();
-                renderAnswerOptions();
-
-            } catch (error) {
-                console.error("Error:", error);
-                showMessage('error', error.message || 'Terjadi kesalahan saat menyimpan.');
-            } finally {
-                await checkUserData(currentUser);
-            }
+        data.pasangan = pairs;
+      } else if (tipe==="susun_kata") {
+        data.jawabanBenar = document.getElementById("susun-kata").value;
+        data.alasan = {
+          benar: document.getElementById("alasan-benar").value,
+          salah: document.getElementById("alasan-salah").value
+        };
+      } else if (tipe==="multi_benar") {
+        const rows = [...dynamicFields.querySelectorAll("div")];
+        data.pilihan = rows.map(r=>{
+          return {
+            teks: r.querySelector(".multi-answer").value,
+            benar: r.querySelector(".multi-check").checked,
+            alasan: r.querySelector(".multi-reason").value
+          };
         });
+      } else if (tipe==="benar_salah") {
+        data.jawabanBenar = document.querySelector("input[name='bs']:checked").value;
+        data.alasan = {
+          benar: document.getElementById("alasan-benar-bs").value,
+          salah: document.getElementById("alasan-salah-bs").value
+        };
+      } else if (tipe==="tts_mini") {
+        data.jawaban = {
+          mendatar: document.getElementById("mendatar").value,
+          menurun: document.getElementById("menurun").value,
+          crossIndex: parseInt(document.getElementById("cross-index").value)
+        };
+        data.alasan = {
+          semua_benar: document.getElementById("alasan-semua-benar").value,
+          semua_salah: document.getElementById("alasan-semua-salah").value,
+          mendatar: document.getElementById("alasan-mendatar").value,
+          menurun: document.getElementById("alasan-menurun").value
+        };
+      }
 
-        function renderAnswerOptions() {
-            const container = document.getElementById('answer-options-container');
-            container.innerHTML = Array.from({ length: 4 }, (_, i) => `
-                <div class="answer-option">
-                    <div class="option-main">
-                        <input type="radio" name="correct-answer" value="${i}" ${i === 0 ? 'checked' : ''} required>
-                        <input type="text" class="jawaban-teks" placeholder="Pilihan Jawaban ${i + 1}" required>
-                    </div>
-                </div>
-            `).join('');
-        }
-        
-        function showMessage(type, text) {
-            messageBox.className = `message ${type}`;
-            messageBox.textContent = text;
-            messageBox.style.display = 'block';
-            setTimeout(() => { messageBox.style.display = 'none'; }, 4000);
-        }
-    </script>
+      try {
+        const batch = writeBatch(db);
+        const pertanyaanRef = doc(collection(db, "pertanyaan"));
+        batch.set(pertanyaanRef, data);
+        await batch.commit();
+        showMessage("success","Pertanyaan berhasil disimpan!");
+        questionForm.reset();
+        renderDynamicFields(tipeSoalSelect.value);
+      } catch(err) {
+        console.error(err);
+        showMessage("error","Gagal simpan soal");
+      }
+    });
+  </script>
 </body>
 </html>
-
-
