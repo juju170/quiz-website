@@ -33,6 +33,7 @@
       background:linear-gradient(180deg, rgba(255,255,255,0.8), rgba(250,250,250,0.95));margin-bottom:8px;position:relative;}
     .choices{display:grid;gap:8px}
     .choice-row{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap; padding-right: 30px;}
+    .choice-row.no-remove{padding-right: 10px;}
     .choice-row input[type=text]{flex:1}
     .choice-reason{width:100%}
     .submit-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
@@ -363,14 +364,106 @@
             }
         }
     }
+    
+    function renderEsai(){
+      dynamicArea.innerHTML = `
+        <div class="section-title">Esai — jawaban & alasan</div>
+        <div class="answer-card">
+          <label>Variasi jawaban yang diterima (pisahkan dengan <code>||</code>)</label>
+          <input id="esai-variations" placeholder="contoh: soekarno || ir. soekarno || ir soekarno">
+          <label style="margin-top:10px">Alasan jika jawaban DINYATAKAN BENAR (akan tampil setelah kuis)</label>
+          <textarea id="esai-reason-correct" placeholder="Jelaskan mengapa jawaban itu benar"></textarea>
+          <label style="margin-top:10px">Alasan / feedback jika jawaban SALAH</label>
+          <textarea id="esai-reason-wrong" placeholder="Sampaikan koreksi atau hint jika jawaban tidak sesuai"></textarea>
+        </div>
+      `;
+    }
 
-    function renderEsai(){ /* ... (kode tidak berubah) ... */ }
-    function renderPencocokan(){ /* ... (kode tidak berubah) ... */ }
-    function handlePencocokanClick(e) { /* ... (kode tidak berubah) ... */ }
-    function renderSusunKata(){ /* ... (kode tidak berubah) ... */ }
-    function renderMultiBenar(){ /* ... (kode tidak berubah) ... */ }
-    function renderBenarSalah(){ /* ... (kode tidak berubah) ... */ }
-    function renderTtsMini(){ /* ... (kode tidak berubah) ... */ }
+    function renderPencocokan(){
+      dynamicArea.innerHTML = `
+        <div class="section-title">Pencocokan — tambahkan pasangan</div>
+        <div id="pairs-container"></div>
+        <div style="margin-top:8px"><button type="button" id="add-pair" class="btn">+ Tambah Pasangan</button></div>
+      `;
+    }
+    
+    function handlePencocokanClick(e) {
+      if(e.target && e.target.id === 'add-pair') {
+        const c = document.getElementById('pairs-container');
+        if(c) {
+          const d = document.createElement('div'); d.className='answer-card';
+          d.innerHTML = `<div style="display:flex;gap:8px"><input placeholder="Kiri (mis: A)" class="pair-left"><input placeholder="Kanan (mis: 1)" class="pair-right"></div><textarea class="pair-reason" placeholder="Alasan untuk pasangan ini (opsional)"></textarea>`;
+          c.appendChild(d);
+        }
+      }
+    }
+
+    function renderSusunKata(){
+      dynamicArea.innerHTML = `
+        <div class="section-title">Susun Kata jadi Kalimat</div>
+        <div class="answer-card">
+          <label>Kalimat Benar</label>
+          <input id="susun-kalimat" placeholder="Tulis kalimat yang benar">
+          <label style="margin-top:8px">Alasan jika BENAR</label>
+          <textarea id="susun-reason-true"></textarea>
+          <label style="margin-top:8px">Alasan jika SALAH</label>
+          <textarea id="susun-reason-false"></textarea>
+        </div>
+      `;
+    }
+
+    function renderMultiBenar(){
+      dynamicArea.innerHTML = `
+        <div class="section-title">Beberapa Jawaban Benar</div>
+        <div class="choices">
+          ${[0,1,2,3].map(i=>`
+            <div class="answer-card choice-row no-remove">
+              <div style="width:36px;text-align:center"><input type="checkbox" class="multi-check" data-index="${i}"></div>
+              <div style="flex:1">
+                <input type="text" class="multi-answer" placeholder="Pilihan ${i+1}">
+                <textarea class="multi-reason" placeholder="Alasan jika pilihan ini benar / salah (ringkas)"></textarea>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderBenarSalah(){
+      dynamicArea.innerHTML = `
+        <div class="section-title">Benar / Salah</div>
+        <div class="answer-card">
+          <label>Pilih jawaban yang benar untuk soal ini</label>
+          <div style="display:flex;gap:12px;margin-top:8px"><label><input type="radio" name="bs" value="benar" checked> Benar</label><label><input type="radio" name="bs" value="salah"> Salah</label></div>
+          <label style="margin-top:10px">Alasan jika BENAR</label>
+          <textarea id="bs-reason-true"></textarea>
+          <label style="margin-top:10px">Alasan jika SALAH</label>
+          <textarea id="bs-reason-false"></textarea>
+        </div>
+      `;
+    }
+
+    function renderTtsMini(){
+      dynamicArea.innerHTML = `
+        <div class="section-title">TTS Mini (mendatar & menurun)</div>
+        <div class="answer-card">
+          <label>Jawaban Mendatar</label>
+          <input id="tts-mendatar" placeholder="Mis: BALI">
+          <label style="margin-top:8px">Jawaban Menurun</label>
+          <input id="tts-menurun" placeholder="Mis: BUKU">
+          <label style="margin-top:8px">Index huruf yang sama (0-based). Contoh: huruf pertama sama -> 0</label>
+          <input id="tts-crossindex" type="number" min="0" value="0">
+          <label style="margin-top:10px">Alasan: semua benar</label>
+          <textarea id="tts-all-true"></textarea>
+          <label style="margin-top:10px">Alasan: semua salah</label>
+          <textarea id="tts-all-false"></textarea>
+          <label style="margin-top:10px">Alasan: mendatar saja benar</label>
+          <textarea id="tts-only-horiz"></textarea>
+          <label style="margin-top:10px">Alasan: menurun saja benar</label>
+          <textarea id="tts-only-vert"></textarea>
+        </div>
+      `;
+    }
 
     function renderDynamic(){
       const t = tipeSoal.value;
@@ -444,9 +537,41 @@
       try{
         const t = tipeSoal.value;
         if(t==='pilihan_ganda'){
-          // ... (logika pilihan ganda tidak berubah)
-        } 
-        // ... (blok else if lainnya tidak berubah)
+          const optionEls = [...dynamicArea.querySelectorAll('.choice-row')];
+          const opts = optionEls.map(el => el.querySelector('.jawaban')?.value.trim() || '');
+          const reasons = optionEls.map(el => el.querySelector('.jawaban-alasan')?.value.trim() || '');
+          if (opts.some(opt => opt === '')) { showFormMessage('err', 'Semua kolom pilihan jawaban harus diisi.'); return; }
+          const selectedRadio = dynamicArea.querySelector('.pg-check:checked');
+          if (!selectedRadio) { showFormMessage('err', 'Tentukan satu jawaban yang benar untuk pilihan ganda.'); return; }
+          const correctIndex = parseInt(selectedRadio.dataset.index, 10);
+          const correctBools = optionEls.map((el, index) => index === correctIndex);
+          data.pilihanJawaban = opts;
+          data.penjelasanPilihan = reasons;
+          data.jawabanBenar = correctBools;
+        } else if(t==='esai'){
+          data.jawabanBenar = document.getElementById('esai-variations').value.trim();
+          data.penjelasanEsai = {
+            benar: document.getElementById('esai-reason-correct').value.trim(),
+            salah: document.getElementById('esai-reason-wrong').value.trim()
+          };
+        } else if(t==='pencocokan'){
+          const pairs = [...dynamicArea.querySelectorAll('#pairs-container .answer-card')].map(card=>{
+            return {kiri:card.querySelector('.pair-left').value.trim(), kanan:card.querySelector('.pair-right').value.trim(), alasan:card.querySelector('.pair-reason').value.trim()}
+          });
+          data.pasangan = pairs;
+        } else if(t==='susun_kata'){
+          data.jawabanBenar = document.getElementById('susun-kalimat').value.trim();
+          data.penjelasanSusun = { benar: document.getElementById('susun-reason-true').value.trim(), salah: document.getElementById('susun-reason-false').value.trim() };
+        } else if(t==='multi_benar'){
+          const rows = [...dynamicArea.querySelectorAll('.multi-answer')].map((el,i)=>({ teks: el.value.trim(), benar: dynamicArea.querySelectorAll('.multi-check')[i].checked, alasan: dynamicArea.querySelectorAll('.multi-reason')[i].value.trim() }));
+          data.pilihan = rows;
+        } else if(t==='benar_salah'){
+          data.jawabanBenar = dynamicArea.querySelector('input[name="bs"]:checked').value;
+          data.penjelasanBS = { benar: document.getElementById('bs-reason-true').value.trim(), salah: document.getElementById('bs-reason-false').value.trim() };
+        } else if(t==='tts_mini'){
+          data.jawaban = { mendatar: document.getElementById('tts-mendatar').value.trim(), menurun: document.getElementById('tts-menurun').value.trim(), crossIndex: Number(document.getElementById('tts-crossindex').value) };
+          data.penjelasanTTS = { semua_benar: document.getElementById('tts-all-true').value.trim(), semua_salah: document.getElementById('tts-all-false').value.trim(), mendatar: document.getElementById('tts-only-horiz').value.trim(), menurun: document.getElementById('tts-only-vert').value.trim() };
+        }
 
         // Save to Firestore using a batch
         const batch = writeBatch(db);
@@ -466,14 +591,34 @@
         previewMedia.textContent='Tidak ada media'; 
         renderDynamic();
 
-        // Re-check quota immediately after saving
         await checkQuestionQuota(currentUser.uid);
 
       }catch(err){ console.error(err); showFormMessage('err', err.message || 'Gagal menyimpan soal'); }
     });
 
     // ---------- PREVIEW & RESET ----------
-    btnPreview.addEventListener('click', () => { /* ... (kode tidak berubah) ... */ });
+    btnPreview.addEventListener('click', () => {
+      const q = document.getElementById('pertanyaan-teks').value.trim();
+      if(!q){ previewCard.textContent='Tulis pertanyaan dulu untuk melihat pratinjau'; return }
+      const t = tipeSoal.value;
+      let html = `<strong>${q}</strong><div style="margin-top:8px;font-size:0.95rem;color:var(--muted)">Tipe: ${t}</div>`;
+      if(uploadedImageUrl) html += `<div style="margin-top:8px"><img src="${uploadedImageUrl}" style="max-width:100%;border-radius:8px"></div>`;
+      if(uploadedAudioUrl) html += `<div style="margin-top:8px"><audio controls src="${uploadedAudioUrl}" style="width:100%"></audio></div>`;
+      
+      if(t==='pilihan_ganda'){
+        const optionEls = [...dynamicArea.querySelectorAll('.choice-row')];
+        html += '<div style="margin-top:10px">';
+        optionEls.forEach((el,i)=>{
+          const teks = el.querySelector('.jawaban')?.value.trim()||`Pilihan ${i+1}`;
+          const alasan = el.querySelector('.jawaban-alasan')?.value.trim()||'';
+          const benar = !!el.querySelector('.pg-check')?.checked;
+          html += `<div style="text-align:left;padding:8px;border-radius:8px;margin-bottom:6px;background:${benar ? '#e8f5e9' : '#fafafa'}"><strong>${teks}</strong><div class="note">Benar: ${benar}</div><div style="margin-top:6px;color:#555">${alasan||'Belum ada alasan'}</div></div>`;
+        });
+        html += '</div>';
+      }
+      previewCard.innerHTML = html;
+    });
+
     btnReset.addEventListener('click', ()=>{ document.getElementById('question-form').reset(); uploadedImageUrl=null; uploadedAudioUrl=null; previewMedia.textContent='Tidak ada media'; renderDynamic(); });
     
     // ---------- INITIAL & DYNAMIC EVENT SETUP ----------
