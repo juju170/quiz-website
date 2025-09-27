@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buat Pertanyaan Baru — Komunitas Ceria</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#fff8f3; --card:#ffffff; --accent1:#ff8a80; --accent2:#ffd180; --accent3:#8c9eff; --accent4:#80d8ff; --muted:#6b6b6b;
+      --glass: rgba(255,255,255,0.7);
+    }
+    *{box-sizing:border-box}
+    body{font-family:'Baloo 2',sans-serif;margin:0;background:linear-gradient(135deg,var(--accent4), #e8f5e9); min-height:100vh; padding:15px;}
+    .wrap{max-width:900px;margin:0 auto}
+    header{display:flex;gap:12px;align-items:center;margin-bottom:15px;flex-wrap:wrap}
+    header .logo{background:var(--card);padding:12px;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,0.08);display:flex;align-items:center;gap:10px}
+    header h1{margin:0;font-size:1.3rem;color:#263238}
+    header p{margin:0;color:var(--muted);font-size:0.9rem}
+    .card{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 8px 25px rgba(0,0,0,0.08);margin-bottom:14px}
+    .grid{display:grid;grid-template-columns:1fr 320px;gap:14px}
+    form .row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+    label{display:block;font-weight:800;margin-bottom:6px;color:#263238}
+    input[type=text], input[type=url], input[type=number], textarea, select{
+      width:100%;padding:10px;border-radius:10px;border:2px solid rgba(0,0,0,0.06);
+      background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,250,250,0.95));font-size:1rem
+    }
+    textarea{min-height:70px;resize:vertical}
+    .section-title{font-weight:900;color:#37474f;margin-bottom:10px}
+    .uploader{background:linear-gradient(90deg,var(--accent2),var(--accent4));padding:10px;border-radius:12px;color:#263238;font-size:0.9rem}
+    .btn{display:inline-block;padding:10px 14px;border-radius:12px;border:none;background:var(--accent3);color:white;font-weight:800;cursor:pointer;font-size:0.95rem}
+    .btn.ghost{background:transparent;border:2px dashed rgba(0,0,0,0.08);color:#263238}
+    .answer-card{border-radius:12px;padding:10px;border:3px solid rgba(0,0,0,0.04);
+      background:linear-gradient(180deg, rgba(255,255,255,0.8), rgba(250,250,250,0.95));margin-bottom:8px}
+    .choices{display:grid;gap:8px}
+    .choice-row{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
+    .choice-row input[type=text]{flex:1}
+    .choice-reason{width:100%}
+    .submit-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+    .btn-submit{background:linear-gradient(90deg,var(--accent1),#ffb74d);padding:12px 18px;border-radius:12px;border:none;color:white;font-weight:900;font-size:1rem;cursor:pointer}
+    .btn-neutral{background:#eeeeee;color:#333;border-radius:10px;padding:10px 12px;border:none}
+    .note{font-size:0.9rem;color:var(--muted);margin-top:6px}
+    @media(max-width:780px){.grid{grid-template-columns:1fr}.right-column{order:-1}}
+    .message{padding:10px;border-radius:10px;margin-top:10px;font-weight:800;font-size:0.9rem}
+    .message.success{background:#e8f5e9;color:#1b5e20}
+    .message.error{background:#ffebee;color:#b71c1c}
+    .preview-media{border-radius:10px;padding:8px;border:1px dashed rgba(0,0,0,0.06);min-height:48px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(250,250,250,0.98))}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="#FF8A80"/><path d="M6 12h12M12 6v12" stroke="#fff" stroke-width="1.5"/></svg>
+        <div>
+          <h1>Buat Pertanyaan Baru</h1>
+          <p>Isi tipe soal & media — Cloudinary placeholder + URL GitHub (tetap didukung)</p>
+        </div>
+      </div>
+    </header>
+    <div class="grid">
+      <div>
+        <form id="question-form" class="card" autocomplete="off">
+          <div>
+            <div class="section-title">Informasi Soal</div>
+            <div class="row">
+              <div style="flex:1">
+                <label for="pertanyaan-teks">Tulis Pertanyaan</label>
+                <textarea id="pertanyaan-teks" placeholder="Contoh: Siapa proklamator kemerdekaan RI?"></textarea>
+              </div>
+            </div>
+
+            <div class="row">
+              <div style="flex:1">
+                <label for="kategori-pilihan">Kategori Mata Pelajaran</label>
+                <select id="kategori-pilihan">
+                  <option value="">-- Pilih Mata Pelajaran --</option>
+                  <option value="matematika">Matematika</option>
+                  <option value="bahasa_indonesia">Bahasa Indonesia</option>
+                  <option value="bahasa_inggris">Bahasa Inggris</option>
+                  <option value="ipa">Ilmu Pengetahuan Alam</option>
+                  <option value="agama_islam">Agama Islam</option>
+                  <option value="ips">Ilmu Sosial</option>
+                  <option value="sejarah">Sejarah</option>
+                  <option value="pkn">Kewarganegaraan</option>
+                  <option value="basa_sunda">Basa Sunda</option>
+                  <option value="olahraga">Olahraga</option>
+                  <option value="seni">Seni</option>
+                  <option value="campuran_seru">Campuran Seru</option>
+                </select>
+              </div>
+              <div style="width:200px">
+                <label for="tipe-soal">Tipe Soal</label>
+                <select id="tipe-soal">
+                  <option value="pilihan_ganda">Pilihan Ganda</option>
+                  <option value="esai">Esai</option>
+                  <option value="pencocokan">Pencocokan</option>
+                  <option value="susun_kata">Susun Kata</option>
+                  <option value="multi_benar">Beberapa Jawaban Benar</option>
+                  <option value="benar_salah">Benar / Salah</option>
+                  <option value="tts_mini">TTS Mini</option>
+                </select>
+              </div>
+            </div>
+
+            <hr style="border:none;height:10px;background:linear-gradient(90deg,var(--accent2),transparent);border-radius:6px;margin:10px 0">
+
+            <div class="section-title">Media — Cloudinary atau URL</div>
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+              <div style="flex:1">
+                <div class="uploader">
+                  <strong>Cloudinary Config (placeholder)</strong>
+                  <div style="margin-top:8px">
+                    <input id="cloud-name" placeholder="Cloud name (ex: demo)" />
+                    <input id="upload-preset" placeholder="Unsigned upload preset (opsional)" style="margin-top:8px" />
+                    <small>Jika terisi, file akan diupload ke Cloudinary. Jika dikosongkan, gunakan URL langsung.</small>
+                  </div>
+                </div>
+              </div>
+              <div style="width:220px">
+                <label>Preview Media</label>
+                <div id="preview-media" class="preview-media">Tidak ada media</div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:12px;margin-bottom:10px;align-items:flex-start;flex-wrap:wrap">
+              <div style="flex:1;min-width:220px">
+                <label>Upload Gambar / Pilih file</label>
+                <input type="file" id="file-image" accept="image/*" />
+                <div style="margin-top:8px;display:flex;gap:8px">
+                  <button type="button" id="upload-image-btn" class="btn">Upload ke Cloudinary</button>
+                  <button type="button" id="use-github-image" class="btn ghost">Gunakan URL GitHub</button>
+                </div>
+                <input type="url" id="github-image-url" placeholder="Tempel URL gambar dari repo GitHub (opsional)" style="margin-top:8px" />
+              </div>
+
+              <div style="flex:1;min-width:220px">
+                <label>Upload Audio / Pilih file</label>
+                <input type="file" id="file-audio" accept="audio/*" />
+                <div style="margin-top:8px;display:flex;gap:8px">
+                  <button type="button" id="upload-audio-btn" class="btn">Upload Audio ke Cloudinary</button>
+                  <button type="button" id="use-github-audio" class="btn ghost">Gunakan URL GitHub</button>
+                </div>
+                <input type="url" id="github-audio-url" placeholder="Tempel URL audio dari repo GitHub (opsional)" style="margin-top:8px" />
+              </div>
+            </div>
+
+            <hr style="margin:12px 0;border:none;height:1px;background:linear-gradient(90deg,transparent,rgba(0,0,0,0.06),transparent)">
+
+            <div id="dynamic-area"></div>
+
+            <div class="submit-row">
+              <button type="button" id="btn-preview" class="btn-neutral">Pratinjau</button>
+              <div style="display:flex;gap:12px">
+                <button type="button" id="btn-reset" class="btn-neutral">Reset</button>
+                <button type="submit" id="btn-save" class="btn-submit">Simpan Pertanyaan</button>
+              </div>
+            </div>
+
+            <div id="form-message" class="message" style="display:none"></div>
+          </div>
+        </form>
+      </div>
+
+      <aside class="right-column">
+        <div class="card">
+          <div class="section-title">Panduan singkat</div>
+          <div class="hint">• Untuk Esai: pisahkan variasi jawaban dengan <code>||</code>, contoh: <em>soekarno || ir. soekarno || ir soekarno</em>
+          <br>• Pilih media: kamu bisa upload ke Cloudinary (butuh cloud name & preset) atau pakai URL GitHub langsung.
+          <br>• Pilihan Ganda: centang 2–4 jawaban benar dan tambahkan alasan per pilihan sehingga akan tampil di halaman play.</div>
+          <hr>
+          <div class="section-title">Preview Input</div>
+          <div id="preview-card" class="answer-card small-muted">Pratinjau akan muncul di sini</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, doc, Timestamp, writeBatch, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // ---------- FIREBASE CONFIG ----------
+    const firebaseConfig = { apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc", authDomain: "forumwidara.firebaseapp.com", projectId: "forumwidara", storageBucket: "forumwidara.appspot.com", messagingSenderId: "216895655168", appId: "1:216895655168:web:59255f600fc3b3b44eb7e5" };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // ---------- DOM ----------
+    const tipeSoal = document.getElementById('tipe-soal');
+    const dynamicArea = document.getElementById('dynamic-area');
+    const previewMedia = document.getElementById('preview-media');
+    const previewCard = document.getElementById('preview-card');
+    const fileImage = document.getElementById('file-image');
+    const fileAudio = document.getElementById('file-audio');
+    const uploadImageBtn = document.getElementById('upload-image-btn');
+    const uploadAudioBtn = document.getElementById('upload-audio-btn');
+    const cloudNameInput = document.getElementById('cloud-name');
+    const uploadPresetInput = document.getElementById('upload-preset');
+    const githubImageUrl = document.getElementById('github-image-url');
+    const githubAudioUrl = document.getElementById('github-audio-url');
+    const useGithubImage = document.getElementById('use-github-image');
+    const useGithubAudio = document.getElementById('use-github-audio');
+    const btnSave = document.getElementById('btn-save');
+    const btnPreview = document.getElementById('btn-preview');
+    const btnReset = document.getElementById('btn-reset');
+    const formMessage = document.getElementById('form-message');
+
+    // state
+    let currentUser = null;
+    let userProfile = null;
+    let uploadedImageUrl = null; // final image url used
+    let uploadedAudioUrl = null; // final audio url used
+
+    // ---------- HELPERS ----------
+    function showFormMessage(type, text){ formMessage.className = 'message '+(type==='ok'?'success':'error'); formMessage.textContent = text; formMessage.style.display='block'; setTimeout(()=>formMessage.style.display='none',5000); }
+
+    function setPreview(mediaType, url){ if(!url){ previewMedia.textContent='Tidak ada media'; return };
+      if(mediaType==='image'){ previewMedia.innerHTML = `<img src="${url}" alt="preview" style="max-width:100%;border-radius:8px;">` }
+      if(mediaType==='audio'){ previewMedia.innerHTML += `<audio controls src="${url}" style="width:100%;margin-top:8px"></audio>` }
+    }
+
+    async function uploadToCloudinary(file, resourceType='image'){
+      const cloud = cloudNameInput.value.trim();
+      if(!cloud) throw new Error('Isi Cloud name terlebih dahulu');
+      const preset = uploadPresetInput.value.trim();
+      const url = `https://api.cloudinary.com/v1_1/${cloud}/${resourceType}/upload`;
+      const fd = new FormData();
+      fd.append('file', file);
+      if(preset) fd.append('upload_preset', preset);
+      const res = await fetch(url, { method:'POST', body:fd });
+      if(!res.ok) throw new Error('Upload gagal: '+res.statusText);
+      const j = await res.json();
+      return j.secure_url || j.url;
+    }
+
+    // allow github url usage
+    useGithubImage.addEventListener('click',()=>{ uploadedImageUrl = githubImageUrl.value.trim() || null; setPreview('image', uploadedImageUrl); showFormMessage('ok','Menggunakan URL gambar dari GitHub (atau URL langsung)'); });
+    useGithubAudio.addEventListener('click',()=>{ uploadedAudioUrl = githubAudioUrl.value.trim() || null; setPreview('audio', uploadedAudioUrl); showFormMessage('ok','Menggunakan URL audio dari GitHub (atau URL langsung)'); });
+
+    uploadImageBtn.addEventListener('click', async ()=>{
+      if(!fileImage.files[0]){ showFormMessage('err','Pilih file gambar dulu'); return }
+      try{ uploadImageBtn.disabled = true; uploadImageBtn.textContent='Uploading...';
+        const url = await uploadToCloudinary(fileImage.files[0],'image');
+        uploadedImageUrl = url; setPreview('image', url); showFormMessage('ok','Gambar terupload ke Cloudinary');
+      }catch(e){ console.error(e); showFormMessage('err', e.message||'Gagal upload gambar') }finally{ uploadImageBtn.disabled=false; uploadImageBtn.textContent='Upload ke Cloudinary' }
+    });
+
+    uploadAudioBtn.addEventListener('click', async ()=>{
+      if(!fileAudio.files[0]){ showFormMessage('err','Pilih file audio dulu'); return }
+      try{ uploadAudioBtn.disabled = true; uploadAudioBtn.textContent='Uploading...';
+        const url = await uploadToCloudinary(fileAudio.files[0],'video'); // audio use video api on Cloudinary
+        uploadedAudioUrl = url; setPreview('audio', url); showFormMessage('ok','Audio terupload ke Cloudinary');
+      }catch(e){ console.error(e); showFormMessage('err', e.message||'Gagal upload audio') }finally{ uploadAudioBtn.disabled=false; uploadAudioBtn.textContent='Upload Audio ke Cloudinary' }
+    });
+
+    // ---------- DYNAMIC FORM RENDERING ----------
+    function renderPilihanGanda(){
+      dynamicArea.innerHTML = `
+        <div class="section-title">Pilihan Ganda — Isi jawaban & alasan per pilihan</div>
+        <div class="note">Centang minimal <strong>2</strong> dan maksimal <strong>4</strong> jawaban benar.</div>
+        <div class="choices">
+          ${[0,1,2,3].map(i=>`
+            <div class="answer-card choice-row">
+              <div style="width:36px;text-align:center">
+                <input type="checkbox" class="pg-check" data-index="${i}">
+              </div>
+              <div style="flex:1">
+                <input type="text" class="jawaban" placeholder="Pilihan ${i+1}">
+                <textarea class="jawaban-alasan" placeholder="Alasan jika pilihan ini BENAR atau mengapa SALAH (ringkas)"></textarea>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderEsai(){
+      dynamicArea.innerHTML = `
+        <div class="section-title">Esai — jawaban & alasan</div>
+        <div class="answer-card">
+          <label>Variasi jawaban yang diterima (pisahkan dengan <code>||</code>)</label>
+          <input id="esai-variations" placeholder="contoh: soekarno || ir. soekarno || ir soekarno">
+          <label style="margin-top:10px">Alasan jika jawaban DINYATAKAN BENAR (akan tampil setelah kuis)</label>
+          <textarea id="esai-reason-correct" placeholder="Jelaskan mengapa jawaban itu benar"></textarea>
+          <label style="margin-top:10px">Alasan / feedback jika jawaban SALAH</label>
+          <textarea id="esai-reason-wrong" placeholder="Sampaikan koreksi atau hint jika jawaban tidak sesuai"></textarea>
+        </div>
+      `;
+    }
+
+    function renderPencocokan(){
+      dynamicArea.innerHTML = `
+        <div class="section-title">Pencocokan — tambahkan pasangan</div>
+        <div id="pairs-container"></div>
+        <div style="margin-top:8px"><button type="button" id="add-pair" class="btn">+ Tambah Pasangan</button></div>
+      `;
+      setTimeout(()=>{
+        const add = document.getElementById('add-pair');
+        add.addEventListener('click',()=>{
+          const c = document.getElementById('pairs-container');
+          const d = document.createElement('div'); d.className='answer-card';
+          d.innerHTML = `<div style="display:flex;gap:8px"><input placeholder="Kiri (mis: A)" class="pair-left"><input placeholder="Kanan (mis: 1)" class="pair-right"></div><textarea class="pair-reason" placeholder="Alasan untuk pasangan ini (opsional)"></textarea>`;
+          c.appendChild(d);
+        });
+      },50);
+    }
+
+    function renderSusunKata(){
+      dynamicArea.innerHTML = `
+        <div class="section-title">Susun Kata jadi Kalimat</div>
+        <div class="answer-card">
+          <label>Kalimat Benar</label>
+          <input id="susun-kalimat" placeholder="Tulis kalimat yang benar">
+          <label style="margin-top:8px">Alasan jika BENAR</label>
+          <textarea id="susun-reason-true"></textarea>
+          <label style="margin-top:8px">Alasan jika SALAH</label>
+          <textarea id="susun-reason-false"></textarea>
+        </div>
+      `;
+    }
+
+    function renderMultiBenar(){
+      dynamicArea.innerHTML = `
+        <div class="section-title">Beberapa Jawaban Benar</div>
+        <div class="choices">
+          ${[0,1,2,3].map(i=>`
+            <div class="answer-card choice-row">
+              <div style="width:36px;text-align:center"><input type="checkbox" class="multi-check" data-index="${i}"></div>
+              <div style="flex:1">
+                <input type="text" class="multi-answer" placeholder="Pilihan ${i+1}">
+                <textarea class="multi-reason" placeholder="Alasan jika pilihan ini benar / salah (ringkas)"></textarea>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderBenarSalah(){
+      dynamicArea.innerHTML = `
+        <div class="section-title">Benar / Salah</div>
+        <div class="answer-card">
+          <label>Pilih jawaban yang benar untuk soal ini</label>
+          <div style="display:flex;gap:12px;margin-top:8px"><label><input type="radio" name="bs" value="benar" checked> Benar</label><label><input type="radio" name="bs" value="salah"> Salah</label></div>
+          <label style="margin-top:10px">Alasan jika BENAR</label>
+          <textarea id="bs-reason-true"></textarea>
+          <label style="margin-top:10px">Alasan jika SALAH</label>
+          <textarea id="bs-reason-false"></textarea>
+        </div>
+      `;
+    }
+
+    function renderTtsMini(){
+      dynamicArea.innerHTML = `
+        <div class="section-title">TTS Mini (mendatar & menurun)</div>
+        <div class="answer-card">
+          <label>Jawaban Mendatar</label>
+          <input id="tts-mendatar" placeholder="Mis: BALI">
+          <label style="margin-top:8px">Jawaban Menurun</label>
+          <input id="tts-menurun" placeholder="Mis: BUKU">
+          <label style="margin-top:8px">Index huruf yang sama (0-based). Contoh: huruf pertama sama -> 0</label>
+          <input id="tts-crossindex" type="number" min="0" value="0">
+          <label style="margin-top:10px">Alasan: semua benar</label>
+          <textarea id="tts-all-true"></textarea>
+          <label style="margin-top:10px">Alasan: semua salah</label>
+          <textarea id="tts-all-false"></textarea>
+          <label style="margin-top:10px">Alasan: mendatar saja benar</label>
+          <textarea id="tts-only-horiz"></textarea>
+          <label style="margin-top:10px">Alasan: menurun saja benar</label>
+          <textarea id="tts-only-vert"></textarea>
+        </div>
+      `;
+    }
+
+    function renderDynamic(){
+      const t = tipeSoal.value;
+      if(t==='pilihan_ganda') renderPilihanGanda();
+      else if(t==='esai') renderEsai();
+      else if(t==='pencocokan') renderPencocokan();
+      else if(t==='susun_kata') renderSusunKata();
+      else if(t==='multi_benar') renderMultiBenar();
+      else if(t==='benar_salah') renderBenarSalah();
+      else if(t==='tts_mini') renderTtsMini();
+    }
+
+    tipeSoal.addEventListener('change', renderDynamic);
+    renderDynamic();
+
+    // ---------- AUTH + PROFILE CHECK ----------
+    async function checkUserData(user){
+      if(!user) return;
+      try{
+        const profileRef = doc(db,'profiles',user.uid);
+        const profileSnap = await getDoc(profileRef);
+        if(!profileSnap.exists() || !profileSnap.data().class){
+          showFormMessage('err','Atur kelas di profilmu terlebih dahulu');
+          document.getElementById('btn-save').disabled = true;
+          return;
+        }
+        userProfile = profileSnap.data();
+        currentUser = user;
+        document.getElementById('btn-save').disabled = false;
+      }catch(e){ console.warn("Profile check error:",e); }
+    }
+
+    onAuthStateChanged(auth, async (user) => { if(user) await checkUserData(user); else window.location.href='index.html'; });
+
+    // ---------- FORM SAVE LOGIC ----------
+    document.getElementById('question-form').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      if(!currentUser || !userProfile){ showFormMessage('err','Tidak dapat menyimpan tanpa profile/kelas.'); return }
+      const data = {
+        untukKelas: userProfile.class,
+        teksPertanyaan: document.getElementById('pertanyaan-teks').value.trim(),
+        kategori: document.getElementById('kategori-pilihan').value || null,
+        dibuatOleh: currentUser.uid,
+        dibuatPada: Timestamp.now(),
+        tipeSoal: tipeSoal.value,
+        urlGambar: uploadedImageUrl || null,
+        urlSuara: uploadedAudioUrl || null
+      };
+
+      try{
+        const t = tipeSoal.value;
+        if(t==='pilihan_ganda'){
+          const optionEls = [...dynamicArea.querySelectorAll('.answer-card')];
+          const opts = optionEls.map(el => el.querySelector('.jawaban')?.value.trim() || '');
+          const reasons = optionEls.map(el => el.querySelector('.jawaban-alasan')?.value.trim() || '');
+          const correctBools = optionEls.map(el => !!el.querySelector('.pg-check')?.checked);
+          const correctCount = correctBools.filter(Boolean).length;
+          if(correctCount < 2 || correctCount > 4){ showFormMessage('err','Tentukan minimal 2 dan maksimal 4 jawaban benar untuk pilihan ganda.'); return }
+          data.pilihanJawaban = opts;
+          data.penjelasanPilihan = reasons;
+          data.jawabanBenar = correctBools; // array of booleans aligned with pilihanJawaban
+        } else if(t==='esai'){
+          data.jawabanBenar = document.getElementById('esai-variations').value.trim();
+          data.penjelasanEsai = {
+            benar: document.getElementById('esai-reason-correct').value.trim(),
+            salah: document.getElementById('esai-reason-wrong').value.trim()
+          };
+        } else if(t==='pencocokan'){
+          const pairs = [...dynamicArea.querySelectorAll('#pairs-container .answer-card')].map(card=>{
+            return {kiri:card.querySelector('.pair-left').value.trim(), kanan:card.querySelector('.pair-right').value.trim(), alasan:card.querySelector('.pair-reason').value.trim()}
+          });
+          data.pasangan = pairs;
+        } else if(t==='susun_kata'){
+          data.jawabanBenar = document.getElementById('susun-kalimat').value.trim();
+          data.penjelasanSusun = { benar: document.getElementById('susun-reason-true').value.trim(), salah: document.getElementById('susun-reason-false').value.trim() };
+        } else if(t==='multi_benar'){
+          const rows = [...dynamicArea.querySelectorAll('.multi-answer')].map((el,i)=>({ teks: el.value.trim(), benar: dynamicArea.querySelectorAll('.multi-check')[i].checked, alasan: dynamicArea.querySelectorAll('.multi-reason')[i].value.trim() }));
+          data.pilihan = rows;
+        } else if(t==='benar_salah'){
+          data.jawabanBenar = dynamicArea.querySelector('input[name="bs"]:checked').value;
+          data.penjelasanBS = { benar: document.getElementById('bs-reason-true').value.trim(), salah: document.getElementById('bs-reason-false').value.trim() };
+        } else if(t==='tts_mini'){
+          data.jawaban = { mendatar: document.getElementById('tts-mendatar').value.trim(), menurun: document.getElementById('tts-menurun').value.trim(), crossIndex: Number(document.getElementById('tts-crossindex').value) };
+          data.penjelasanTTS = { semua_benar: document.getElementById('tts-all-true').value.trim(), semua_salah: document.getElementById('tts-all-false').value.trim(), mendatar: document.getElementById('tts-only-horiz').value.trim(), menurun: document.getElementById('tts-only-vert').value.trim() };
+        }
+
+        // save to firestore
+        const batch = writeBatch(db);
+        const ref = doc(collection(db,'pertanyaan'));
+        batch.set(ref, data);
+        await batch.commit();
+        showFormMessage('ok','Pertanyaan berhasil disimpan ✅');
+        // reset minimal
+        document.getElementById('question-form').reset(); uploadedImageUrl = null; uploadedAudioUrl = null; previewMedia.textContent='Tidak ada media'; renderDynamic();
+      }catch(err){ console.error(err); showFormMessage('err', err.message || 'Gagal menyimpan soal'); }
+    });
+
+    // preview builder
+    btnPreview.addEventListener('click', () => {
+      const q = document.getElementById('pertanyaan-teks').value.trim();
+      if(!q){ previewCard.textContent='Tulis pertanyaan dulu untuk melihat pratinjau'; return }
+      const t = tipeSoal.value;
+      let html = `<strong>${q}</strong><div style="margin-top:8px;font-size:0.95rem;color:var(--muted)">Tipe: ${t}</div>`;
+      if(uploadedImageUrl) html += `<div style="margin-top:8px"><img src="${uploadedImageUrl}" style="max-width:100%;border-radius:8px"></div>`;
+      if(uploadedAudioUrl) html += `<div style="margin-top:8px"><audio controls src="${uploadedAudioUrl}" style="width:100%"></audio></div>`;
+      // show options preview for pilihan ganda
+      if(t==='pilihan_ganda'){
+        const optionEls = [...dynamicArea.querySelectorAll('.answer-card')];
+        html += '<div style="margin-top:10px">';
+        optionEls.forEach((el,i)=>{
+          const teks = el.querySelector('.jawaban')?.value.trim()||`Pilihan ${i+1}`;
+          const alasan = el.querySelector('.jawaban-alasan')?.value.trim()||'';
+          const benar = !!el.querySelector('.pg-check')?.checked;
+          html += `<div style="text-align:left;padding:8px;border-radius:8px;margin-bottom:6px;background:#fafafa"><strong>${teks}</strong><div class="note">Benar: ${benar}</div><div style="margin-top:6px;color:#555">${alasan||'Belum ada alasan'}</div></div>`;
+        });
+        html += '</div>';
+      }
+      previewCard.innerHTML = html;
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', ()=>{ document.getElementById('question-form').reset(); uploadedImageUrl=null; uploadedAudioUrl=null; previewMedia.textContent='Tidak ada media'; renderDynamic(); });
+
+  </script>
+</body>
+</html>
