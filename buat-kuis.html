@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Buat Soal Kuis — Gabungan BK + Buat-Kuis</title>
+  <title>Buat Soal Kuis — Colorful UI</title>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
@@ -33,38 +33,64 @@
     .header-title{display:flex;gap:15px;align-items:center;}
     .logo-icon{background:linear-gradient(45deg, var(--accent3), var(--accent4));padding:12px;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,0.2);}
     h1{margin:0;font-size:1.6rem; color: white;}
+    
+    /* --- Gaya Colorful Border Utama --- */
     .card{
         background: var(--card-bg);
-        border: 1px solid var(--border-color);
+        border: 2px solid transparent;
+        border-image: linear-gradient(45deg, var(--accent1), var(--accent3), var(--accent4)) 1;
         backdrop-filter: blur(8px);
         border-radius:16px;
         padding:20px;
         box-shadow:0 8px 32px 0 rgba(0,0,0,0.3);
         margin-bottom:18px
     }
-    label{display:block;font-weight:700;margin-bottom:8px;font-size: 1rem;color:var(--muted-light)}
+    label{display:block;font-weight:700;margin-bottom:8px;font-size: 1rem;color:white; opacity: 0.9;}
     input[type=text], input[type=url], input[type=number], textarea, select{
       width:100%;
-      padding:10px 12px;
+      padding: 16px;
       border-radius:10px;
-      border: 1px solid rgba(255,255,255,0.06);
       background: rgba(255,255,255,0.03);
-      font-size:1rem;
+      font-size: 1.05rem;
       color: var(--muted-light);
+      border: 2px solid transparent;
+      background-clip: padding-box; /* Penting untuk border-image */
+      border-image: linear-gradient(45deg, var(--accent3), var(--accent4)) 1;
+      transition: all 0.2s ease-in-out;
     }
-    textarea{min-height:70px;resize:vertical}
+    input[type=text]:focus, input[type=url]:focus, input[type=number]:focus, textarea:focus, select:focus {
+        outline: none;
+        box-shadow: 0 0 15px rgba(72, 219, 251, 0.4);
+    }
+    textarea{min-height:90px;resize:vertical}
+    .answer-card { 
+        padding: 12px; 
+        background: rgba(255,255,255,0.02); 
+        border-radius: 10px; 
+        margin-bottom: 10px; 
+        position: relative; 
+        color:var(--muted-light);
+        border: 2px solid transparent;
+        border-image: linear-gradient(135deg, var(--accent3), var(--accent4), var(--accent1)) 1;
+    }
+    /* --- Akhir Gaya Colorful Border --- */
+
     .grid{display:grid;grid-template-columns:1fr 320px;gap:20px}
     .btn{display:inline-block;padding:10px 14px;border-radius:12px;border:none;font-weight:800;cursor:pointer;font-size:0.95rem}
+    .btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
     .btn-submit{background:linear-gradient(45deg,var(--accent1),var(--accent2)); color:white}
     .btn-neutral{background:rgba(255,255,255,0.06); color:var(--muted-light)}
     .btn-ghost{background:transparent;border:2px dashed rgba(255,255,255,0.06);color:var(--muted-light)}
+    .btn-danger{background-color: rgba(231, 76, 60, 0.1); color: #ffacac; border: 1px solid rgba(231, 76, 60, 0.2);}
     .section-title{font-weight:800;font-size: 1.1rem; margin-bottom:10px; color:white}
     .submit-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
-    .file-attach-area { border: 2px dashed rgba(255,255,255,0.04); border-radius: 12px; padding: 12px; text-align: center; background: rgba(0,0,0,0.05) }
+    .file-attach-area { border: 2px dashed rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; text-align: center; background: rgba(0,0,0,0.05) }
     input[type=file] { display: none; }
     .file-label { cursor: pointer; background: var(--accent3); color: white; padding: 8px 12px; border-radius: 8px; display: inline-block; }
     .file-name { margin-top: 8px; font-size: 0.9rem; color: rgba(255,255,255,0.7); }
-    .answer-card { padding: 12px; background: rgba(255,255,255,0.02); border-radius: 10px; margin-bottom: 10px; position: relative; color:var(--muted-light) }
     .choices{display:grid;gap:8px}
     .choice-row{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
     .preview-media{border-radius:12px;min-height:48px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.02); color:var(--muted-light)}
@@ -84,7 +110,7 @@
       <div class="header-title">
         <div class="logo-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="white"/></svg></div>
         <div>
-          <h1>Buat Soal Kuis — BK + BuatKuis</h1>
+          <h1>Buat Soal Kuis — Colorful UI</h1>
           <div style="font-size:0.9rem;color:rgba(255,255,255,0.7)">UI & file upload dari BK, fungsionalitas lengkap dari Buat-Kuis</div>
         </div>
       </div>
@@ -118,7 +144,7 @@
               </div>
               <div style="flex:1; min-width:160px;">
                 <label for="tipe-soal">Tipe Soal</label>
-                <select id="tipe-soal" onchange="renderDynamic()">
+                <select id="tipe-soal">
                   <option value="pilihan_ganda">Pilihan Ganda</option>
                   <option value="esai">Esai</option>
                   <option value="pencocokan">Pencocokan</option>
@@ -278,14 +304,6 @@
     if(!res.ok) throw new Error('Upload gagal: '+res.statusText);
     const j = await res.json();
     return j.secure_url || j.url;
-  }/${resourceType}/upload`;
-    const fd = new FormData();
-    fd.append('file', file);
-    if(preset) fd.append('upload_preset', preset);
-    const res = await fetch(url, { method:'POST', body: fd });
-    if(!res.ok) throw new Error('Upload gagal: '+res.statusText);
-    const j = await res.json();
-    return j.secure_url || j.url;
   }
 
   useGithubImage.addEventListener('click', ()=>{ uploadedImageUrl = githubImageUrl.value.trim() || null; setPreview('image', uploadedImageUrl); showFormMessage('ok','Menggunakan URL gambar langsung'); });
@@ -309,47 +327,85 @@
   fileImage.addEventListener('change', ()=>{ document.getElementById('file-image-name').textContent = fileImage.files[0]?.name || 'Belum ada file dipilih'; pendingUploads.questionImage = fileImage.files[0]||null; });
   fileAudio.addEventListener('change', ()=>{ document.getElementById('file-audio-name').textContent = fileAudio.files[0]?.name || 'Belum ada file dipilih'; pendingUploads.questionAudio = fileAudio.files[0]||null; });
 
-  // ---------- DYNAMIC FORM RENDERING (from buat-kuis) ----------
+  // ---------- DYNAMIC FORM RENDERING ----------
   
   function renderPilihanGanda(){
     dynamicArea.innerHTML = `
       <div class="section-title">Pilihan Ganda — Isi jawaban & alasan per pilihan</div>
-      <div class="note">Centang minimal <strong>1</strong> dan maksimal <strong>4</strong> jawaban benar.</div>
-      <div class="choices">
-        ${[0,1,2,3].map(i=>`
-          <div class="answer-card choice-row" data-choice-index="${i}">
-            <div style="width:36px;text-align:center"><input type="checkbox" class="pg-check" data-index="${i}"></div>
+      <div class="note">Centang minimal <strong>1</strong> jawaban benar. Anda bisa menambahkan 2-4 pilihan jawaban.</div>
+      <div id="pg-choices-container" class="choices"></div>
+      <div style="margin-top:8px;">
+        <button type="button" id="add-pg-choice" class="btn btn-neutral">+ Tambah Pilihan</button>
+      </div>
+    `;
+
+    const container = document.getElementById('pg-choices-container');
+    const addButton = document.getElementById('add-pg-choice');
+
+    function updatePilihanGandaButtons() {
+        const choices = container.querySelectorAll('.answer-card');
+        addButton.disabled = choices.length >= 4;
+        choices.forEach(choice => {
+            const deleteButton = choice.querySelector('.btn-delete-item');
+            if (deleteButton) {
+                deleteButton.disabled = choices.length <= 2;
+            }
+        });
+    }
+
+    function addPilihanGandaChoice() {
+        if (container.children.length >= 4) return;
+
+        const choiceIndex = container.children.length;
+        const newChoice = document.createElement('div');
+        newChoice.className = 'answer-card choice-row';
+        newChoice.dataset.choiceIndex = choiceIndex;
+
+        newChoice.innerHTML = `
+            <div style="width:36px;text-align:center"><input type="checkbox" class="pg-check" data-index="${choiceIndex}"></div>
             <div style="flex:1">
-              <input type="text" class="jawaban" placeholder="Pilihan ${i+1}">
+              <input type="text" class="jawaban" placeholder="Pilihan ${choiceIndex + 1}">
               <textarea class="jawaban-alasan" placeholder="Alasan jika pilihan ini BENAR atau mengapa SALAH (ringkas)"></textarea>
             </div>
             <div style="width:140px;text-align:center">
-              <label class="file-label" data-target="opt-img-${i}">Pilih Gambar</label>
-              <input type="file" accept="image/*" id="opt-img-${i}" style="display:none">
-              <div id="opt-img-name-${i}" class="file-name">Belum ada</div>
+              <label class="file-label" data-target="opt-img-${choiceIndex}">Pilih Gambar</label>
+              <input type="file" accept="image/*" id="opt-img-${choiceIndex}" style="display:none">
+              <div id="opt-img-name-${choiceIndex}" class="file-name">Belum ada</div>
             </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-    // attach listeners for option images
-    [0,1,2,3].forEach(i=>{
-      const f = document.getElementById(`opt-img-${i}`);
-      f?.addEventListener('change', ()=>{ const file = f.files[0]; if(file){ pendingUploads.optionImages[i]=file; document.getElementById(`opt-img-name-${i}`).textContent = file.name; } else { delete pendingUploads.optionImages[i]; document.getElementById(`opt-img-name-${i}`).textContent='Belum ada'; } });
-      const label = document.querySelector(`label.file-label[data-target="opt-img-${i}"]`);
-      label?.addEventListener('click', ()=> f.click());
-    });
+            <button type="button" class="btn btn-danger btn-delete-item" style="padding: 8px 12px;">Hapus</button>
+        `;
+
+        container.appendChild(newChoice);
+
+        const fileInput = newChoice.querySelector(`#opt-img-${choiceIndex}`);
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            const nameDiv = newChoice.querySelector(`#opt-img-name-${choiceIndex}`);
+            if (file) {
+                pendingUploads.optionImages[choiceIndex] = file;
+                nameDiv.textContent = file.name;
+            } else {
+                delete pendingUploads.optionImages[choiceIndex];
+                nameDiv.textContent = 'Belum ada';
+            }
+        });
+        newChoice.querySelector(`label.file-label`).addEventListener('click', () => fileInput.click());
+        newChoice.querySelector('.btn-delete-item').addEventListener('click', () => {
+            newChoice.remove();
+            delete pendingUploads.optionImages[choiceIndex];
+            updatePilihanGandaButtons();
+        });
+
+        updatePilihanGandaButtons();
+    }
+    
+    setTimeout(() => {
+        addButton.addEventListener('click', addPilihanGandaChoice);
+        addPilihanGandaChoice();
+        addPilihanGandaChoice();
+    }, 30);
   }
-      </div>
-    `;
-    // attach listeners for option images
-    [0,1,2,3].forEach(i=>{
-      const f = document.getElementById(`opt-img-${i}`);
-      f?.addEventListener('change', ()=>{ const file = f.files[0]; if(file){ pendingUploads.optionImages[i]=file; document.getElementById(`opt-img-name-${i}`).textContent = file.name; } else { delete pendingUploads.optionImages[i]; document.getElementById(`opt-img-name-${i}`).textContent='Belum ada'; } });
-      const label = document.querySelector(`label.file-label[data-target="opt-img-${i}"]`);
-      label?.addEventListener('click', ()=> f.click());
-    });
-  }
+
 
   function renderEsai(){
     dynamicArea.innerHTML = `
@@ -371,14 +427,25 @@
       <div id="pairs-container"></div>
       <div style="margin-top:8px"><button type="button" id="add-pair" class="btn btn-neutral">+ Tambah Pasangan</button></div>
     `;
-    setTimeout(()=>{
-      const add = document.getElementById('add-pair');
-      add.addEventListener('click', ()=>{
+    
+    function addPair() {
         const c = document.getElementById('pairs-container');
-        const d = document.createElement('div'); d.className='answer-card';
-        d.innerHTML = `<div style="display:flex;gap:8px"><input placeholder="Kiri (mis: A)" class="pair-left"><input placeholder="Kanan (mis: 1)" class="pair-right"></div><textarea class="pair-reason" placeholder="Alasan untuk pasangan ini (opsional)"></textarea>`;
+        const d = document.createElement('div');
+        d.className = 'answer-card';
+        d.innerHTML = `<div style="display:flex;gap:8px;align-items:center;">
+                          <div style="flex:1;"><input placeholder="Kiri (mis: A)" class="pair-left"></div>
+                          <div style="flex:1;"><input placeholder="Kanan (mis: 1)" class="pair-right"></div>
+                          <button type="button" class="btn btn-danger btn-delete-item" style="padding: 8px 12px;">X</button>
+                       </div>
+                       <textarea class="pair-reason" placeholder="Alasan untuk pasangan ini (opsional)" style="margin-top:8px;"></textarea>`;
         c.appendChild(d);
-      });
+        d.querySelector('.btn-delete-item').addEventListener('click', () => d.remove());
+    }
+
+    setTimeout(()=>{
+      document.getElementById('add-pair').addEventListener('click', addPair);
+      addPair(); 
+      addPair(); 
     },30);
   }
 
@@ -399,18 +466,33 @@
   function renderMultiBenar(){
     dynamicArea.innerHTML = `
       <div class="section-title">Beberapa Jawaban Benar</div>
-      <div class="choices">
-        ${[0,1,2,3].map(i=>`
-          <div class="answer-card choice-row">
-            <div style="width:36px;text-align:center"><input type="checkbox" class="multi-check" data-index="${i}"></div>
+      <div id="multi-benar-container"></div>
+      <div style="margin-top:8px;"><button type="button" id="add-multi-benar" class="btn btn-neutral">+ Tambah Pilihan</button></div>
+    `;
+
+    function addMultiBenarChoice() {
+        const container = document.getElementById('multi-benar-container');
+        const newChoice = document.createElement('div');
+        newChoice.className = 'answer-card choice-row';
+        const choiceCount = container.children.length + 1;
+
+        newChoice.innerHTML = `
+            <div style="width:36px;text-align:center"><input type="checkbox" class="multi-check"></div>
             <div style="flex:1">
-              <input type="text" class="multi-answer" placeholder="Pilihan ${i+1}">
+              <input type="text" class="multi-answer" placeholder="Pilihan ${choiceCount}">
               <textarea class="multi-reason" placeholder="Alasan jika pilihan ini benar / salah (ringkas)"></textarea>
             </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
+            <button type="button" class="btn btn-danger btn-delete-item" style="padding: 8px 12px;">Hapus</button>
+        `;
+        container.appendChild(newChoice);
+        newChoice.querySelector('.btn-delete-item').addEventListener('click', () => newChoice.remove());
+    }
+
+    setTimeout(() => {
+        document.getElementById('add-multi-benar').addEventListener('click', addMultiBenarChoice);
+        addMultiBenarChoice(); 
+        addMultiBenarChoice(); 
+    }, 30);
   }
 
   function renderBenarSalah(){
@@ -435,19 +517,26 @@
         <input id="tts-mendatar" placeholder="Contoh: BOLA">
         <label style="margin-top:10px">Jawaban Menurun</label>
         <input id="tts-menurun" placeholder="Contoh: KOTAK">
-        <label style="margin-top:10px">Alasan / Penjelasan</label>
-        <textarea id="tts-reason" placeholder="Alasan umum jika jawaban benar"></textarea>
+        <hr style="margin:12px 0; border-color: var(--border-color);">
+        <label style="margin-top:10px">Alasan jika KEDUANYA BENAR</label>
+        <textarea id="tts-reason-both-correct" placeholder="Contoh: Hebat! Kamu berhasil menjawab semuanya."></textarea>
+        <label style="margin-top:10px">Alasan jika HANYA MENDATAR yang benar</label>
+        <textarea id="tts-reason-mendatar-correct" placeholder="Contoh: Bagus, jawaban mendatarmu benar! Coba lagi yang menurun."></textarea>
+        <label style="margin-top:10px">Alasan jika HANYA MENURUN yang benar</label>
+        <textarea id="tts-reason-menurun-correct" placeholder="Contoh: Jawaban menurunmu tepat! Sedikit lagi untuk yang mendatar."></textarea>
+        <label style="margin-top:10px">Alasan jika KEDUANYA SALAH</label>
+        <textarea id="tts-reason-both-wrong" placeholder="Contoh: Ups, belum ada yang tepat. Coba pikirkan lagi ya."></textarea>
       </div>
     `;
   }
 
   function updateGuide(type){
     const guides = {
-      pilihan_ganda: "Pilih 2-4 jawaban benar. Bisa lampirkan gambar per pilihan.",
+      pilihan_ganda: "Isi 2-4 pilihan jawaban. Centang minimal 1 jawaban benar. Bisa lampirkan gambar per pilihan.",
       esai: "Pisahkan variasi jawaban dengan ||. Contoh: Soekarno || Ir. Soekarno.",
       pencocokan: "Buat pasangan antara kolom kiri dan kanan.",
       susun_kata: "Tulis kalimat yang benar; sistem akan mengacak tampilannya.",
-      multi_benar: "Siswa bisa memilih lebih dari satu jawaban.",
+      multi_benar: "Siswa bisa memilih lebih dari satu jawaban. Tambah pilihan dengan tombol '+'.",
       benar_salah: "Tentukan Benar atau Salah dan tambahkan penjelasan.",
       tts_mini: "Isi mendatar & menurun. Sistem akan mencari persilangan otomatis."
     };
@@ -498,13 +587,12 @@
     if(!currentUser || !userProfile){ showFormMessage('err','Tidak dapat menyimpan tanpa profile/kelas.'); return; }
     btnSave.disabled=true; btnSave.textContent='Memproses...';
     try{
-      // upload pending files (question-level and options) to Cloudinary if cloud name provided
       let uploadedUrls = { questionImage: null, questionAudio: null, optionImages: {} };
       if(pendingUploads.questionImage) uploadedUrls.questionImage = await uploadToCloudinary(pendingUploads.questionImage,'image');
       if(pendingUploads.questionAudio) uploadedUrls.questionAudio = await uploadToCloudinary(pendingUploads.questionAudio,'video');
       for(const idx in pendingUploads.optionImages){
         const file = pendingUploads.optionImages[idx];
-        uploadedUrls.optionImages[idx] = await uploadToCloudinary(file,'image');
+        if(file) uploadedUrls.optionImages[idx] = await uploadToCloudinary(file,'image');
       }
 
       const data = {
@@ -516,41 +604,36 @@
         tipeSoal: tipeSoal.value,
         urlGambar: uploadedUrls.questionImage || uploadedImageUrl || null,
         urlSuara: uploadedUrls.questionAudio || uploadedAudioUrl || null,
-        isHarian: !!document.getElementById('is-harian') && document.getElementById('is-harian').checked // optional flag
+        isHarian: !!document.getElementById('is-harian') && document.getElementById('is-harian').checked
       };
 
       const t = tipeSoal.value;
       if(t==='pilihan_ganda'){
-        // collect option inputs consistently
-        const optionEls = [...dynamicArea.querySelectorAll('.answer-card')];
+        const optionEls = [...dynamicArea.querySelectorAll('#pg-choices-container .answer-card')];
         const opts = optionEls.map(el => el.querySelector('.jawaban')?.value.trim() || '');
         const reasons = optionEls.map(el => el.querySelector('.jawaban-alasan')?.value.trim() || '');
-        // collect checkbox booleans per option (ensure length matches options)
-        const correctBools = optionEls.map((el,i) => {
-            const cb = el.querySelector('.pg-check');
-            return !!(cb && cb.checked);
-        });
-        const correctCount = correctBools.filter(Boolean).length;
-        if(correctCount < 1){ // allow single-correct or multi-correct but at least 1
+        const correctBools = optionEls.map((el) => !!el.querySelector('.pg-check')?.checked);
+        if(correctBools.filter(Boolean).length < 1){
             throw new Error('Tentukan minimal 1 jawaban benar untuk pilihan ganda.');
         }
-        // attach option image urls if uploaded
-        const optImages = optionEls.map((el,i)=> uploadedUrls.optionImages[i] || null);
+        if(opts.some(o => !o)) throw new Error('Semua pilihan jawaban untuk Pilihan Ganda harus diisi.');
+        const optImages = optionEls.map((el, i) => uploadedUrls.optionImages[el.dataset.choiceIndex] || null);
+
         data.pilihanJawaban = opts;
         data.penjelasanPilihan = reasons;
-        data.jawabanBenar = correctBools; // always save as array of booleans to be consistent
+        data.jawabanBenar = correctBools;
         data.pilihanGambar = optImages;
       } else if(t==='multi_benar'){
-        const rows = [...dynamicArea.querySelectorAll('.multi-answer')].map((el,i)=>({
-            teks: el.value.trim(),
-            benar: !!dynamicArea.querySelectorAll('.multi-check')[i].checked,
-            alasan: dynamicArea.querySelectorAll('.multi-reason')[i].value.trim()
+        const rows = [...dynamicArea.querySelectorAll('#multi-benar-container .answer-card')].map(card => ({
+            teks: card.querySelector('.multi-answer').value.trim(),
+            benar: card.querySelector('.multi-check').checked,
+            alasan: card.querySelector('.multi-reason').value.trim()
         }));
-        // validate at least one true
         if(rows.filter(r=>r.benar).length < 1) throw new Error('Tentukan minimal 1 jawaban benar untuk soal multi-benarnya.');
+        if(rows.some(r=>!r.teks)) throw new Error('Semua pilihan jawaban untuk multi-benar harus diisi.');
         data.pilihan = rows;
       } else if(t==='esai'){
-        data.jawabanBenar = document.getElementById('esai-variations').value.trim(); // string with || separator
+        data.jawabanBenar = document.getElementById('esai-variations').value.trim();
         data.penjelasanEsai = { benar: document.getElementById('esai-reason-correct').value.trim(), salah: document.getElementById('esai-reason-wrong').value.trim() };
       } else if(t==='pencocokan'){
         const pairs = [...dynamicArea.querySelectorAll('#pairs-container .answer-card')].map(card=>({
@@ -559,12 +642,11 @@
             alasan: card.querySelector('.pair-reason').value.trim()
         }));
         if(pairs.length < 1) throw new Error('Tambahkan minimal 1 pasangan untuk soal pencocokan.');
+        if(pairs.some(p=>!p.kiri || !p.kanan)) throw new Error('Semua pasangan Kiri dan Kanan harus diisi.');
         data.pasangan = pairs;
       } else if(t==='susun_kata'){
         data.jawabanBenar = document.getElementById('susun-kalimat').value.trim();
         data.penjelasanSusun = { benar: document.getElementById('susun-reason-true').value.trim(), salah: document.getElementById('susun-reason-false').value.trim() };
-      } else if(t==='multi_benar'){
-        // handled above
       } else if(t==='benar_salah'){
         data.jawabanBenar = dynamicArea.querySelector('input[name="bs"]:checked').value;
         data.penjelasanBS = { benar: document.getElementById('bs-reason-true').value.trim(), salah: document.getElementById('bs-reason-false').value.trim() };
@@ -575,7 +657,12 @@
         const intersection = findIntersection(mendatar, menurun);
         if(!intersection) throw new Error('Mendatar dan menurun harus memiliki minimal 1 huruf yang sama.');
         data.jawaban = { mendatar, menurun, mendatarIndex: intersection.mendatarIndex, menurunIndex: intersection.menurunIndex };
-        data.penjelasanTTS = { semua_benar: document.getElementById('tts-reason').value.trim() };
+        data.penjelasanTTS = { 
+            keduanyaBenar: document.getElementById('tts-reason-both-correct').value.trim(),
+            keduanyaSalah: document.getElementById('tts-reason-both-wrong').value.trim(),
+            mendatarBenar: document.getElementById('tts-reason-mendatar-correct').value.trim(),
+            menurunBenar: document.getElementById('tts-reason-menurun-correct').value.trim()
+        };
       }
 
       // write to firestore
@@ -591,7 +678,9 @@
       renderDynamic();
     }catch(err){ console.error(err); showFormMessage('err', err.message || 'Gagal menyimpan soal'); }
     finally{ btnSave.disabled=false; btnSave.textContent='Simpan Pertanyaan'; }
-  });\n\n// preview builder
+  });
+
+  // preview builder
   btnPreview.addEventListener('click', ()=>{
     const q = document.getElementById('pertanyaan-teks').value.trim();
     if(!q){ previewCard.textContent='Tulis pertanyaan dulu untuk melihat pratinjau'; return; }
@@ -600,7 +689,7 @@
     if(uploadedImageUrl) html += `<div style="margin-top:8px"><img src="${uploadedImageUrl}" style="max-width:100%;border-radius:8px"></div>`;
     if(uploadedAudioUrl) html += `<div style="margin-top:8px"><audio controls src="${uploadedAudioUrl}" style="width:100%"></audio></div>`;
     if(t==='pilihan_ganda'){
-      const optionEls = [...dynamicArea.querySelectorAll('.answer-card')];
+      const optionEls = [...dynamicArea.querySelectorAll('#pg-choices-container .answer-card')];
       html += '<div style="margin-top:10px">';
       optionEls.forEach((el,i)=>{
         const teks = el.querySelector('.jawaban')?.value.trim()||`Pilihan ${i+1}`;
@@ -609,6 +698,16 @@
         html += `<div style="text-align:left;padding:8px;border-radius:8px;margin-bottom:6px;background:rgba(255,255,255,0.02)"><strong>${teks}</strong><div class="note">Benar: ${benar}</div><div style="margin-top:6px;color:var(--muted-light)">${alasan||'Belum ada alasan'}</div></div>`;
       });
       html += '</div>';
+    } else if (t === 'multi_benar') {
+        const optionEls = [...dynamicArea.querySelectorAll('#multi-benar-container .answer-card')];
+        html += '<div style="margin-top:10px">';
+        optionEls.forEach((el,i)=>{
+            const teks = el.querySelector('.multi-answer')?.value.trim()||`Pilihan ${i+1}`;
+            const alasan = el.querySelector('.multi-reason')?.value.trim()||'';
+            const benar = !!el.querySelector('.multi-check')?.checked;
+            html += `<div style="text-align:left;padding:8px;border-radius:8px;margin-bottom:6px;background:rgba(255,255,255,0.02)"><strong>${teks}</strong><div class="note">Benar: ${benar}</div><div style="margin-top:6px;color:var(--muted-light)">${alasan||'Belum ada alasan'}</div></div>`;
+        });
+        html += '</div>';
     }
     previewCard.innerHTML = html;
   });
@@ -616,91 +715,7 @@
   document.getElementById('btn-reset').addEventListener('click', ()=>{
     document.getElementById('question-form').reset(); uploadedImageUrl=null; uploadedAudioUrl=null; pendingUploads = { questionImage:null, questionAudio:null, optionImages:{} }; document.getElementById('file-image-name').textContent='Belum ada file dipilih'; document.getElementById('file-audio-name').textContent='Belum ada file dipilih'; renderDynamic();
   });
-
-
-// --- Dynamic renderers for question types ---
-function renderPilihanGanda(){
-  dynamicArea.innerHTML = `
-    <div class="section-title">Pilihan Ganda</div>
-    ${[0,1,2,3].map(i=>`
-      <div class="answer-card">
-        <label><input type="checkbox" class="pg-check" data-index="${i}"> Benar?</label>
-        <input type="text" class="jawaban" placeholder="Pilihan ${i+1}">
-        <textarea class="jawaban-alasan" placeholder="Alasan"></textarea>
-      </div>`).join('')}`;
-}
-
-function renderMultiBenar(){
-  dynamicArea.innerHTML = `
-    <div class="section-title">Beberapa Jawaban Benar</div>
-    ${[0,1,2,3].map(i=>`
-      <div class="answer-card">
-        <label><input type="checkbox" class="multi-check" data-index="${i}"> Benar?</label>
-        <input type="text" class="multi-answer" placeholder="Pilihan ${i+1}">
-        <textarea class="multi-reason" placeholder="Alasan"></textarea>
-      </div>`).join('')}`;
-}
-
-function renderEsai(){
-  dynamicArea.innerHTML = `
-    <div class="section-title">Esai</div>
-    <input id="esai-variations" placeholder="Variasi jawaban benar (pisah dengan ||)">
-    <label>Alasan jika BENAR</label><textarea id="esai-reason-correct"></textarea>
-    <label>Alasan jika SALAH</label><textarea id="esai-reason-wrong"></textarea>`;
-}
-
-function renderBenarSalah(){
-  dynamicArea.innerHTML = `
-    <div class="section-title">Benar / Salah</div>
-    <label><input type="radio" name="bs" value="benar" checked> Benar</label>
-    <label><input type="radio" name="bs" value="salah"> Salah</label>
-    <label>Alasan jika BENAR</label><textarea id="bs-reason-true"></textarea>
-    <label>Alasan jika SALAH</label><textarea id="bs-reason-false"></textarea>`;
-}
-
-function renderTtsMini(){
-  dynamicArea.innerHTML = `
-    <div class="section-title">TTS Mini</div>
-    <label>Jawaban Mendatar</label><input id="tts-mendatar">
-    <label>Jawaban Menurun</label><input id="tts-menurun">
-    <label>Alasan</label><textarea id="tts-reason"></textarea>`;
-}
-
-function renderPencocokan(){
-  dynamicArea.innerHTML = `
-    <div class="section-title">Pencocokan</div>
-    <div id="pairs-container"></div>
-    <button type="button" id="add-pair">+ Tambah Pasangan</button>`;
-  document.getElementById('add-pair').onclick = ()=>{
-    const c = document.getElementById('pairs-container');
-    const d = document.createElement('div'); d.className='answer-card';
-    d.innerHTML = '<input class="pair-left" placeholder="Kiri"> <input class="pair-right" placeholder="Kanan"><textarea class="pair-reason" placeholder="Alasan"></textarea>';
-    c.appendChild(d);
-  };
-}
-
-function renderSusunKata(){
-  dynamicArea.innerHTML = `
-    <div class="section-title">Susun Kata</div>
-    <input id="susun-kalimat" placeholder="Kalimat Benar">
-    <label>Alasan jika BENAR</label><textarea id="susun-reason-true"></textarea>
-    <label>Alasan jika SALAH</label><textarea id="susun-reason-false"></textarea>`;
-}
-
-function renderDynamic(){
-  const t = tipeSoal.value;
-  console.log("renderDynamic", t);
-  dynamicArea.innerHTML = '';
-  if(t==='pilihan_ganda') renderPilihanGanda();
-  else if(t==='multi_benar') renderMultiBenar();
-  else if(t==='esai') renderEsai();
-  else if(t==='benar_salah') renderBenarSalah();
-  else if(t==='tts_mini') renderTtsMini();
-  else if(t==='pencocokan') renderPencocokan();
-  else if(t==='susun_kata') renderSusunKata();
-  else dynamicArea.innerHTML = '<div class="note">Tipe soal belum didukung.</div>';
-}
-
 </script>
 </body>
 </html>
+
