@@ -59,18 +59,32 @@
                     </div>
                     <div class="input-group">
                         <label for="kategori-pilihan">Pilih Kategori Soal</label>
+                        <!-- PERUBAHAN 1: Menyesuaikan daftar pelajaran -->
                         <select id="kategori-pilihan" required>
-                            <option value="">-- Pilih Kategori --</option>
+                            <option value="">-- Pilih Mata Pelajaran --</option>
                             <option value="matematika">Matematika</option>
                             <option value="bahasa_indonesia">Bahasa Indonesia</option>
+                            <option value="bahasa_inggris">Bahasa Inggris</option>
                             <option value="ipa">Ilmu Pengetahuan Alam</option>
+                            <option value="agama_islam">Ilmu Agama Islam</option>
                             <option value="ips">Ilmu Sosial</option>
-                            <option value="lainnya">Lainnya / Teka-Teki</option>
+                            <option value="sejarah">Ilmu Sejarah</option>
+                            <option value="pkn">Ilmu Kewarganegaraan</option>
+                            <option value="basa_sunda">Basa Sunda</option>
+                            <option value="olahraga">Ilmu Olahraga</option>
+                            <option value="seni">Ilmu Seni</option>
+                            <option value="campuran_seru">Campuran Teka Teki</option>
                         </select>
                     </div>
                     <div id="pilihan-ganda-container">
                         <hr><label style="font-weight:700;">Tulis 4 Pilihan Jawaban</label>
                         <div id="answer-options-container" class="answer-options"></div>
+                    </div>
+                    <!-- PERUBAHAN 2: Menambahkan field penjelasan yang opsional -->
+                    <div class="input-group">
+                        <label for="penjelasan-jawaban">Penjelasan Jawaban (Opsional)</label>
+                        <textarea id="penjelasan-jawaban" placeholder="Jelaskan mengapa jawaban yang benar itu benar. Ini akan membantu temanmu belajar." rows="3"></textarea>
+                        <div class="info-text">Penjelasan ini akan muncul setelah kuis selesai. Boleh dikosongkan.</div>
                     </div>
                     <div class="submit-section">
                         <button type="submit" id="submit-btn" class="btn-submit">Simpan Pertanyaan ✅</button>
@@ -102,13 +116,12 @@
         const kuotaContainer = document.getElementById('kuota-container');
         
         let currentUser = null;
-        let userProfile = null; // Menyimpan data profil pengguna
+        let userProfile = null;
         const MAX_QUOTA = 5;
  
         async function checkUserData(user) {
             if (!user) return;
             
-            // 1. Ambil data profil untuk mendapatkan kelas
             const profileRef = doc(db, 'profiles', user.uid);
             const profileSnap = await getDoc(profileRef);
 
@@ -116,13 +129,11 @@
                 kuotaContainer.textContent = "Kamu harus mengatur kelas di profilmu terlebih dahulu!";
                 kuotaContainer.classList.add('no-quota');
                 formFieldset.disabled = true;
-                // Arahkan ke halaman profil jika kelas belum diatur
                 setTimeout(() => { window.location.href = 'profil.html'; }, 3000);
                 return;
             }
             userProfile = profileSnap.data();
 
-            // 2. Cek kuota pembuatan soal
             const startOfToday = new Date();
             startOfToday.setHours(0, 0, 0, 0);
             const startOfTodayTimestamp = Timestamp.fromDate(startOfToday);
@@ -160,7 +171,6 @@
                 renderAnswerOptions();
                 await checkUserData(user);
             } else {
-                // Arahkan ke login jika belum masuk
                 window.location.href = 'index.html'; 
             }
         });
@@ -177,17 +187,17 @@
                 const batch = writeBatch(db);
                 const pertanyaanRef = doc(collection(db, "pertanyaan"));
                 
-                // --- DATA BARU YANG DITAMBAHKAN ---
                 const dataPertanyaan = {
-                    untukKelas: userProfile.class, // Menyimpan info kelas
-                    //------------------------------------
+                    untukKelas: userProfile.class,
                     teksPertanyaan: document.getElementById('pertanyaan-teks').value,
                     kategori: document.getElementById('kategori-pilihan').value,
                     dibuatOleh: currentUser.uid,
                     dibuatPada: Timestamp.now(),
-                    tipeSoal: 'pilihan_ganda', // Untuk saat ini hanya pilihan ganda
+                    tipeSoal: 'pilihan_ganda',
                     urlGambar: document.getElementById('url-gambar').value.trim() || null,
-                    urlSuara: document.getElementById('url-suara').value.trim() || null
+                    urlSuara: document.getElementById('url-suara').value.trim() || null,
+                    // PERUBAHAN 2: Menyimpan data dari field penjelasan
+                    penjelasan: document.getElementById('penjelasan-jawaban').value.trim() || null
                 };
 
                 const jawabanTeks = document.querySelectorAll('.jawaban-teks');
@@ -207,7 +217,6 @@
                 console.error("Error:", error);
                 showMessage('error', error.message || 'Terjadi kesalahan saat menyimpan.');
             } finally {
-                // Cek ulang kuota setelah submit
                 await checkUserData(currentUser);
             }
         });
@@ -233,4 +242,5 @@
     </script>
 </body>
 </html>
+
 
