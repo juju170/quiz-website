@@ -5,158 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buat Pengumuman Lomba Ceria!</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts: Poppins & Baloo 2 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #FFFBEB; /* Light yellow background */
+        body { font-family: 'Poppins', sans-serif; background-color: #FFFBEB; }
+        .form-container { background: white; border-radius: 24px; padding: 32px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); border: 2px solid #FEF3C7; }
+        .input-group { margin-bottom: 20px; }
+        .input-field { width: 100%; padding: 12px 16px; border: 2px solid #E5E7EB; border-radius: 12px; transition: all 0.3s ease; }
+        .input-field.bg-white { /* Style for select dropdown */
+            -webkit-appearance: none; appearance: none;
+            background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>');
+            background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em;
         }
-        .form-container {
-            background: white;
-            border-radius: 24px;
-            padding: 32px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-            border: 2px solid #FEF3C7;
-        }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        .input-field {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #E5E7EB;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
-        .input-field:focus {
-            outline: none;
-            border-color: #FBBF24; /* Amber-400 */
-            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.3);
-        }
-        .label-text {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 8px;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #F9A825, #F57F17); /* Yellow to Orange */
-            color: white;
-            font-weight: 700;
-            padding: 16px;
-            border-radius: 9999px;
-            width: 100%;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(249, 168, 37, 0.4);
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(249, 168, 37, 0.5);
-        }
-        .announcement-card {
-            padding: 24px;
-            border-radius: 20px;
-            color: #1F2937;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .announcement-card:hover {
-            transform: scale(1.05);
-        }
-        .badge-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-        nav a {
-            padding: 8px 16px;
-            border-radius: 999px;
-            font-weight: 600;
-            transition: all 0.2s ease-in-out;
-        }
-        nav a.active {
-            background-color: #D97706;
-            color: white;
-        }
-        nav a:not(.active):hover {
-            background-color: #FEF3C7;
-            color: #D97706;
-        }
-
-        /* --- KODE TOMBOL BERANDA YANG DIPERBAIKI --- */
-        .tombol-beranda {
-            position: fixed; /* Membuat posisi tombol tetap saat di-scroll */
-            bottom: 20px;
-            right: 20px;
-            
-            background-color: #FFC107; /* Warna kuning amber */
-            color: #333; /* Warna teks gelap */
-            
-            padding: 12px 20px; /* Jarak antara teks dan tepi tombol */
-            border-radius: 50px; /* Membuat sudut menjadi bulat sempurna */
-            
-            display: flex; /* Mengaktifkan flexbox untuk menata ikon dan teks */
-            align-items: center; /* Menengahkan ikon dan teks secara vertikal */
-            gap: 8px; /* Jarak antara emoji dan teks "Beranda" */
-            
-            font-family: 'Baloo 2', sans-serif; /* Menggunakan font yang sesuai tema */
-            font-size: 1.1rem;
-            font-weight: 700;
-            text-decoration: none; /* Menghilangkan garis bawah pada link */
-            
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Efek bayangan halus */
-            transition: transform 0.2s ease, box-shadow 0.2s ease; /* Animasi halus */
-            z-index: 1000; /* Memastikan tombol selalu di lapisan paling atas */
-        }
-
-        .tombol-beranda:hover {
-            transform: translateY(-3px); /* Sedikit terangkat saat kursor di atasnya */
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Bayangan menjadi lebih jelas */
-        }
+        .input-field:focus { outline: none; border-color: #FBBF24; box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.3); }
+        .label-text { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #374151; margin-bottom: 8px; }
+        .btn-primary { background: linear-gradient(135deg, #F9A825, #F57F17); color: white; font-weight: 700; padding: 16px; border-radius: 9999px; width: 100%; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(249, 168, 37, 0.4); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(249, 168, 37, 0.5); }
+        .announcement-card { padding: 24px; border-radius: 20px; color: #1F2937; box-shadow: 0 8px 16px rgba(0,0,0,0.1); transition: transform 0.3s ease; display: flex; flex-direction: column; justify-content: space-between; }
+        .announcement-card:hover { transform: scale(1.05); }
+        .tombol-beranda { position: fixed; bottom: 20px; right: 20px; background-color: #FFC107; color: #333; padding: 12px 20px; border-radius: 50px; display: flex; align-items: center; gap: 8px; font-family: 'Baloo 2', sans-serif; font-size: 1.1rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); transition: transform 0.2s ease, box-shadow 0.2s ease; z-index: 1000; }
+        .tombol-beranda:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); }
     </style>
 </head>
 <body class="container mx-auto p-4 md:p-8 max-w-5xl text-gray-800">
-        <!-- Header -->
         <header class="text-center mb-10">
             <h1 class="text-4xl md:text-5xl font-bold text-amber-600">Umumkan Lomba Kuis Seru! 📣</h1>
             <p class="text-gray-500 mt-2">Ajak semua siswa untuk berkompetisi dan memenangkan lencana juara!</p>
         </header>
 
-        <!-- Form Pembuatan Pengumuman -->
         <main class="form-container mb-12">
             <h2 class="text-2xl font-bold mb-6 text-gray-700">Buat Pengumuman Baru</h2>
             <form id="announcementForm">
-                <!-- Judul Pengumuman -->
                 <div class="input-group">
                     <label for="judul" class="label-text"><i data-lucide="edit"></i>Judul Pengumuman</label>
                     <input type="text" id="judul" class="input-field" placeholder="Contoh: Lomba Cerdas Cermat Sains" required>
                 </div>
-
-                <!-- Deskripsi Lomba -->
                 <div class="input-group">
                     <label for="deskripsi" class="label-text"><i data-lucide="file-text"></i>Deskripsi Lomba</label>
                     <textarea id="deskripsi" rows="3" class="input-field" placeholder="Jelaskan tentang lomba, aturan, dan jadwalnya di sini..."></textarea>
                 </div>
                 
-                <!-- Hadiah Lencana -->
                 <fieldset class="border-2 border-dashed border-gray-300 p-4 rounded-xl mb-6">
                     <legend class="text-lg font-bold px-2 text-gray-600 flex items-center gap-2"><i data-lucide="award"></i>Hadiah Lencana Juara</legend>
                     <div class="grid md:grid-cols-3 gap-6 mt-4">
@@ -166,8 +59,7 @@
                     </div>
                 </fieldset>
 
-                <!-- Kuis, Waktu Mulai, dan Maks Partisipan -->
-                <div class="grid md:grid-cols-3 gap-6">
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div class="input-group">
                         <label for="quiz-select" class="label-text"><i data-lucide="link"></i>Hubungkan Kuis</label>
                         <select id="quiz-select" class="input-field bg-white" required>
@@ -175,17 +67,28 @@
                         </select>
                     </div>
                      <div class="input-group">
-                        <label for="start-time" class="label-text"><i data-lucide="calendar-clock"></i>Waktu Mulai Lomba</label>
+                        <label for="start-time" class="label-text"><i data-lucide="calendar-clock"></i>Waktu Mulai</label>
                         <input type="datetime-local" id="start-time" class="input-field" required>
                     </div>
-                    <!-- [MODIFIED] Input untuk maksimal partisipan -->
                     <div class="input-group">
-                        <label for="max-participants" class="label-text"><i data-lucide="users"></i>Maksimal Partisipan</label>
+                        <label for="max-participants" class="label-text"><i data-lucide="users"></i>Maks Partisipan</label>
                         <input type="number" id="max-participants" class="input-field" placeholder="Contoh: 30" min="1" required>
+                    </div>
+                    <!-- [MODIFIED] Mengganti input teks menjadi pilihan (select) -->
+                    <div class="input-group">
+                        <label for="target-class" class="label-text"><i data-lucide="contact-2"></i>Target Kelas</label>
+                        <select id="target-class" class="input-field bg-white" required>
+                            <option value="" disabled selected>-- Pilih Kelas --</option>
+                            <option value="Kelas 1">Kelas 1</option>
+                            <option value="Kelas 2">Kelas 2</option>
+                            <option value="Kelas 3">Kelas 3</option>
+                            <option value="Kelas 4">Kelas 4</option>
+                            <option value="Kelas 5">Kelas 5</option>
+                            <option value="Kelas 6">Kelas 6</option>
+                        </select>
                     </div>
                 </div>
                
-                <!-- Tombol Buat Pengumuman -->
                 <div class="mt-6">
                     <button type="submit" class="btn-primary flex items-center justify-center gap-2">
                         <i data-lucide="send"></i>
@@ -195,27 +98,22 @@
             </form>
         </main>
 
-        <!-- Daftar Pengumuman -->
         <section>
             <h2 class="text-3xl font-bold text-center mb-8 text-amber-600">Pengumuman Aktif 🌟</h2>
             <div id="announcement-list" class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                 <!-- Data dari Firestore akan ditampilkan di sini -->
                 <p id="loading-announcements" class="text-center text-gray-500 col-span-full">Memuat pengumuman...</p>
             </div>
         </section>
 
-    <!-- Tombol Beranda (HTML) -->
     <a href="index.html" class="tombol-beranda" title="Kembali ke Beranda">
         <span>🏠</span>
         <span>Beranda</span>
     </a>    
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, getDocs, serverTimestamp, doc, getDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // GANTI DENGAN KONFIGURASI FIREBASE ANDA
         const firebaseConfig = {
             apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
             authDomain: "forumwidara.firebaseapp.com",
@@ -225,46 +123,29 @@
             appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
         };
 
-        // Inisialisasi Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Referensi Koleksi
         const announcementsCollection = collection(db, 'announcements');
         const quizzesCollection = collection(db, 'quizzes');
-
-        // Elemen DOM
         const form = document.getElementById('announcementForm');
         const announcementListContainer = document.getElementById('announcement-list');
         const quizSelect = document.getElementById('quiz-select');
         const cardColors = ['from-blue-300 to-indigo-400', 'from-green-300 to-cyan-400', 'from-pink-300 to-rose-400', 'from-purple-300 to-violet-400'];
 
-        // --- FUNGSI ---
-
-        // Mengambil dan mengisi daftar kuis ke dalam select box
         async function populateQuizzes() {
             try {
                 const querySnapshot = await getDocs(quizzesCollection);
                 quizSelect.innerHTML = '<option value="">-- Pilih Kuis --</option>';
-                if (querySnapshot.empty) {
-                    quizSelect.innerHTML = '<option value="">Belum ada kuis tersedia</option>';
-                    quizSelect.disabled = true;
-                } else {
-                     querySnapshot.forEach(doc => {
-                        const option = document.createElement('option');
-                        option.value = doc.id;
-                        option.textContent = doc.data().title;
-                        quizSelect.appendChild(option);
-                    });
-                    quizSelect.disabled = false;
-                }
+                querySnapshot.forEach(doc => {
+                    const option = new Option(doc.data().title, doc.id);
+                    quizSelect.add(option);
+                });
             } catch (error) {
                 console.error("Error getting quizzes: ", error);
-                quizSelect.innerHTML = '<option value="">Gagal memuat kuis</option>';
             }
         }
 
-        // Render pengumuman dari Firestore
         async function renderAnnouncements(docs) {
             announcementListContainer.innerHTML = '';
             if (docs.length === 0) {
@@ -273,44 +154,30 @@
             }
 
             for (const [index, docSnap] of docs.entries()) {
-                const announcement = docSnap.data();
+                const ann = docSnap.data();
                 const card = document.createElement('div');
-                const selectedColor = cardColors[index % cardColors.length];
-                card.className = `announcement-card bg-gradient-to-br ${selectedColor}`;
+                card.className = `announcement-card bg-gradient-to-br ${cardColors[index % cardColors.length]}`;
                 
-                // Ambil judul kuis
-                let quizTitle = 'Kuis tidak ditemukan';
-                if (announcement.quizId) {
-                    try {
-                        const quizDoc = await getDoc(doc(db, 'quizzes', announcement.quizId));
-                        if (quizDoc.exists()) {
-                            quizTitle = quizDoc.data().title;
-                        }
-                    } catch (error) {
-                        console.error("Error fetching quiz title:", error);
-                    }
+                let quizTitle = '...';
+                if (ann.quizId) {
+                    const quizDoc = await getDoc(doc(db, 'quizzes', ann.quizId));
+                    if (quizDoc.exists()) quizTitle = quizDoc.data().title;
                 }
-                
-                // [MODIFIED] Menampilkan info maks partisipan di kartu
-                const maxParticipantsInfo = announcement.maxParticipants 
-                    ? `<div class="flex justify-between items-center text-sm font-semibold bg-white/30 px-4 py-2 rounded-lg mt-2">
-                            <span><i data-lucide="users" class="inline-block mr-1"></i>Maks Partisipan</span>
-                            <span class="font-bold">${announcement.maxParticipants}</span>
-                       </div>`
-                    : '';
-
 
                 card.innerHTML = `
                     <div>
-                        <h3 class="text-2xl font-bold mb-2">${announcement.title}</h3>
-                        <p class="mb-4 text-gray-800">${announcement.description}</p>
+                        <h3 class="text-2xl font-bold mb-2">${ann.title}</h3>
+                        <p class="mb-4 text-gray-800">${ann.description}</p>
                     </div>
-                    <div class="mt-auto">
+                    <div class="mt-auto space-y-2">
                         <div class="flex justify-between items-center text-sm font-semibold bg-white/30 px-4 py-2 rounded-lg">
-                            <span><i data-lucide="book-open" class="inline-block mr-1"></i>${quizTitle}</span>
-                            <a href="see-info.html" class="bg-white text-gray-800 px-3 py-1 rounded-full hover:bg-gray-100">Lihat Info</a>
+                            <span><i data-lucide="contact-2" class="inline-block w-4 h-4 mr-1"></i>Kelas</span>
+                            <span class="font-bold">${ann.targetClass || 'Semua'}</span>
                         </div>
-                        ${maxParticipantsInfo}
+                        <div class="flex justify-between items-center text-sm font-semibold bg-white/30 px-4 py-2 rounded-lg">
+                            <span><i data-lucide="book-open" class="inline-block w-4 h-4 mr-1"></i>${quizTitle}</span>
+                            <a href="see-info.html" class="bg-white text-gray-800 px-3 py-1 rounded-full hover:bg-gray-100">Lihat</a>
+                        </div>
                     </div>
                 `;
                 announcementListContainer.appendChild(card);
@@ -318,7 +185,6 @@
             lucide.createIcons();
         }
 
-        // Simpan pengumuman baru ke Firestore
         async function saveAnnouncement(e) {
             e.preventDefault();
             
@@ -326,34 +192,24 @@
             const description = form.deskripsi.value;
             const quizId = form['quiz-select'].value;
             const startTimeValue = form['start-time'].value;
-            // [MODIFIED] Mengambil nilai maksimal partisipan
             const maxParticipants = parseInt(form['max-participants'].value, 10);
+            const targetClass = form['target-class'].value; // [MODIFIED]
 
-            if (!title || !quizId || !startTimeValue || !maxParticipants) {
-                alert('Semua kolom wajib diisi, termasuk maksimal partisipan!');
+            if (!title || !quizId || !startTimeValue || !maxParticipants || !targetClass) {
+                alert('Semua kolom wajib diisi!');
                 return;
             }
-            
-            if (maxParticipants <= 0) {
-                alert('Maksimal partisipan harus lebih dari 0.');
-                return;
-            }
-
-            const badges = {
-                gold: form['badge-gold'].value.trim(),
-                silver: form['badge-silver'].value.trim(),
-                bronze: form['badge-bronze'].value.trim(),
-            };
-            
-            const startTime = Timestamp.fromDate(new Date(startTimeValue));
 
             const newAnnouncement = {
-                title,
-                description,
-                quizId,
-                startTime,
-                maxParticipants, // [MODIFIED] Menyimpan maxParticipants ke Firestore
-                badges,
+                title, description, quizId,
+                startTime: Timestamp.fromDate(new Date(startTimeValue)),
+                maxParticipants,
+                targetClass, // [MODIFIED]
+                badges: {
+                    gold: form['badge-gold'].value.trim(),
+                    silver: form['badge-silver'].value.trim(),
+                    bronze: form['badge-bronze'].value.trim(),
+                },
                 createdAt: serverTimestamp()
             };
 
@@ -363,22 +219,16 @@
                 alert('Pengumuman berhasil diterbitkan!');
             } catch (error) {
                 console.error("Error adding document: ", error);
-                alert('Gagal menerbitkan pengumuman.');
             }
         }
 
-        // --- EVENT LISTENERS ---
-
-        // Tampilkan pengumuman secara real-time
-        onSnapshot(announcementsCollection, (snapshot) => {
+        onSnapshot(collection(db, 'announcements'), (snapshot) => {
             document.getElementById('loading-announcements').style.display = 'none';
             renderAnnouncements(snapshot.docs);
         });
 
-        // Simpan saat form disubmit
         form.addEventListener('submit', saveAnnouncement);
 
-        // Panggil saat halaman dimuat
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             populateQuizzes();
@@ -386,4 +236,5 @@
     </script>
 </body>
 </html>
+
 
