@@ -13,11 +13,9 @@
     body { font-family: 'Poppins', sans-serif; background-color: #f7fafc; }
     .font-heading { font-family: 'Fredoka One', cursive; }
     .info-card {
-      background: white;
-      border-radius: 20px;
+      background: white; border-radius: 20px;
       box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-      transition: all 0.3s ease-in-out;
-      border: 1px solid #e2e8f0;
+      transition: all 0.3s ease-in-out; border: 1px solid #e2e8f0;
     }
     .info-card:hover { transform: translateY(-5px); }
     .timer-box { background-color: #edf2f7; border-radius: 12px; padding: 1rem; }
@@ -65,38 +63,25 @@
 
     async function getCompletedAnnouncementIds(userId) {
       const completedIds = new Set();
-      try {
-        const resultsRef = collection(db, 'results');
-        const q = query(resultsRef, where("userId", "==", userId));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach(doc => {
-          if (doc.data().announcementId) completedIds.add(doc.data().announcementId);
-        });
-      } catch (error) {
-        console.error("Gagal ambil riwayat:", error);
-      }
+      const q = query(collection(db, 'results'), where("userId", "==", userId));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(doc => completedIds.add(doc.data().announcementId));
       return completedIds;
     }
 
     function updateCountdown(card, announcementId) {
       const timerBox = card.querySelector('.timer-box');
-      if (!timerBox || !timerBox.dataset.starttime) return;
+      if (!timerBox) return;
       const startTime = parseInt(timerBox.dataset.starttime, 10);
-      const now = new Date().getTime();
-      const distance = startTime - now;
+      const distance = startTime - new Date().getTime();
 
       const playButton = card.querySelector('.btn-play');
       const timerWrapper = card.querySelector('.timer-wrapper');
 
       if (distance <= 0) {
-        if (timerWrapper) timerWrapper.style.display = 'none';
-        // Hanya tampilkan tombol jika tidak dinonaktifkan karena penuh
+        if(timerWrapper) timerWrapper.style.display = 'none';
         if (playButton && !playButton.disabled) playButton.style.display = 'flex';
-
-        if (countdownIntervals[announcementId]) {
-          clearInterval(countdownIntervals[announcementId]);
-          delete countdownIntervals[announcementId];
-        }
+        if (countdownIntervals[announcementId]) clearInterval(countdownIntervals[announcementId]);
       } else {
         timerBox.querySelector('.days').textContent = String(Math.floor(distance / (1000*60*60*24))).padStart(2, '0');
         timerBox.querySelector('.hours').textContent = String(Math.floor((distance % (1000*60*60*24))/(1000*60*60))).padStart(2,'0');
@@ -108,52 +93,43 @@
     async function renderAnnouncements(docs, userId) {
       grid.innerHTML = '';
       if (docs.length === 0) {
-        grid.innerHTML = '<p class="col-span-full text-center text-gray-500">Belum ada pengumuman lomba.</p>';
+        grid.innerHTML = '<p class="col-span-full text-center text-gray-500">Belum ada pengumuman.</p>';
         return;
       }
-
       Object.values(countdownIntervals).forEach(clearInterval);
       countdownIntervals = {};
-
       const completedAnnouncementIds = await getCompletedAnnouncementIds(userId);
 
-      // [MODIFIED] Menggunakan for...of untuk menangani async/await di dalam loop
       for (const docSnap of docs) {
-        const announcement = docSnap.data();
-        const announcementId = docSnap.id;
+        const ann = docSnap.data();
+        const annId = docSnap.id;
         const card = document.createElement('div');
         card.className = 'info-card flex flex-col p-6';
 
-        // [MODIFIED] Mengambil data partisipan saat ini
-        const participantsRef = collection(db, `announcements/${announcementId}/participants`);
-        const participantsSnap = await getDocs(participantsRef);
+        const participantsSnap = await getDocs(collection(db, `announcements/${annId}/participants`));
         const currentParticipants = participantsSnap.size;
-        const maxParticipants = announcement.maxParticipants || 0; // Default 0 jika tidak diset
+        const maxParticipants = ann.maxParticipants || 0;
         const isFull = maxParticipants > 0 && currentParticipants >= maxParticipants;
-
+        
         const participantInfoHTML = maxParticipants > 0 
             ? `<div class="text-sm font-semibold text-gray-500 text-center mt-3">
                  <i data-lucide="users" class="inline-block w-4 h-4 -mt-1"></i> 
                  Peserta: ${currentParticipants} / ${maxParticipants}
+                 <span class="ml-4"><i data-lucide="contact-2" class="inline-block w-4 h-4 -mt-1"></i> Kelas: <strong>${ann.targetClass || 'Semua'}</strong></span>
                </div>`
             : '';
         
-        const startTimeMs = announcement.startTime.toMillis();
-        const isCompleted = completedAnnouncementIds.has(announcementId);
-        const now = new Date().getTime();
-        const sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000;
-        const expirationTimeMs = startTimeMs + sevenDaysInMillis;
-        const isExpired = now > expirationTimeMs;
-        const isCountingDown = now < startTimeMs;
+        const startTimeMs = ann.startTime.toMillis();
+        const isCompleted = completedAnnouncementIds.has(annId);
+        const isExpired = new Date().getTime() > (startTimeMs + 7*24*60*60*1000);
+        const isCountingDown = new Date().getTime() < startTimeMs;
 
         let bottomHTML = '';
-
         if (isCompleted) {
           bottomHTML = `<button class="btn-disabled w-full py-3 rounded-lg mt-4" disabled>Kuis sudah diikuti</button>`;
         } else if (isExpired) {
           bottomHTML = `<button class="btn-disabled w-full py-3 rounded-lg mt-4" disabled>Kuis kedaluwarsa</button>`;
         } else if (isFull) {
-          // [MODIFIED] Tombol dinonaktifkan jika kelas penuh
           bottomHTML = `<button class="btn-disabled w-full py-3 rounded-lg mt-4" disabled>Kelas Penuh</button>${participantInfoHTML}`;
         } else {
           bottomHTML = `
@@ -169,127 +145,113 @@
               </div>
             </div>
             <button class="btn-play w-full py-3 rounded-lg mt-4 flex items-center justify-center gap-2"
-              data-quizid="${announcement.quizId}" data-announcementid="${announcementId}" style="display:${isCountingDown?'none':'flex'}">
+              data-quizid="${ann.quizId}" data-announcementid="${annId}" style="display:${isCountingDown?'none':'flex'}">
               <i data-lucide="play-circle" class="w-5 h-5"></i> Gabung Kuis!
             </button>
             ${participantInfoHTML}
             <p class="waiting-text hidden text-gray-600 mt-2">⏳ Menunggu ujian dimulai...</p>
-            <div class="participants-list hidden"></div>
-          `;
+            <div class="participants-list hidden"></div>`;
         }
-
-        card.innerHTML = `
-          <div class="flex-grow">
-            <h2 class="font-heading text-2xl font-bold">${announcement.title}</h2>
-            <p class="text-gray-600 mt-2 mb-4">${announcement.description}</p>
+        card.innerHTML = `<div class="flex-grow">
+            <h2 class="font-heading text-2xl font-bold">${ann.title}</h2>
+            <p class="text-gray-600 mt-2 mb-4">${ann.description}</p>
           </div>
-          ${bottomHTML}
-        `;
+          ${bottomHTML}`;
         grid.appendChild(card);
-
         if (isCountingDown && !isCompleted && !isExpired) {
-          updateCountdown(card, announcementId);
-          countdownIntervals[announcementId] = setInterval(() => updateCountdown(card, announcementId), 1000);
+          updateCountdown(card, annId);
+          countdownIntervals[annId] = setInterval(() => updateCountdown(card, annId), 1000);
         }
       }
-
       lucide.createIcons();
     }
 
-    // Handle join quiz button
     grid.addEventListener('click', async (e) => {
-      if (e.target.closest('.btn-play')) {
-        const btn = e.target.closest('.btn-play');
-        const quizId = btn.dataset.quizid;
-        const announcementId = btn.dataset.announcementid;
-        const card = btn.closest('.info-card');
+      const btn = e.target.closest('.btn-play');
+      if (!btn) return;
 
-        if (!auth.currentUser) { alert("Silakan login dulu"); return; }
+      const quizId = btn.dataset.quizid;
+      const annId = btn.dataset.announcementid;
+      const card = btn.closest('.info-card');
+      const currentUser = auth.currentUser;
 
-        // [MODIFIED] Cek ulang kuota sebelum join untuk mencegah race condition
-        const announcementRefCheck = doc(db, 'announcements', announcementId);
-        const announcementSnap = await getDoc(announcementRefCheck);
-        if (!announcementSnap.exists()) {
-            alert("Error: Lomba ini tidak ditemukan.");
-            return;
+      if (!currentUser) { alert("Silakan login dulu."); return; }
+
+      // --- [MODIFIED] Validasi Kelas dan Kuota ---
+      try {
+        btn.disabled = true;
+        btn.textContent = 'Memeriksa...';
+
+        const annRef = doc(db, 'announcements', annId);
+        const profileRef = doc(db, 'profiles', currentUser.uid);
+
+        const [annSnap, profileSnap, participantsSnap] = await Promise.all([
+            getDoc(annRef),
+            getDoc(profileRef),
+            getDocs(collection(db, `announcements/${annId}/participants`))
+        ]);
+
+        if (!annSnap.exists()) throw new Error("Lomba ini tidak ditemukan.");
+        
+        const annData = annSnap.data();
+        const userClass = profileSnap.exists() ? profileSnap.data().class : null;
+
+        // 1. Cek apakah user sudah set kelas di profil
+        if (!userClass) {
+          alert("Anda harus mengatur kelas Anda di halaman profil terlebih dahulu!");
+          window.location.href = 'profile.html';
+          return;
         }
-        const maxParticipants = announcementSnap.data().maxParticipants || 0;
-        const participantsRefCheck = collection(db, `announcements/${announcementId}/participants`);
-        const participantsSnap = await getDocs(participantsRefCheck);
-        const currentParticipants = participantsSnap.size;
 
-        if (maxParticipants > 0 && currentParticipants >= maxParticipants) {
-            alert("Maaf, kelas sudah penuh!");
-            btn.textContent = "Kelas Penuh";
-            btn.disabled = true;
-            btn.classList.remove('btn-play');
-            btn.classList.add('btn-disabled');
-            return;
+        // 2. Cek kecocokan kelas
+        if (annData.targetClass.toLowerCase() !== userClass.toLowerCase()) {
+           throw new Error(`Kuis ini hanya untuk ${annData.targetClass}. Kelas Anda adalah ${userClass}.`);
         }
-        // --- Akhir Pengecekan Ulang ---
 
-        try {
-          const participantRef = doc(db, `announcements/${announcementId}/participants/${auth.currentUser.uid}`);
-          await setDoc(participantRef, {
-            userId: auth.currentUser.uid,
-            joinedAt: serverTimestamp(),
-            status: "waiting"
-          }, { merge: true });
-
-          btn.classList.add('hidden');
-          card.querySelector('.waiting-text').classList.remove('hidden');
-          const listElement = card.querySelector('.participants-list');
-          if(listElement) listElement.classList.remove('hidden');
-
-          // Pantau peserta real-time
-          const participantsRef = collection(db, `announcements/${announcementId}/participants`);
-          onSnapshot(participantsRef, (snap) => {
-            const list = card.querySelector('.participants-list');
-            if (!list) return;
-            const participantNames = [];
-            snap.forEach(p => {
-                // Untuk privasi, kita bisa tampilkan ID terpotong atau nama panggilan jika ada
-                const shortId = p.data().userId.substring(0, 8);
-                participantNames.push(`<div>👤 Pengguna ...${shortId}</div>`);
-            });
-            list.innerHTML = `<p class="font-semibold mb-1">Peserta (${snap.size}):</p>${participantNames.join('')}`;
-          });
-
-          // Pantau startTime → redirect
-          const announcementRef = doc(db, 'announcements', announcementId);
-          onSnapshot(announcementRef, (snap) => {
-            if (snap.exists()) {
-              const data = snap.data();
-              const startTime = data.startTime?.toDate ? data.startTime.toDate() : null;
-              if (startTime && new Date() >= startTime) {
-                window.location.href = `play.html?quizId=${quizId}&announcementId=${announcementId}`;
-              }
-            }
-          });
-        } catch (err) {
-          console.error("Gagal join:", err);
-          alert("Gagal join lobby");
+        // 3. Cek kuota
+        if (annData.maxParticipants > 0 && participantsSnap.size >= annData.maxParticipants) {
+           throw new Error("Maaf, kelas sudah penuh!");
         }
+        // --- Akhir Validasi ---
+
+        await setDoc(doc(db, `announcements/${annId}/participants/${currentUser.uid}`), {
+            userId: currentUser.uid,
+            joinedAt: serverTimestamp()
+        });
+        
+        btn.classList.add('hidden');
+        card.querySelector('.waiting-text').classList.remove('hidden');
+        card.querySelector('.participants-list').classList.remove('hidden');
+
+        onSnapshot(doc(db, 'announcements', annId), (snap) => {
+          const data = snap.data();
+          if (data && data.startTime && new Date() >= data.startTime.toDate()) {
+            window.location.href = `play.html?quizId=${quizId}&announcementId=${annId}`;
+          }
+        });
+
+      } catch (err) {
+        console.error("Gagal join:", err);
+        alert(err.message);
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="play-circle" class="w-5 h-5"></i> Gabung Kuis!';
+        lucide.createIcons();
       }
     });
 
-    // Load announcements
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        const announcementsRef = collection(db, 'announcements');
-        const q = query(announcementsRef, orderBy("createdAt", "desc"));
+        const q = query(collection(db, 'announcements'), orderBy("createdAt", "desc"));
         onSnapshot(q, (snapshot) => {
           document.getElementById('loading-info').style.display = 'none';
           renderAnnouncements(snapshot.docs, user.uid);
         });
       } else {
-        signInAnonymously(auth).catch(err => {
-          console.error("Login gagal:", err);
-          grid.innerHTML = '<p class="col-span-full text-center text-red-500">Login diperlukan.</p>';
-        });
+        signInAnonymously(auth).catch(err => console.error("Login gagal:", err));
       }
     });
   </script>
 </body>
 </html>
+
 
