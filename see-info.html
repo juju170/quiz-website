@@ -45,7 +45,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, onSnapshot, query, where, getDocs, orderBy, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, query, where, getDocs, orderBy, doc, setDoc, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA6zXOerKvdPJTmBp5Y6R2yFsy98xLDsKc",
@@ -90,7 +90,8 @@
 
       if (distance <= 0) {
         if (timerWrapper) timerWrapper.style.display = 'none';
-        if (playButton) playButton.style.display = 'flex';
+        // Hanya tampilkan tombol jika tidak dinonaktifkan karena penuh
+        if (playButton && !playButton.disabled) playButton.style.display = 'flex';
 
         if (countdownIntervals[announcementId]) {
           clearInterval(countdownIntervals[announcementId]);
@@ -116,12 +117,27 @@
 
       const completedAnnouncementIds = await getCompletedAnnouncementIds(userId);
 
-      docs.forEach(docSnap => {
+      // [MODIFIED] Menggunakan for...of untuk menangani async/await di dalam loop
+      for (const docSnap of docs) {
         const announcement = docSnap.data();
         const announcementId = docSnap.id;
         const card = document.createElement('div');
         card.className = 'info-card flex flex-col p-6';
 
+        // [MODIFIED] Mengambil data partisipan saat ini
+        const participantsRef = collection(db, `announcements/${announcementId}/participants`);
+        const participantsSnap = await getDocs(participantsRef);
+        const currentParticipants = participantsSnap.size;
+        const maxParticipants = announcement.maxParticipants || 0; // Default 0 jika tidak diset
+        const isFull = maxParticipants > 0 && currentParticipants >= maxParticipants;
+
+        const participantInfoHTML = maxParticipants > 0 
+            ? `<div class="text-sm font-semibold text-gray-500 text-center mt-3">
+                 <i data-lucide="users" class="inline-block w-4 h-4 -mt-1"></i> 
+                 Peserta: ${currentParticipants} / ${maxParticipants}
+               </div>`
+            : '';
+        
         const startTimeMs = announcement.startTime.toMillis();
         const isCompleted = completedAnnouncementIds.has(announcementId);
         const now = new Date().getTime();
@@ -133,9 +149,12 @@
         let bottomHTML = '';
 
         if (isCompleted) {
-          bottomHTML = `<button class="btn-disabled w-full py-3 rounded-lg mt-4" disabled>Kuis sudah kamu ikuti</button>`;
+          bottomHTML = `<button class="btn-disabled w-full py-3 rounded-lg mt-4" disabled>Kuis sudah diikuti</button>`;
         } else if (isExpired) {
           bottomHTML = `<button class="btn-disabled w-full py-3 rounded-lg mt-4" disabled>Kuis kedaluwarsa</button>`;
+        } else if (isFull) {
+          // [MODIFIED] Tombol dinonaktifkan jika kelas penuh
+          bottomHTML = `<button class="btn-disabled w-full py-3 rounded-lg mt-4" disabled>Kelas Penuh</button>${participantInfoHTML}`;
         } else {
           bottomHTML = `
             <div class="timer-wrapper ${isCountingDown ? '' : 'hidden'}">
@@ -153,6 +172,7 @@
               data-quizid="${announcement.quizId}" data-announcementid="${announcementId}" style="display:${isCountingDown?'none':'flex'}">
               <i data-lucide="play-circle" class="w-5 h-5"></i> Gabung Kuis!
             </button>
+            ${participantInfoHTML}
             <p class="waiting-text hidden text-gray-600 mt-2">⏳ Menunggu ujian dimulai...</p>
             <div class="participants-list hidden"></div>
           `;
@@ -171,7 +191,7 @@
           updateCountdown(card, announcementId);
           countdownIntervals[announcementId] = setInterval(() => updateCountdown(card, announcementId), 1000);
         }
-      });
+      }
 
       lucide.createIcons();
     }
@@ -186,6 +206,28 @@
 
         if (!auth.currentUser) { alert("Silakan login dulu"); return; }
 
+        // [MODIFIED] Cek ulang kuota sebelum join untuk mencegah race condition
+        const announcementRefCheck = doc(db, 'announcements', announcementId);
+        const announcementSnap = await getDoc(announcementRefCheck);
+        if (!announcementSnap.exists()) {
+            alert("Error: Lomba ini tidak ditemukan.");
+            return;
+        }
+        const maxParticipants = announcementSnap.data().maxParticipants || 0;
+        const participantsRefCheck = collection(db, `announcements/${announcementId}/participants`);
+        const participantsSnap = await getDocs(participantsRefCheck);
+        const currentParticipants = participantsSnap.size;
+
+        if (maxParticipants > 0 && currentParticipants >= maxParticipants) {
+            alert("Maaf, kelas sudah penuh!");
+            btn.textContent = "Kelas Penuh";
+            btn.disabled = true;
+            btn.classList.remove('btn-play');
+            btn.classList.add('btn-disabled');
+            return;
+        }
+        // --- Akhir Pengecekan Ulang ---
+
         try {
           const participantRef = doc(db, `announcements/${announcementId}/participants/${auth.currentUser.uid}`);
           await setDoc(participantRef, {
@@ -196,17 +238,21 @@
 
           btn.classList.add('hidden');
           card.querySelector('.waiting-text').classList.remove('hidden');
-          card.querySelector('.participants-list').classList.remove('hidden');
+          const listElement = card.querySelector('.participants-list');
+          if(listElement) listElement.classList.remove('hidden');
 
           // Pantau peserta real-time
           const participantsRef = collection(db, `announcements/${announcementId}/participants`);
           onSnapshot(participantsRef, (snap) => {
             const list = card.querySelector('.participants-list');
-            list.innerHTML = `<p class="font-semibold mb-1">Peserta yang sudah join:</p>`;
+            if (!list) return;
+            const participantNames = [];
             snap.forEach(p => {
-              const d = p.data();
-              list.innerHTML += `<div>👤 ${d.userId}</div>`;
+                // Untuk privasi, kita bisa tampilkan ID terpotong atau nama panggilan jika ada
+                const shortId = p.data().userId.substring(0, 8);
+                participantNames.push(`<div>👤 Pengguna ...${shortId}</div>`);
             });
+            list.innerHTML = `<p class="font-semibold mb-1">Peserta (${snap.size}):</p>${participantNames.join('')}`;
           });
 
           // Pantau startTime → redirect
@@ -246,3 +292,4 @@
   </script>
 </body>
 </html>
+
