@@ -3,73 +3,183 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Buat Pertanyaan Baru — Komunitas Ceria</title>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
+  <title>Buat Pertanyaan Baru</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo&family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg:#fff8f3; --card:#ffffff; --accent1:#ff8a80; --accent2:#ffd180; --accent3:#8c9eff; --accent4:#80d8ff; --muted:#6b6b6b;
-      --glass: rgba(255,255,255,0.7);
+    :root {
+      --bg-space: #0f0c29;
+      --card-bg: rgba(22, 18, 61, 0.5);
+      --border-color: rgba(255, 255, 255, 0.12);
+      --accent1: #ff7e5f;
+      --accent2: #feb47b;
+      --accent3: #8697ff;
+      --accent4: #48dbfb;
+      --accent-yellow: #FFC107;
+      --space-glow: rgba(72, 219, 251, 0.15);
+      --muted-light: rgba(255, 255, 255, 0.8);
     }
-    *{box-sizing:border-box}
-    body{font-family:'Baloo 2',sans-serif;margin:0;background:linear-gradient(135deg,var(--accent4), #e8f5e9); min-height:100vh; padding:15px;}
-    .wrap{max-width:900px;margin:0 auto}
-    header{display:flex;gap:12px;align-items:center;margin-bottom:15px;flex-wrap:wrap}
-    header .logo{background:var(--card);padding:12px;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,0.08);display:flex;align-items:center;gap:10px}
-    header h1{margin:0;font-size:1.3rem;color:#263238}
-    header p{margin:0;color:var(--muted);font-size:0.9rem}
-    .card{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 8px 25px rgba(0,0,0,0.08);margin-bottom:14px}
-    .grid{display:grid;grid-template-columns:1fr 320px;gap:14px}
-    form .row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
-    label{display:block;font-weight:800;margin-bottom:6px;color:#263238}
-    input[type=text], input[type=url], input[type=number], textarea, select{
-      width:100%;padding:10px;border-radius:10px;border:2px solid rgba(0,0,0,0.06);
-      background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,250,250,0.95));font-size:1rem
+    * { box-sizing: border-box; scroll-behavior: smooth; }
+    body {
+      font-family: 'Baloo', sans-serif;
+      margin: 0;
+      background: linear-gradient(180deg, #071023 0%, #0f0c29 100%);
+      color: var(--muted-light);
+      min-height: 100vh;
+      padding: 15px;
+      overflow-x: hidden;
+      position: relative;
     }
-    textarea{min-height:70px;resize:vertical}
-    .section-title{font-weight:900;color:#37474f;margin-bottom:10px}
-    .uploader{background:linear-gradient(90deg,var(--accent2),var(--accent4));padding:10px;border-radius:12px;color:#263238;font-size:0.9rem}
-    .btn{display:inline-block;padding:10px 14px;border-radius:12px;border:none;background:var(--accent3);color:white;font-weight:800;cursor:pointer;font-size:0.95rem}
-    .btn.ghost{background:transparent;border:2px dashed rgba(0,0,0,0.08);color:#263238}
-    .answer-card{border-radius:12px;padding:10px;border:3px solid rgba(0,0,0,0.04);
-      background:linear-gradient(180deg, rgba(255,255,255,0.8), rgba(250,250,250,0.95));margin-bottom:8px}
-    .choices{display:grid;gap:8px}
-    .choice-row{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
-    .choice-row input[type=text]{flex:1}
-    .choice-reason{width:100%}
-    .submit-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
-    .btn-submit{background:linear-gradient(90deg,var(--accent1),#ffb74d);padding:12px 18px;border-radius:12px;border:none;color:white;font-weight:900;font-size:1rem;cursor:pointer}
-    .btn-neutral{background:#eeeeee;color:#333;border-radius:10px;padding:10px 12px;border:none}
-    @media(max-width:780px){.grid{grid-template-columns:1fr}.right-column{order:-1}}
-    .message{padding:10px;border-radius:10px;margin-top:10px;font-weight:800;font-size:0.9rem}
-    .message.success{background:#e8f5e9;color:#1b5e20}
-    .message.error{background:#ffebee;color:#b71c1c}
+    body::after {
+        content: '';
+        position: fixed;
+        top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: radial-gradient(circle at center, var(--space-glow), transparent 40%);
+        animation: rotate-glow 35s linear infinite;
+        z-index: -2;
+    }
+    @keyframes rotate-glow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    #starfield { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+    .wrap { max-width: 980px; margin: 20px auto; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+    .header-title { display: flex; gap: 15px; align-items: center; }
+    .logo-icon { background: linear-gradient(45deg, var(--accent3), var(--accent4)); padding: 12px; border-radius: 16px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); }
+    h1 { margin: 0; font-size: 1.6rem; color: white; text-transform: uppercase; }
+    
+    @keyframes gradient-animation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      margin-bottom: 18px;
+      position: relative;
+      z-index: 1;
+      border: 2px solid transparent;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px; right: -2px; bottom: -2px;
+      background: linear-gradient(45deg, var(--accent1), var(--accent3), var(--accent4), var(--accent1));
+      background-size: 400% 400%;
+      border-radius: inherit;
+      z-index: -1;
+      animation: gradient-animation 8s ease infinite;
+    }
+
+    input[type=text], input[type=url], input[type=number], textarea, select {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-family: 'Baloo 2', sans-serif;
+      color: var(--muted-light);
+      border: 2px solid transparent;
+      background: linear-gradient(rgba(255,255,255,0.04), rgba(255,255,255,0.04)) padding-box,
+                  linear-gradient(45deg, var(--accent3), var(--accent4), var(--accent1)) border-box;
+      background-size: 400% 400%;
+      animation: gradient-animation 7s ease infinite;
+      transition: all 0.2s ease-in-out;
+    }
+    
+    .answer-card {
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      position: relative;
+      color: var(--muted-light);
+      border: 2px solid transparent;
+      background: linear-gradient(rgba(255,255,255,0.02), rgba(255,255,255,0.02)) padding-box,
+                  linear-gradient(135deg, var(--accent3), var(--accent4), var(--accent1)) border-box;
+      background-size: 400% 400%;
+      animation: gradient-animation 9s ease infinite;
+    }
+
+    input[type=text]:focus, input[type=url]:focus, input[type=number]:focus, textarea:focus, select:focus {
+      outline: none;
+      box-shadow: 0 0 15px rgba(72, 219, 251, 0.4);
+    }
+    textarea { min-height: 80px; resize: vertical; }
+
+    .grid { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
+    .btn { display: inline-block; padding: 10px 14px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; font-size: 0.95rem; text-decoration: none; text-align: center; transition: transform 0.2s, box-shadow 0.2s; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .btn:disabled { cursor: not-allowed; opacity: 0.5; transform: none; box-shadow: none;}
+    .btn-submit { background: linear-gradient(45deg, var(--accent1), var(--accent2)); color: white; }
+    .btn-neutral { background: rgba(255, 255, 255, 0.08); color: var(--muted-light); }
+    .btn-danger { background-color: rgba(231, 76, 60, 0.1); color: #ffacac; border: 1px solid rgba(231, 76, 60, 0.2); }
+    .btn-home {
+        background: var(--accent-yellow);
+        color: #333;
+        font-size: 1.1rem;
+        padding: 8px 10px;
+        border-radius: 12px;
+        line-height: 1;
+        transform: scale(0.75);
+        transform-origin: center;
+    }
+
+    .section-title { font-weight: 800; font-size: 1.1rem; margin-bottom: 10px; color: white; }
+    .submit-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+    .file-attach-area { border: 2px dashed rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px; text-align: center; background: rgba(0, 0, 0, 0.05); }
+    input[type=file] { display: none; }
+    .file-label { cursor: pointer; background: var(--accent3); color: white; padding: 8px 12px; border-radius: 8px; display: inline-block; }
+    .file-name { margin-top: 8px; font-size: 0.9rem; color: rgba(255, 255, 255, 0.7); display: inline-block; }
+    .choices { display: grid; gap: 8px; }
+    .preview-media { border-radius: 12px; min-height: 48px; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.02); color: var(--muted-light); }
+    .note { font-size: 0.9rem; color: rgba(255, 255, 255, 0.6); margin-top: 6px; }
+    .message { padding: 10px; border-radius: 10px; margin-top: 10px; font-weight: 800; font-size: 0.95rem; display: none; }
+    .message.success { background: rgba(46, 204, 113, 0.12); color: #bff1c6; }
+    .message.error { background: rgba(231, 76, 60, 0.12); color: #ffd6d6; }
+    
+    /* Pilihan Ganda Compact Styles */
+    .optional-details summary { cursor: pointer; font-size: 0.85rem; color: var(--accent4); margin-bottom: 8px; }
+    .optional-details .details-content { display: flex; flex-direction: column; gap: 8px; }
+
+    @media(max-width: 780px) { 
+        .grid { grid-template-columns: 1fr; } 
+        .right-column { order: -1; } 
+        body { padding: 8px; }
+        .wrap { width: 100%; margin: 10px auto; }
+        .card { width: 95%; margin: 0 auto 18px auto; }
+        h1 { font-size: 1.3rem; }
+        .header-title { flex-grow: 1; }
+    }
   </style>
 </head>
 <body>
+  <canvas id="starfield"></canvas>
+
   <div class="wrap">
     <header>
-      <div class="logo">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="#FF8A80"/><path d="M6 12h12M12 6v12" stroke="#fff" stroke-width="1.5"/></svg>
+      <div class="header-title">
+        <div class="logo-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="white"/></svg></div>
         <div>
-          <h1>Buat Pertanyaan Baru</h1>
-          <p>Isi tipe soal & media — mendukung Cloudinary (isi config) atau URL GitHub</p>
+          <h1>BUAT PERTANYAAN BARU</h1>
+          <div style="font-size:0.9rem;color:rgba(255,255,255,0.7)">"satu pertanyaan berarti"</div>
         </div>
       </div>
+      <a href="index.html" class="btn btn-home">🏠</a>
     </header>
-    <div class="grid">
-      <div>
-        <form id="question-form" class="card" autocomplete="off">
-          <div>
-            <div class="section-title">Informasi Soal</div>
-            <div class="row">
-              <div style="flex:1">
-                <label for="pertanyaan-teks">Tulis Pertanyaan</label>
-                <textarea id="pertanyaan-teks" placeholder="Contoh: Siapa proklamator kemerdekaan RI?"></textarea>
-              </div>
-            </div>
 
-            <div class="row">
-              <div style="flex:1">
+    <div class="grid">
+      <main>
+        <form id="question-form" class="card" autocomplete="off">
+            <div class="section-title">Informasi Soal</div>
+            <label for="pertanyaan-teks">Tulis Pertanyaan</label>
+            <textarea id="pertanyaan-teks" placeholder="Contoh: Planet manakah yang paling dekat dengan Matahari?"></textarea>
+
+            <div style="display:flex; gap: 16px; margin-top:12px; flex-wrap:wrap;">
+              <div style="flex:1; min-width:160px;">
                 <label for="kategori-pilihan">Kategori Mata Pelajaran</label>
                 <select id="kategori-pilihan">
                   <option value="">-- Pilih Mata Pelajaran --</option>
@@ -87,7 +197,7 @@
                   <option value="campuran_seru">Campuran Seru</option>
                 </select>
               </div>
-              <div style="width:200px">
+              <div style="flex:1; min-width:160px;">
                 <label for="tipe-soal">Tipe Soal</label>
                 <select id="tipe-soal">
                   <option value="pilihan_ganda">Pilihan Ganda</option>
@@ -98,109 +208,407 @@
                   <option value="benar_salah">Benar / Salah</option>
                   <option value="tts_mini">TTS Mini</option>
                 </select>
+                <div style="margin-top:8px;"><label><input type="checkbox" id="is-harian"> Tandai sebagai Kuis Harian</label></div>
               </div>
             </div>
 
-            <hr style="border:none;height:10px;background:linear-gradient(90deg,var(--accent2),transparent);border-radius:6px;margin:10px 0">
+            <hr style="border:none;height:1px;background:rgba(255,255,255,0.04);margin:18px 0">
 
-            <div class="section-title">Media — Cloudinary atau URL</div>
-            <div class="uploader">
-              <strong>Cloudinary Config</strong>
-              <div style="margin-top:6px">
-                <input id="cloud-name" placeholder="Cloud name (contoh: demo)" />
-                <input id="upload-preset" placeholder="Unsigned upload preset (opsional)" style="margin-top:6px" />
-                <small>Isi di sini jika mau upload ke Cloudinary. Kosongkan bila pakai URL langsung.</small>
+            <div class="section-title">Media Lampiran (opsional)</div>
+            <div style="display:flex;gap:12px;margin-bottom:12px;align-items:flex-start;flex-wrap:wrap">
+              <div style="flex:1;min-width:220px">
+                <label>Lampirkan Gambar (untuk soal)</label>
+                <div class="file-attach-area">
+                  <label for="file-image" class="file-label">Pilih Gambar</label>
+                  <input type="file" id="file-image" accept="image/*" />
+                  <div class="file-name" id="file-image-name">Belum ada file dipilih</div>
+                </div>
+              </div>
+
+              <div style="flex:1;min-width:220px">
+                <label>Lampirkan Audio (untuk soal)</label>
+                <div class="file-attach-area">
+                  <label for="file-audio" class="file-label">Pilih Audio</label>
+                  <input type="file" id="file-audio" accept="audio/*" />
+                  <div class="file-name" id="file-audio-name">Belum ada file dipilih</div>
+                </div>
+              </div>
+              
+              <div style="width:220px">
+                <label>Preview Media</label>
+                <div id="preview-media" class="preview-media">Tidak ada media</div>
               </div>
             </div>
-            <div style="margin-top:10px">
-              <label>Upload Gambar / Audio (atau gunakan URL GitHub)</label>
-              <input type="file" id="file-image" accept="image/*" />
-              <input type="file" id="file-audio" accept="audio/*" style="margin-top:6px" />
-              <input type="url" id="github-image-url" placeholder="URL gambar dari GitHub" style="margin-top:6px" />
-              <input type="url" id="github-audio-url" placeholder="URL audio dari GitHub" style="margin-top:6px" />
-            </div>
 
-            <hr style="margin:10px 0;border:none;height:1px;background:rgba(0,0,0,0.1)">
+            <hr style="margin:12px 0;border:none;height:1px;background:rgba(255,255,255,0.03)">
 
             <div id="dynamic-area"></div>
 
             <div class="submit-row">
-              <button type="button" id="btn-preview" class="btn-neutral">Pratinjau</button>
-              <div style="display:flex;gap:10px">
-                <button type="button" id="btn-reset" class="btn-neutral">Reset</button>
-                <button type="submit" id="btn-save" class="btn-submit">Simpan Pertanyaan</button>
+              <button type="button" id="btn-preview" class="btn btn-neutral">Pratinjau</button>
+              <div>
+                <button type="button" id="btn-reset" class="btn btn-neutral" style="margin-right:8px">Reset</button>
+                <button type="submit" id="btn-save" class="btn btn-submit">Simpan Pertanyaan</button>
               </div>
             </div>
-            <div id="form-message" class="message" style="display:none"></div>
-          </div>
+            <div id="form-message" class="message"></div>
         </form>
-      </div>
+      </main>
 
       <aside class="right-column">
         <div class="card">
-          <div class="section-title">Panduan singkat</div>
-          <div class="hint" style="font-size:0.9rem">• Untuk Esai: pisahkan variasi jawaban dengan <code>||</code><br>• Pilihan Ganda: sekarang bisa centang 2–4 jawaban benar + alasan tiap opsi.<br>• Media: isi config Cloudinary atau gunakan URL GitHub.</div>
-          <hr>
-          <div class="section-title">Preview Input</div>
-          <div id="preview-card" class="answer-card small-muted">Pratinjau akan muncul di sini</div>
+          <div class="section-title">Status & Panduan</div>
+          <div id="quota-display" style="font-weight:bold; margin-bottom:10px; color:var(--accent4)">Memeriksa kuota...</div>
+          <div id="guide-text" class="note">Pilih tipe soal untuk melihat panduan.</div>
+          <hr style="border-color: var(--border-color); margin: 12px 0;">
+          <div class="section-title">Preview</div>
+          <div id="preview-card" class="answer-card">Pratinjau akan muncul di sini</div>
         </div>
       </aside>
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, doc, Timestamp, writeBatch, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+<script type="module">
+  // NOTE: Ganti konfigurasi Firebase Anda di sini
+  const firebaseConfig = { 
+    apiKey: "AIzaSy...", 
+    authDomain: "...", 
+    projectId: "...", 
+    storageBucket: "...", 
+    messagingSenderId: "...", 
+    appId: "..." 
+  };
+  
+  // NOTE: Ganti konfigurasi Cloudinary Anda di sini
+  const CLOUDINARY_CLOUD_NAME = "ganti-dengan-cloud-name";
+  const CLOUDINARY_UPLOAD_PRESET = "ganti-dengan-upload-preset";
 
-    const firebaseConfig = { /* config sama */ };
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, doc, Timestamp, writeBatch, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const tipeSoal = document.getElementById('tipe-soal');
-    const dynamicArea = document.getElementById('dynamic-area');
+  // ---------- STARFIELD BACKGROUND ----------
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  function initStarfield() {
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    let stars = [];
+    for (let i = 0; i < 180; i++) stars.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, r: Math.random() * 1.5, vx: (Math.random() - 0.5) * 20, vy: (Math.random() - 0.5) * 20 });
+    function draw() { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.globalCompositeOperation = 'lighter'; for (const s of stars) { ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 2 * Math.PI); ctx.fill(); s.x += s.vx / 60; s.y += s.vy / 60; if (s.x < 0 || s.x > canvas.width) s.vx = -s.vx; if (s.y < 0 || s.y > canvas.height) s.vy = -s.vy; } requestAnimationFrame(draw); }
+    draw(); window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+  }
+  initStarfield();
 
-    function renderPilihanGanda(){
-      dynamicArea.innerHTML = `
-        <div class="section-title">Pilihan Ganda (boleh pilih 2–4 benar)</div>
-        <div class="choices">
-          ${[0,1,2,3].map(i=>`
-            <div class="answer-card choice-row">
-              <input type="checkbox" class="pg-check" data-index="${i}">
-              <div style="flex:1">
-                <input type="text" class="pg-answer" placeholder="Pilihan ${i+1}">
-                <textarea class="pg-reason" placeholder="Alasan jika dipilih (benar/salah)"></textarea>
-              </div>
-            </div>`).join('')}
-        </div>
-      `;
+  // ---------- FIREBASE INITIALIZATION ----------
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  
+  // ---------- DOM ELEMENTS ----------
+  const tipeSoal = document.getElementById('tipe-soal');
+  const dynamicArea = document.getElementById('dynamic-area');
+  const previewMedia = document.getElementById('preview-media');
+  const previewCard = document.getElementById('preview-card');
+  const fileImage = document.getElementById('file-image');
+  const fileAudio = document.getElementById('file-audio');
+  const btnSave = document.getElementById('btn-save');
+  const btnPreview = document.getElementById('btn-preview');
+  const btnReset = document.getElementById('btn-reset');
+  const formMessage = document.getElementById('form-message');
+  const quotaDisplay = document.getElementById('quota-display');
+
+  // ---------- APP STATE ----------
+  let currentUser = null;
+  let pendingUploads = { questionImage: null, questionAudio: null, optionImages: {} };
+  const MAX_QUOTA = 5;
+
+  function showFormMessage(type, text, persist = false) {
+    formMessage.className = 'message ' + (type === 'ok' ? 'success' : 'error');
+    formMessage.textContent = text; formMessage.style.display = 'block';
+    if (!persist) setTimeout(() => formMessage.style.display = 'none', 4500);
+  }
+
+  function setPreview(mediaType, url) {
+    if (!url) { previewMedia.innerHTML = 'Tidak ada media'; return; }
+    if (mediaType === 'image') { previewMedia.innerHTML = `<img src="${url}" alt="preview" style="max-width:100%;border-radius:8px">`; }
+    if (mediaType === 'audio') { previewMedia.innerHTML = `<audio controls src="${url}" style="width:100%;margin-top:8px"></audio>`; }
+  }
+
+  async function uploadToCloudinary(file, resourceType = 'image') {
+    if (!CLOUDINARY_CLOUD_NAME || CLOUDINARY_CLOUD_NAME === "ganti-dengan-cloud-name") {
+        throw new Error('Konfigurasi Cloudinary belum diisi di kode JavaScript.');
+    }
+    const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`;
+    const fd = new FormData();
+    fd.append('file', file);
+    if (CLOUDINARY_UPLOAD_PRESET && CLOUDINARY_UPLOAD_PRESET !== "ganti-dengan-upload-preset") {
+        fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    }
+    const res = await fetch(url, { method: 'POST', body: fd });
+    if (!res.ok) throw new Error('Upload gagal: ' + res.statusText);
+    const j = await res.json();
+    return j.secure_url || j.url;
+  }
+
+  fileImage.addEventListener('change', () => { 
+    const file = fileImage.files[0];
+    document.getElementById('file-image-name').textContent = file?.name || 'Belum ada file dipilih'; 
+    pendingUploads.questionImage = file || null; 
+    if(file) setPreview('image', URL.createObjectURL(file));
+  });
+  fileAudio.addEventListener('change', () => { 
+    const file = fileAudio.files[0];
+    document.getElementById('file-audio-name').textContent = file?.name || 'Belum ada file dipilih'; 
+    pendingUploads.questionAudio = file || null; 
+    if(file) setPreview('audio', URL.createObjectURL(file));
+  });
+
+  // ---------- DYNAMIC FORM RENDERING ----------
+  
+  function renderPilihanGanda() {
+    dynamicArea.innerHTML = `
+      <div class="section-title">Pilihan Ganda — Pilih satu jawaban benar</div>
+      <div class="note">Gunakan <strong>Radio Button</strong> untuk memilih jawaban yang benar.</div>
+      <div id="pg-choices-container" class="choices"></div>
+      <div style="margin-top:8px;">
+        <button type="button" id="add-pg-choice" class="btn btn-neutral">+ Tambah Pilihan</button>
+      </div>
+    `;
+
+    const container = document.getElementById('pg-choices-container');
+    const addButton = document.getElementById('add-pg-choice');
+
+    container.addEventListener('change', (e) => {
+        if (e.target.classList.contains('option-image-input')) {
+            const file = e.target.files[0];
+            const nameTargetId = e.target.dataset.nameTarget;
+            const nameDiv = document.getElementById(nameTargetId);
+            const choiceIndex = e.target.closest('.answer-card').dataset.choiceIndex;
+            
+            if (file) {
+                pendingUploads.optionImages[choiceIndex] = file;
+                if (nameDiv) nameDiv.textContent = file.name;
+            } else {
+                delete pendingUploads.optionImages[choiceIndex];
+                if (nameDiv) nameDiv.textContent = 'Belum ada gambar';
+            }
+        }
+    });
+
+    function updatePilihanGandaButtons() {
+        const choices = container.querySelectorAll('.answer-card');
+        addButton.disabled = choices.length >= 4;
+        choices.forEach(choice => {
+            const deleteButton = choice.querySelector('.btn-delete-item');
+            if (deleteButton) deleteButton.disabled = choices.length <= 2;
+        });
     }
 
-    function renderDynamic(){
-      if(tipeSoal.value==='pilihan_ganda') renderPilihanGanda();
-      else dynamicArea.innerHTML = `<p>Pilih tipe soal lain...</p>`;
+    function addPilihanGandaChoice() {
+        if (container.children.length >= 4) return;
+        const choiceIndex = container.children.length;
+        const newChoice = document.createElement('div');
+        newChoice.className = 'answer-card';
+        newChoice.dataset.choiceIndex = choiceIndex;
+        newChoice.innerHTML = `
+            <div style="display: flex; gap: 12px; align-items: flex-start; width: 100%;">
+                <div style="padding-top: 8px;">
+                    <input type="radio" name="pg-correct-answer" class="pg-radio" data-index="${choiceIndex}" style="width: 22px; height: 22px; flex-shrink: 0; accent-color: var(--accent-yellow);">
+                </div>
+                <div style="flex:1; display: flex; flex-direction: column; gap: 8px;">
+                    <input type="text" class="jawaban" placeholder="Teks Pilihan ${choiceIndex + 1}" style="padding: 12px; font-size: 1rem;">
+                    <details class="optional-details">
+                        <summary>Opsi Tambahan (Alasan & Gambar)</summary>
+                        <div class="details-content">
+                            <textarea class="jawaban-alasan" placeholder="Alasan singkat (opsional)"></textarea>
+                            <div class="file-attach-area" style="padding: 8px; text-align: left; background: rgba(0,0,0,0.1);">
+                                <label for="opt-img-${choiceIndex}" class="file-label" style="font-size: 0.8rem; padding: 6px 10px;">Gambar</label>
+                                <input type="file" accept="image/*" id="opt-img-${choiceIndex}" class="option-image-input" data-name-target="opt-img-name-${choiceIndex}" style="display:none">
+                                <span id="opt-img-name-${choiceIndex}" class="file-name" style="margin-left: 10px; font-size: 0.8rem;">Belum ada</span>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+                <button type="button" class="btn btn-danger btn-delete-item" style="padding: 8px 12px; align-self: center;">Hapus</button>
+            </div>`;
+        container.appendChild(newChoice);
+        newChoice.querySelector(`label[for="opt-img-${choiceIndex}"]`).addEventListener('click', (e) => {
+            e.preventDefault();
+            newChoice.querySelector(`#opt-img-${choiceIndex}`).click();
+        });
+        newChoice.querySelector('.btn-delete-item').addEventListener('click', () => {
+            newChoice.remove();
+            delete pendingUploads.optionImages[choiceIndex];
+            updatePilihanGandaButtons();
+        });
+        updatePilihanGandaButtons();
     }
-    tipeSoal.addEventListener('change', renderDynamic);
-    renderDynamic();
+    
+    setTimeout(() => {
+        addButton.addEventListener('click', addPilihanGandaChoice);
+        addPilihanGandaChoice();
+        addPilihanGandaChoice();
+    }, 30);
+  }
 
-    // --- simpan ke firestore ---
-    document.getElementById('question-form').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const rows = [...dynamicArea.querySelectorAll('.answer-card')].map((row,i)=>({
-        teks: row.querySelector('.pg-answer')?.value.trim(),
-        benar: row.querySelector('.pg-check')?.checked,
-        alasan: row.querySelector('.pg-reason')?.value.trim()
-      }));
+  // --- Functions for other question types (shortened for brevity) ---
+  function renderEsai(){ dynamicArea.innerHTML = `<div class="section-title">Esai — jawaban & alasan</div><div class="answer-card"><label>Variasi jawaban yang diterima (pisahkan dengan <code>||</code>)</label><input id="esai-variations" placeholder="contoh: soekarno || ir. soekarno"><label style="margin-top:10px">Alasan jika jawaban BENAR</label><textarea id="esai-reason-correct"></textarea><label style="margin-top:10px">Alasan jika jawaban SALAH</label><textarea id="esai-reason-wrong"></textarea></div>`; }
+  function renderPencocokan(){ dynamicArea.innerHTML = `<div class="section-title">Pencocokan — tambahkan pasangan</div><div id="pairs-container"></div><div style="margin-top:8px"><button type="button" id="add-pair" class="btn btn-neutral">+ Tambah Pasangan</button></div>`; function a(){const c=document.getElementById("pairs-container"),d=document.createElement("div");d.className="answer-card",d.innerHTML='<div style="display:flex;gap:8px;align-items:center;"><div style="flex:1;"><input placeholder="Kiri (mis: A)" class="pair-left"></div><div style="flex:1;"><input placeholder="Kanan (mis: 1)" class="pair-right"></div><button type="button" class="btn btn-danger btn-delete-item" style="padding: 8px 12px;">X</button></div><textarea class="pair-reason" placeholder="Alasan untuk pasangan ini (opsional)" style="margin-top:8px;"></textarea>',c.appendChild(d),d.querySelector(".btn-delete-item").addEventListener("click",()=>d.remove())}setTimeout(()=>{document.getElementById("add-pair").addEventListener("click",a),a(),a()},30); }
+  function renderSusunKata(){ dynamicArea.innerHTML = `<div class="section-title">Susun Kata jadi Kalimat</div><div class="answer-card"><label>Kalimat Benar</label><input id="susun-kalimat" placeholder="Tulis kalimat yang benar"><label style="margin-top:8px">Alasan jika BENAR</label><textarea id="susun-reason-true"></textarea><label style="margin-top:8px">Alasan jika SALAH</label><textarea id="susun-reason-false"></textarea></div>`; }
+  function renderMultiBenar(){ dynamicArea.innerHTML = `<div class="section-title">Beberapa Jawaban Benar</div><div id="multi-benar-container"></div><div style="margin-top:8px;"><button type="button" id="add-multi-benar" class="btn btn-neutral">+ Tambah Pilihan</button></div>`; function a(){const c=document.getElementById("multi-benar-container"),d=document.createElement("div");d.className="answer-card choice-row";const e=c.children.length+1;d.innerHTML=`<div style="width:36px;text-align:center"><input type="checkbox" class="multi-check"></div><div style="flex:1"><input type="text" class="multi-answer" placeholder="Pilihan ${e}"><textarea class="multi-reason" placeholder="Alasan jika pilihan ini benar / salah (ringkas)"></textarea></div><button type="button" class="btn btn-danger btn-delete-item" style="padding: 8px 12px;">Hapus</button>`,c.appendChild(d),d.querySelector(".btn-delete-item").addEventListener("click",()=>d.remove())}setTimeout(()=>{document.getElementById("add-multi-benar").addEventListener("click",a),a(),a()},30); }
+  function renderBenarSalah(){ dynamicArea.innerHTML = `<div class="section-title">Benar / Salah</div><div class="answer-card"><label>Pilih jawaban yang benar</label><div style="display:flex;gap:12px;margin-top:8px"><label><input type="radio" name="bs" value="benar" checked> Benar</label><label><input type="radio" name="bs" value="salah"> Salah</label></div><label style="margin-top:10px">Alasan jika BENAR</label><textarea id="bs-reason-true"></textarea><label style="margin-top:10px">Alasan jika SALAH</label><textarea id="bs-reason-false"></textarea></div>`; }
+  function renderTtsMini(){ dynamicArea.innerHTML = `<div class="section-title">TTS Mini</div><div class="answer-card"><label>Jawaban Mendatar</label><input id="tts-mendatar" placeholder="Contoh: BOLA"><label style="margin-top:10px">Jawaban Menurun</label><input id="tts-menurun" placeholder="Contoh: KOTAK"><hr style="margin:12px 0; border-color: var(--border-color);"><label style="margin-top:10px">Alasan jika KEDUANYA BENAR</label><textarea id="tts-reason-both-correct"></textarea><label style="margin-top:10px">Alasan jika KEDUANYA SALAH</label><textarea id="tts-reason-both-wrong"></textarea></div>`;}
+  
+  function updateGuide(type) {
+    const guides = { pilihan_ganda: "Isi 2-4 pilihan jawaban. Pilih 1 jawaban benar dengan radio button. Bisa lampirkan gambar per pilihan.", esai: "Pisahkan variasi jawaban dengan ||. Contoh: Soekarno || Ir. Soekarno.", pencocokan: "Buat pasangan antara kolom kiri dan kanan.", susun_kata: "Tulis kalimat yang benar; sistem akan mengacak tampilannya.", multi_benar: "Siswa bisa memilih lebih dari satu jawaban. Tambah pilihan dengan tombol '+'.", benar_salah: "Tentukan Benar atau Salah dan tambahkan penjelasan.", tts_mini: "Isi mendatar & menurun. Sistem akan mencari persilangan otomatis." };
+    document.getElementById('guide-text').textContent = guides[type] || "Pilih tipe soal untuk melihat panduan.";
+  }
+
+  function renderDynamic() {
+    const t = tipeSoal.value;
+    updateGuide(t);
+    pendingUploads.optionImages = {};
+    if (t === 'pilihan_ganda') renderPilihanGanda();
+    else if (t === 'esai') renderEsai();
+    else if (t === 'pencocokan') renderPencocokan();
+    else if (t === 'susun_kata') renderSusunKata();
+    else if (t === 'multi_benar') renderMultiBenar();
+    else if (t === 'benar_salah') renderBenarSalah();
+    else if (t === 'tts_mini') renderTtsMini();
+  }
+  tipeSoal.addEventListener('change', renderDynamic);
+
+  // ---------- AUTH & QUOTA CHECK ----------
+  async function checkAndDisplayQuota(user) {
+      if (!user) {
+          quotaDisplay.textContent = "Silakan login untuk membuat soal.";
+          btnSave.disabled = true;
+          return false;
+      }
+      quotaDisplay.textContent = 'Memeriksa kuota...';
+      try {
+          const now = new Date();
+          const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          const startOfDayTimestamp = Timestamp.fromDate(startOfDay);
+          const timestampsRef = collection(db, 'userData', user.uid, 'questionCreationTimestamp');
+          const q = query(timestampsRef, where("timestamp", ">=", startOfDayTimestamp));
+          const querySnapshot = await getDocs(q);
+          const questionsMadeToday = querySnapshot.size;
+          const remainingQuota = MAX_QUOTA - questionsMadeToday;
+
+          if (remainingQuota <= 0) {
+              quotaDisplay.textContent = `Kuota harian habis (0/${MAX_QUOTA}). Coba lagi besok.`;
+              quotaDisplay.style.color = 'var(--accent1)';
+              btnSave.disabled = true;
+              return false;
+          } else {
+              quotaDisplay.textContent = `Kuota hari ini: ${remainingQuota}/${MAX_QUOTA}`;
+              quotaDisplay.style.color = 'var(--accent4)';
+              btnSave.disabled = false;
+              return true;
+          }
+      } catch (e) {
+          console.error("Error checking quota: ", e);
+          quotaDisplay.textContent = "Gagal memeriksa kuota.";
+          quotaDisplay.style.color = 'var(--accent1)';
+          btnSave.disabled = true;
+          return false;
+      }
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      currentUser = user;
+      await checkAndDisplayQuota(user);
+    } else {
+      currentUser = null;
+      quotaDisplay.textContent = 'Anda harus login untuk menyimpan pertanyaan.';
+      btnSave.disabled = true;
+    }
+  });
+
+  // ---------- FORM SAVE LOGIC ----------
+  document.getElementById('question-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentUser) { showFormMessage('err', 'Tidak dapat menyimpan, Anda harus login.'); return; }
+    
+    const hasQuota = await checkAndDisplayQuota(currentUser);
+    if (!hasQuota) {
+        showFormMessage('err', 'Kuota harian Anda telah habis.');
+        return;
+    }
+    
+    btnSave.disabled = true; btnSave.textContent = 'Memproses...';
+    try {
+      let uploadedUrls = { questionImage: null, questionAudio: null, optionImages: {} };
+      if (pendingUploads.questionImage) uploadedUrls.questionImage = await uploadToCloudinary(pendingUploads.questionImage, 'image');
+      if (pendingUploads.questionAudio) uploadedUrls.questionAudio = await uploadToCloudinary(pendingUploads.questionAudio, 'video');
+      for (const idx in pendingUploads.optionImages) {
+        const file = pendingUploads.optionImages[idx];
+        if (file) uploadedUrls.optionImages[idx] = await uploadToCloudinary(file, 'image');
+      }
+
       const data = {
         teksPertanyaan: document.getElementById('pertanyaan-teks').value.trim(),
-        kategori: document.getElementById('kategori-pilihan').value,
+        kategori: document.getElementById('kategori-pilihan').value || null,
+        dibuatOleh: currentUser.uid,
+        dibuatPada: Timestamp.now(),
         tipeSoal: tipeSoal.value,
-        pilihan: rows
+        urlGambar: uploadedUrls.questionImage || null,
+        urlSuara: uploadedUrls.questionAudio || null,
+        isHarian: document.getElementById('is-harian').checked
       };
-      console.log("Data siap disimpan:", data);
-      alert("Disimpan (dummy).");
-    });
-  </script>
+
+      const t = tipeSoal.value;
+      if(t==='pilihan_ganda'){
+        const optionEls = [...dynamicArea.querySelectorAll('#pg-choices-container .answer-card')];
+        data.pilihanJawaban = optionEls.map(el => el.querySelector('.jawaban')?.value.trim() || '');
+        data.penjelasanPilihan = optionEls.map(el => el.querySelector('.jawaban-alasan')?.value.trim() || '');
+        
+        const checkedRadio = dynamicArea.querySelector('input[name="pg-correct-answer"]:checked');
+        if (!checkedRadio) throw new Error('Tentukan satu jawaban yang benar.');
+        const correctChoiceIndex = parseInt(checkedRadio.dataset.index, 10);
+        data.jawabanBenar = optionEls.map(el => {
+            const currentChoiceIndex = parseInt(el.dataset.choiceIndex, 10);
+            return currentChoiceIndex === correctChoiceIndex;
+        });
+
+        data.pilihanGambar = optionEls.map(el => uploadedUrls.optionImages[el.dataset.choiceIndex] || null);
+        if(data.pilihanJawaban.some(o=>!o)) throw new Error('Semua pilihan jawaban harus diisi.');
+      } // ... (other types logic here)
+
+      const batch = writeBatch(db);
+      const questionRef = doc(collection(db, 'pertanyaan'));
+      batch.set(questionRef, data);
+      
+      const userTimestampRef = doc(collection(db, 'userData', currentUser.uid, 'questionCreationTimestamp'), questionRef.id);
+      batch.set(userTimestampRef, { timestamp: data.dibuatPada, questionId: questionRef.id });
+
+      await batch.commit();
+      
+      showFormMessage('ok', 'Pertanyaan berhasil disimpan ✅');
+      document.getElementById('question-form').reset();
+      pendingUploads = { questionImage: null, questionAudio: null, optionImages: {} };
+      document.getElementById('file-image-name').textContent = 'Belum ada file dipilih';
+      document.getElementById('file-audio-name').textContent = 'Belum ada file dipilih';
+      previewMedia.innerHTML = 'Tidak ada media';
+      await checkAndDisplayQuota(currentUser); 
+      renderDynamic();
+    } catch (err) {
+      console.error(err);
+      showFormMessage('err', err.message || 'Gagal menyimpan soal');
+    } finally {
+      btnSave.disabled = false;
+      btnSave.textContent = 'Simpan Pertanyaan';
+    }
+  });
+  
+  btnPreview.addEventListener('click', () => { /* ... preview logic ... */ });
+  btnReset.addEventListener('click', () => { /* ... reset logic ... */ });
+
+  // Initial render
+  renderDynamic();
+</script>
 </body>
 </html>
+
