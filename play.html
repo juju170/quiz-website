@@ -206,44 +206,65 @@
             }, 1000);
         }
 
-        async function saveResultAndAwardBadges(score, userId) {
-            try {
-                await addDoc(collection(db, 'results'), {
-                    userId: userId,
-                    quizId: quizId,
-                    announcementId: announcementId,
-                    quizTitle: quizTitleText,
-                    score: score,
-                    completedAt: serverTimestamp()
-                });
-                let badgeType = null;
-                let badgeMessage = "";
-                if (score >= quizBadgeThresholds.gold) {
-                    badgeType = 'gold';
-                    badgeMessage = "醇 Kamu dapat Lencana Emas!";
-                } else if (score >= quizBadgeThresholds.silver) {
-                    badgeType = 'silver';
-                    badgeMessage = "･Kamu dapat Lencana Perak!";
-                } else if (score >= quizBadgeThresholds.bronze) {
-                    badgeType = 'bronze';
-                    badgeMessage = "･Kamu dapat Lencana Perunggu!";
-                }
-                if (badgeType) {
-                    const profileRef = doc(db, 'profiles', userId);    
-                    await setDoc(profileRef, {
-                        badges: { [badgeType]: increment(1) },
-                        name: "Siswa Keren"
-                    }, { merge: true });
-                    const badgeTextEl = document.getElementById('badge-award-text');
-                    if(badgeTextEl) {
-                        badgeTextEl.textContent = badgeMessage;
-                        badgeTextEl.classList.remove('hidden');
-                    }
-                }
-            } catch (error) {
-                console.error("Gagal menyimpan hasil atau memberi lencana:", error);
+        import { query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+async function saveResultAndAwardBadges(score, userId) {
+    try {
+        // 1. Simpan hasil ke results
+        const resultRef = await addDoc(collection(db, 'results'), {
+            userId: userId,
+            quizId: quizId,
+            announcementId: announcementId,
+            quizTitle: quizTitleText,
+            score: score,
+            completedAt: serverTimestamp()
+        });
+
+        // 2. Ambil semua hasil untuk announcementId ini
+        const resultsRef = collection(db, 'results');
+        const q = query(
+            resultsRef,
+            where("announcementId", "==", announcementId),
+            orderBy("score", "desc"),
+            orderBy("completedAt", "asc")
+        );
+        const resultsSnap = await getDocs(q);
+
+        // 3. Tentukan top 3
+        const ranking = resultsSnap.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        const medalWinners = {
+            gold: ranking[0]?.userId || null,
+            silver: ranking[1]?.userId || null,
+            bronze: ranking[2]?.userId || null
+        };
+
+        // 4. Cek apakah user ini termasuk top 3
+        let badgeType = null;
+        if (userId === medalWinners.gold) badgeType = "gold";
+        else if (userId === medalWinners.silver) badgeType = "silver";
+        else if (userId === medalWinners.bronze) badgeType = "bronze";
+
+        // 5. Kalau dapat lencana → update profile
+        if (badgeType) {
+            const profileRef = doc(db, 'profiles', userId);
+            await setDoc(profileRef, {
+                badges: { [badgeType]: increment(1) }
+            }, { merge: true });
+
+            const badgeTextEl = document.getElementById('badge-award-text');
+            if (badgeTextEl) {
+                badgeTextEl.textContent = `🎉 Kamu dapat Lencana ${badgeType.toUpperCase()}!`;
+                badgeTextEl.classList.remove('hidden');
             }
         }
+    } catch (error) {
+        console.error("Gagal menyimpan hasil atau memberi lencana:", error);
+    }
+            }
 
         async function showResults(userId) { 
             clearInterval(timerInterval);
