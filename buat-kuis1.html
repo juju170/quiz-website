@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buat Pertanyaan Baru — Komunitas Ceria</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#fff8f3; --card:#ffffff; --accent1:#ff8a80; --accent2:#ffd180; --accent3:#8c9eff; --accent4:#80d8ff; --muted:#6b6b6b;
+      --glass: rgba(255,255,255,0.7);
+    }
+    *{box-sizing:border-box}
+    body{font-family:'Baloo 2',sans-serif;margin:0;background:linear-gradient(135deg,var(--accent4), #e8f5e9); min-height:100vh; padding:15px;}
+    .wrap{max-width:900px;margin:0 auto}
+    header{display:flex;gap:12px;align-items:center;margin-bottom:15px;flex-wrap:wrap}
+    header .logo{background:var(--card);padding:12px;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,0.08);display:flex;align-items:center;gap:10px}
+    header h1{margin:0;font-size:1.3rem;color:#263238}
+    header p{margin:0;color:var(--muted);font-size:0.9rem}
+    .card{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 8px 25px rgba(0,0,0,0.08);margin-bottom:14px}
+    .grid{display:grid;grid-template-columns:1fr 320px;gap:14px}
+    form .row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+    label{display:block;font-weight:800;margin-bottom:6px;color:#263238}
+    input[type=text], input[type=url], input[type=number], textarea, select{
+      width:100%;padding:10px;border-radius:10px;border:2px solid rgba(0,0,0,0.06);
+      background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,250,250,0.95));font-size:1rem
+    }
+    textarea{min-height:70px;resize:vertical}
+    .section-title{font-weight:900;color:#37474f;margin-bottom:10px}
+    .uploader{background:linear-gradient(90deg,var(--accent2),var(--accent4));padding:10px;border-radius:12px;color:#263238;font-size:0.9rem}
+    .btn{display:inline-block;padding:10px 14px;border-radius:12px;border:none;background:var(--accent3);color:white;font-weight:800;cursor:pointer;font-size:0.95rem}
+    .btn.ghost{background:transparent;border:2px dashed rgba(0,0,0,0.08);color:#263238}
+    .answer-card{border-radius:12px;padding:10px;border:3px solid rgba(0,0,0,0.04);
+      background:linear-gradient(180deg, rgba(255,255,255,0.8), rgba(250,250,250,0.95));margin-bottom:8px}
+    .choices{display:grid;gap:8px}
+    .choice-row{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
+    .choice-row input[type=text]{flex:1}
+    .choice-reason{width:100%}
+    .submit-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+    .btn-submit{background:linear-gradient(90deg,var(--accent1),#ffb74d);padding:12px 18px;border-radius:12px;border:none;color:white;font-weight:900;font-size:1rem;cursor:pointer}
+    .btn-neutral{background:#eeeeee;color:#333;border-radius:10px;padding:10px 12px;border:none}
+    @media(max-width:780px){.grid{grid-template-columns:1fr}.right-column{order:-1}}
+    .message{padding:10px;border-radius:10px;margin-top:10px;font-weight:800;font-size:0.9rem}
+    .message.success{background:#e8f5e9;color:#1b5e20}
+    .message.error{background:#ffebee;color:#b71c1c}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="6" fill="#FF8A80"/><path d="M6 12h12M12 6v12" stroke="#fff" stroke-width="1.5"/></svg>
+        <div>
+          <h1>Buat Pertanyaan Baru</h1>
+          <p>Isi tipe soal & media — mendukung Cloudinary (isi config) atau URL GitHub</p>
+        </div>
+      </div>
+    </header>
+    <div class="grid">
+      <div>
+        <form id="question-form" class="card" autocomplete="off">
+          <div>
+            <div class="section-title">Informasi Soal</div>
+            <div class="row">
+              <div style="flex:1">
+                <label for="pertanyaan-teks">Tulis Pertanyaan</label>
+                <textarea id="pertanyaan-teks" placeholder="Contoh: Siapa proklamator kemerdekaan RI?"></textarea>
+              </div>
+            </div>
+
+            <div class="row">
+              <div style="flex:1">
+                <label for="kategori-pilihan">Kategori Mata Pelajaran</label>
+                <select id="kategori-pilihan">
+                  <option value="">-- Pilih Mata Pelajaran --</option>
+                  <option value="matematika">Matematika</option>
+                  <option value="bahasa_indonesia">Bahasa Indonesia</option>
+                  <option value="bahasa_inggris">Bahasa Inggris</option>
+                  <option value="ipa">Ilmu Pengetahuan Alam</option>
+                  <option value="agama_islam">Agama Islam</option>
+                  <option value="ips">Ilmu Sosial</option>
+                  <option value="sejarah">Sejarah</option>
+                  <option value="pkn">Kewarganegaraan</option>
+                  <option value="basa_sunda">Basa Sunda</option>
+                  <option value="olahraga">Olahraga</option>
+                  <option value="seni">Seni</option>
+                  <option value="campuran_seru">Campuran Seru</option>
+                </select>
+              </div>
+              <div style="width:200px">
+                <label for="tipe-soal">Tipe Soal</label>
+                <select id="tipe-soal">
+                  <option value="pilihan_ganda">Pilihan Ganda</option>
+                  <option value="esai">Esai</option>
+                  <option value="pencocokan">Pencocokan</option>
+                  <option value="susun_kata">Susun Kata</option>
+                  <option value="multi_benar">Beberapa Jawaban Benar</option>
+                  <option value="benar_salah">Benar / Salah</option>
+                  <option value="tts_mini">TTS Mini</option>
+                </select>
+              </div>
+            </div>
+
+            <hr style="border:none;height:10px;background:linear-gradient(90deg,var(--accent2),transparent);border-radius:6px;margin:10px 0">
+
+            <div class="section-title">Media — Cloudinary atau URL</div>
+            <div class="uploader">
+              <strong>Cloudinary Config</strong>
+              <div style="margin-top:6px">
+                <input id="cloud-name" placeholder="Cloud name (contoh: demo)" />
+                <input id="upload-preset" placeholder="Unsigned upload preset (opsional)" style="margin-top:6px" />
+                <small>Isi di sini jika mau upload ke Cloudinary. Kosongkan bila pakai URL langsung.</small>
+              </div>
+            </div>
+            <div style="margin-top:10px">
+              <label>Upload Gambar / Audio (atau gunakan URL GitHub)</label>
+              <input type="file" id="file-image" accept="image/*" />
+              <input type="file" id="file-audio" accept="audio/*" style="margin-top:6px" />
+              <input type="url" id="github-image-url" placeholder="URL gambar dari GitHub" style="margin-top:6px" />
+              <input type="url" id="github-audio-url" placeholder="URL audio dari GitHub" style="margin-top:6px" />
+            </div>
+
+            <hr style="margin:10px 0;border:none;height:1px;background:rgba(0,0,0,0.1)">
+
+            <div id="dynamic-area"></div>
+
+            <div class="submit-row">
+              <button type="button" id="btn-preview" class="btn-neutral">Pratinjau</button>
+              <div style="display:flex;gap:10px">
+                <button type="button" id="btn-reset" class="btn-neutral">Reset</button>
+                <button type="submit" id="btn-save" class="btn-submit">Simpan Pertanyaan</button>
+              </div>
+            </div>
+            <div id="form-message" class="message" style="display:none"></div>
+          </div>
+        </form>
+      </div>
+
+      <aside class="right-column">
+        <div class="card">
+          <div class="section-title">Panduan singkat</div>
+          <div class="hint" style="font-size:0.9rem">• Untuk Esai: pisahkan variasi jawaban dengan <code>||</code><br>• Pilihan Ganda: sekarang bisa centang 2–4 jawaban benar + alasan tiap opsi.<br>• Media: isi config Cloudinary atau gunakan URL GitHub.</div>
+          <hr>
+          <div class="section-title">Preview Input</div>
+          <div id="preview-card" class="answer-card small-muted">Pratinjau akan muncul di sini</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, doc, Timestamp, writeBatch, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = { /* config sama */ };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const tipeSoal = document.getElementById('tipe-soal');
+    const dynamicArea = document.getElementById('dynamic-area');
+
+    function renderPilihanGanda(){
+      dynamicArea.innerHTML = `
+        <div class="section-title">Pilihan Ganda (boleh pilih 2–4 benar)</div>
+        <div class="choices">
+          ${[0,1,2,3].map(i=>`
+            <div class="answer-card choice-row">
+              <input type="checkbox" class="pg-check" data-index="${i}">
+              <div style="flex:1">
+                <input type="text" class="pg-answer" placeholder="Pilihan ${i+1}">
+                <textarea class="pg-reason" placeholder="Alasan jika dipilih (benar/salah)"></textarea>
+              </div>
+            </div>`).join('')}
+        </div>
+      `;
+    }
+
+    function renderDynamic(){
+      if(tipeSoal.value==='pilihan_ganda') renderPilihanGanda();
+      else dynamicArea.innerHTML = `<p>Pilih tipe soal lain...</p>`;
+    }
+    tipeSoal.addEventListener('change', renderDynamic);
+    renderDynamic();
+
+    // --- simpan ke firestore ---
+    document.getElementById('question-form').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const rows = [...dynamicArea.querySelectorAll('.answer-card')].map((row,i)=>({
+        teks: row.querySelector('.pg-answer')?.value.trim(),
+        benar: row.querySelector('.pg-check')?.checked,
+        alasan: row.querySelector('.pg-reason')?.value.trim()
+      }));
+      const data = {
+        teksPertanyaan: document.getElementById('pertanyaan-teks').value.trim(),
+        kategori: document.getElementById('kategori-pilihan').value,
+        tipeSoal: tipeSoal.value,
+        pilihan: rows
+      };
+      console.log("Data siap disimpan:", data);
+      alert("Disimpan (dummy).");
+    });
+  </script>
+</body>
+</html>
