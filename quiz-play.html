@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Waktunya Kuis! - Komunitas Ceria 2SD</title>
+    <title>Waktunya Kuis! - Komunitas Ceria</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet">
@@ -30,7 +30,6 @@
         .answer-btn.wrong { background-color: var(--red-wrong); color: white; border-color: #c62828; }
         .next-btn { margin-top: 15px; background-color: var(--orange-next); color: white; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: 800; border-radius: 30px; cursor: pointer; visibility: hidden; border-bottom: 4px solid #f57c00; }
         
-        /* --- STYLE UNTUK ESAI & SUSUN HURUF --- */
         .esai-wrapper textarea { width: 100%; padding: 15px; font-family: 'Baloo 2', sans-serif; font-size: 1.2rem; border-radius: 10px; border: 3px solid #ccc; box-sizing: border-box; min-height: 120px; }
         .susun-huruf-wrapper { margin-top: 15px; }
         .answer-slots-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; min-height: 60px; padding: 5px; }
@@ -40,7 +39,6 @@
         .susun-huruf-actions { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
         .btn-action-word { background-color: #ffb74d; color: white; padding: 10px 25px; font-size: 1rem; border-radius: 20px; }
         .btn-check-word { background-color: #66bb6a; }
-        /* --- AKHIR STYLE --- */
 
         .feedback-box { min-height: 40px; font-size: 1.6rem; font-weight: 700; margin-top: 15px; }
         .feedback-explanation { font-size: 1rem; font-weight: 400; color: #5f5c3a; margin-top: 10px; background-color: var(--yellow-explanation); padding: 12px; border-radius: 8px; border-left: 5px solid #fbc02d; text-align: left; }
@@ -57,11 +55,12 @@
 </head>
 <body>
     <div id="quiz-container" class="quiz-container">
-        <h2>Memuat Kuis...</h2>
+        <h2>Menyiapkan sesi...</h2>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
         import { getFirestore, collection, getDocs, query, where, limit, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -73,6 +72,7 @@
             appId: "1:216895655168:web:59255f600fc3b3b44eb7e5"
         };
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
 
         const quizContainer = document.getElementById('quiz-container');
@@ -89,6 +89,16 @@
             keren: 'https://raw.githubusercontent.com/juju170/quiz-website/e7fe1bcc58cc86542724a090f068553510594eb4/hmm10.mp3',
             belajar: 'https://raw.githubusercontent.com/juju170/quiz-website/e7fe1bcc58cc86542724a090f068553510594eb4/duh0.mp3'
         };
+
+        async function getUserProfile(userId) {
+            if (!userId) return null;
+            const profileRef = doc(db, 'profiles', userId);
+            const docSnap = await getDoc(profileRef);
+            if (docSnap.exists() && docSnap.data().class) {
+                return docSnap.data();
+            }
+            return null;
+        }
         
         async function getUserData(userId) {
             if (!userId) return { nama: 'Komunitas' };
@@ -161,43 +171,6 @@
                     showResults();
                 }
             });
-        }
-        
-        async function startQuiz() {
-            loadQuizUI();
-            const params = new URLSearchParams(window.location.search);
-            const category = params.get('kategori');
-            const isHarian = params.get('harian') === 'true';
-            
-            let q;
-            const pertanyaanRef = collection(db, "pertanyaan");
-            
-            if (isHarian) {
-                q = query(pertanyaanRef, where("isHarian", "==", true), limit(10));
-            } else if (category) {
-                // --- PERBAIKAN ---
-                // Kueri disederhanakan untuk hanya mencari berdasarkan kategori.
-                // Ini akan memperbaiki masalah di mana soal tidak muncul karena filter ganda
-                // dan juga akan menyertakan soal harian dalam kuis kategori yang relevan.
-                q = query(pertanyaanRef, where("kategori", "==", category), limit(10));
-            } else {
-                 // Jika tidak ada kategori, ambil soal acak yang bukan soal harian
-                q = query(pertanyaanRef, where("isHarian", "!=", true), limit(10));
-            }
-
-            try {
-                allQuestions = await fetchQuestions(q);
-
-                if (allQuestions.length === 0) {
-                    quizContainer.innerHTML = '<h2>Oops! Tidak ada pertanyaan untuk kategori ini. Coba buat soal atau pilih kategori lain!</h2><a href="index.html">Kembali</a>';
-                    return;
-                }
-                allQuestions = shuffle(allQuestions);
-                loadQuestion();
-            } catch(error) {
-                console.error("Gagal memuat pertanyaan:", error);
-                quizContainer.innerHTML = '<h2>Terjadi kesalahan saat memuat kuis. Coba lagi nanti.</h2>';
-            }
         }
         
         function loadQuestion() {
@@ -387,7 +360,7 @@
             } else if (percentage >= 70) {
                 result = { emoji: '🤩', message: 'WAH KAMU HEBAT', sound: resultSounds.hebat };
             } else if (percentage >= 50) {
-                result = { emoji: '👍', message: 'WAH KAMU KEREN!', sound: resultSounds.keren };
+                result = { emoji: '🙂', message: 'WAH KAMU KEREN!', sound: resultSounds.keren };
             } else {
                 result = { emoji: '🤔', message: 'BELAJAR LAGI YA!', sound: resultSounds.belajar };
             }
@@ -427,8 +400,91 @@
             return array;
         }
 
-        startQuiz();
+        // Fungsi bantuan untuk mendapatkan daftar kelas yang valid
+        function getEligibleClasses(userClass) {
+            const classNumber = parseInt(userClass.replace(/\D/g, '')); // Hanya ambil angka dari string kelas
+            if (isNaN(classNumber)) return []; 
+            
+            const classes = [];
+            for (let i = classNumber; i >= 1; i--) {
+                classes.push(`Kelas ${i}`);
+            }
+            return classes;
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userProfile = await getUserProfile(user.uid);
+                const userClass = userProfile ? userProfile.class : null;
+
+                const params = new URLSearchParams(window.location.search);
+                const category = params.get('kategori');
+                const isHarian = params.get('harian') === 'true';
+
+                let q;
+                const pertanyaanRef = collection(db, "pertanyaan");
+
+                if (isHarian) {
+                    // --- LOGIKA BARU UNTUK KUIS HARIAN ---
+                    // Jika ini Kuis Harian, pengguna harus punya data kelas.
+                    if (!userClass) {
+                        quizContainer.innerHTML = '<h2>Kamu harus mengatur kelas di profilmu dulu untuk main Kuis Harian!</h2><p>Tenang, kamu akan diarahkan ke halaman profil...</p>';
+                        setTimeout(() => { window.location.href = 'profil.html'; }, 3500);
+                        return;
+                    }
+                    // Ambil daftar kelas yang valid (kelas pengguna dan di bawahnya)
+                    const targetClasses = getEligibleClasses(userClass);
+                    if (targetClasses.length === 0) {
+                         quizContainer.innerHTML = `<h2>Format kelas di profilmu (${userClass}) tidak valid.</h2><a href="profil.html">Perbaiki Profil</a>`;
+                         return;
+                    }
+                    // Buat query untuk mengambil soal dari semua kelas yang valid.
+                    q = query(pertanyaanRef, where("untukKelas", "in", targetClasses), limit(10));
+                
+                } else if (category) {
+                    // Logika kuis per kategori (TIDAK BERUBAH)
+                    if (!userClass) {
+                        quizContainer.innerHTML = '<h2>Kamu harus mengatur kelas di profilmu dulu untuk main kuis ini!</h2><p>Tenang, kamu akan diarahkan ke halaman profil...</p>';
+                        setTimeout(() => { window.location.href = 'profil.html'; }, 3500);
+                        return;
+                    }
+                    q = query(pertanyaanRef, where("kategori", "==", category), where("untukKelas", "==", userClass), limit(10));
+                } else {
+                    // Kuis acak (tanpa kategori) tidak memerlukan filter kelas
+                    q = query(pertanyaanRef, where("isHarian", "!=", true), limit(10));
+                }
+
+                loadQuizUI();
+                try {
+                    allQuestions = await fetchQuestions(q);
+
+                    if (allQuestions.length === 0) {
+                        let message = `<h2>Oops! Tidak ada pertanyaan yang ditemukan.</h2><p>Coba pilih kategori lain atau buat soal sendiri!</p><a href="index.html" style="margin-top:15px; display:inline-block;">Kembali</a>`;
+                        if (isHarian) {
+                           message = `<h2>Oops! Belum ada soal Kuis Harian untuk kelasmu dan di bawahnya.</h2><p>Ayo, buat beberapa soal agar teman-temanmu bisa bermain!</p><a href="index.html" style="margin-top:15px; display:inline-block;">Kembali</a>`;
+                        } else if (category && userClass) {
+                           message = `<h2>Oops! Belum ada soal "${category}" untuk ${userClass}.</h2><p>Jadilah yang pertama membuat soal untuk teman-temanmu!</p><a href="index.html" style="margin-top:15px; display:inline-block;">Kembali</a>`;
+                        }
+                        quizContainer.innerHTML = message;
+                        return;
+                    }
+                    allQuestions = shuffle(allQuestions);
+                    loadQuestion();
+                } catch(error) {
+                    console.error("Gagal memuat pertanyaan:", error);
+                    quizContainer.innerHTML = '<h2>Terjadi kesalahan saat memuat kuis. Coba lagi nanti.</h2>';
+                }
+
+            } else {
+                signInAnonymously(auth).catch(err => {
+                    console.error("Gagal masuk anonim:", err);
+                    quizContainer.innerHTML = '<h2>Gagal menyambung ke server. Periksa koneksi internetmu.</h2>';
+                });
+            }
+        });
     </script>
 </body>
 </html>
+
+
 
